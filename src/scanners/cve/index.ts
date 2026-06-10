@@ -43,6 +43,19 @@ export class CVEScanner implements IScanner {
           .digest('hex')
           .slice(0, 16);
 
+        const refs = [...(vuln.references || [])];
+        if (vuln.id.startsWith('GHSA-')) {
+          const ghsaUrl = `https://github.com/advisories/${vuln.id}`;
+          if (!refs.includes(ghsaUrl)) {
+            refs.unshift(ghsaUrl);
+          }
+        } else if (vuln.id.startsWith('CVE-')) {
+          const cveUrl = `https://nvd.nist.gov/vuln/detail/${vuln.id}`;
+          if (!refs.includes(cveUrl)) {
+            refs.unshift(cveUrl);
+          }
+        }
+
         findings.push({
           id: `cve-${fingerprint.slice(0, 8)}`,
           ruleId: 'cve/known-vulnerability',
@@ -65,8 +78,9 @@ export class CVEScanner implements IScanner {
             description: vuln.fixedVersion
               ? `Upgrade ${vuln.package} to version ${vuln.fixedVersion}`
               : `No fix available yet. Consider finding an alternative package.`,
-            references: vuln.references || [],
+            references: refs,
           },
+          references: refs,
           metadata: {
             fingerprint,
             tags: ['cve', 'dependency', vuln.ecosystem],

@@ -40,6 +40,52 @@ export async function discoverFiles(
 ): Promise<DiscoveredFile[]> {
   const absoluteTarget = resolve(targetPath);
 
+  // If targetPath is a file, return it directly if it matches language and size limits
+  try {
+    const stat = statSync(absoluteTarget);
+    if (stat.isFile()) {
+      const ext = extname(absoluteTarget).toLowerCase();
+      const name = basename(absoluteTarget);
+      
+      // Skip binary files
+      if (SKIP_EXTENSIONS.has(ext)) {
+        return [];
+      }
+      
+      const language = getLanguageByExtension(ext);
+      if (!language && !DEPENDENCY_FILES.has(name)) {
+        return [];
+      }
+
+      // Filter by configured languages
+      if (
+        languages.length > 0 &&
+        !languages.includes('auto') &&
+        language &&
+        !languages.includes(language)
+      ) {
+        return [];
+      }
+
+      // Skip very large files (>5MB)
+      if (stat.size > 5 * 1024 * 1024) {
+        consola.debug(`Skipping large file: ${name} (${(stat.size / 1024 / 1024).toFixed(1)}MB)`);
+        return [];
+      }
+
+      consola.info(`Discovered 1 file to scan`);
+      return [{
+        path: absoluteTarget,
+        relativePath: name,
+        language: language || 'unknown',
+        size: stat.size,
+        isDependencyFile: DEPENDENCY_FILES.has(name),
+      }];
+    }
+  } catch {
+    // If file/directory doesn't exist, proceed to globbing which will handle/log
+  }
+
   // Load .gitignore and .deepscanignore
   const ig = ignore();
   loadIgnoreFile(absoluteTarget, '.gitignore', ig);

@@ -22,7 +22,12 @@ scanners:
     enabled: true
     sources:
       - osv
-
+ai:
+  enabled: false
+  provider: openai
+  model: gemini-2.5-flash
+  apiKey: "key"
+ 
 rules:
   include:
     - "*"
@@ -40,6 +45,3 @@ paths:
 
 output:
   format: console
-
-ai:
-  enabled: false

@@ -66,6 +66,7 @@ export interface Finding {
   cwe?: string[];
   owasp?: string[];
   fix?: FixSuggestion;
+  references?: string[];
   aiValidation?: AIValidationResult;
   metadata: {
     fingerprint: string;

@@ -125,6 +125,8 @@ ${finding.context ? `**Context:** This code is in a ${finding.context.type} cont
         return this.callAnthropic(prompt, apiKey);
       case 'ollama':
         return this.callOllama(prompt);
+      case 'google':
+        return this.callGoogle(prompt, apiKey);
       default:
         throw new Error(`Unknown AI provider: ${this.config.provider}`);
     }
@@ -262,8 +264,42 @@ ${finding.context ? `**Context:** This code is in a ${finding.context.type} cont
         return process.env.ANTHROPIC_API_KEY;
       case 'ollama':
         return 'local'; // Ollama doesn't need an API key
+      case 'google':
+        return process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       default:
         return undefined;
     }
+  }
+
+  /**
+   * Call Google Gemini API (via OpenAI compatibility endpoint)
+   */
+  private async callGoogle(prompt: string, apiKey: string): Promise<string> {
+    const baseUrl = this.config.baseUrl || 'https://generativelanguage.googleapis.com/v1beta/openai';
+    const model = this.config.model || 'gemini-2.5-flash';
+
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: 'You are a security code reviewer. Respond only in valid JSON.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: this.config.temperature || 0.1,
+        max_tokens: 500,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Google Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as { choices: Array<{ message: { content: string } }> };
+    return data.choices[0]?.message?.content || '';
   }
 }

@@ -223,8 +223,38 @@ export function analyzeFileOps(context: ScanFileContext): Finding[] {
       if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) {
         continue;
       }
-      if (trimmed.startsWith('import ') || trimmed.startsWith('export ') || trimmed.startsWith('from ') || trimmed.includes('require(')) {
+      const isConfigFile = 
+        filePath.endsWith('.config.js') || 
+        filePath.endsWith('.config.ts') || 
+        filePath.includes('vite.config') || 
+        filePath.includes('webpack.') || 
+        filePath.includes('tailwind.');
+
+      if (
+        trimmed.startsWith('import ') ||
+        trimmed.startsWith('export ') ||
+        trimmed.startsWith('from ') ||
+        trimmed.includes('require(') ||
+        trimmed.includes('require ') ||
+        trimmed.includes('require_once ') ||
+        trimmed.includes('include ') ||
+        trimmed.includes('include_once ') ||
+        isConfigFile
+      ) {
         continue;
+      }
+
+      // Skip static path constants starting points
+      if (
+        trimmed.includes('__DIR__') ||
+        trimmed.includes('__dirname') ||
+        trimmed.includes('__filename') ||
+        trimmed.includes('__FILE__') ||
+        trimmed.includes('import.meta.url')
+      ) {
+        if (!/(?:req|request|params|query|body|args|input|user|GET|POST|REQUEST)\b/i.test(trimmed)) {
+          continue;
+        }
       }
 
       // For the generic ../ pattern, reduce noise – only flag if in a file ops context

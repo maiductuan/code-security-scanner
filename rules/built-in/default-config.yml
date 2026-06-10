@@ -33,26 +33,14 @@ paths:
     - "**/*"
   exclude:
     - "node_modules/"
-    - "vendor/"
-    - "dist/"
-    - "build/"
     - ".git/"
     - "**/node_modules/**"
-    - "**/vendor/**"
-    - "**/dist/**"
-    - "**/build/**"
     - "**/.git/**"
     - "**/*.min.js"
     - "**/*.min.css"
     - "**/*.map"
     - "**/*.lock"
     - "**/package-lock.json"
-    - "__pycache__/"
-    - ".venv/"
-    - "venv/"
-    - "target/"
-    - "bin/"
-    - "obj/"
 output:
   format: console
   verbose: false

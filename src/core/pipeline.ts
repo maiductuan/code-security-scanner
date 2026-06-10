@@ -6,6 +6,7 @@ import type { IScanner, DiscoveredFile, PipelineOptions, ProgressCallback, ScanF
 import { discoverFiles, readFileContent } from './file-discovery.js';
 import { RuleEngine } from '../rules/rule-engine.js';
 import { getLanguageConfig } from '../languages/registry.js';
+import { AIValidator } from './ai-validator.js';
 
 /** DeepScan version */
 const VERSION = '1.0.0';
@@ -75,6 +76,20 @@ export class ScanPipeline {
       processed++;
       if (onProgress) {
         onProgress(processed, totalFiles, file.relativePath);
+      }
+    }
+
+    // Step 4.5: AI Validation (if enabled)
+    if (this.config.ai?.enabled) {
+      try {
+        const aiValidator = new AIValidator(this.config.ai);
+        if (aiValidator.isAvailable()) {
+          this.findings = await aiValidator.validateFindings(this.findings);
+          // Filter out findings evaluated as false positives
+          this.findings = this.findings.filter(f => !f.aiValidation || f.aiValidation.isValid !== false);
+        }
+      } catch (error) {
+        consola.error('AI Validation failed:', error);
       }
     }
 

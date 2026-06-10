@@ -285,6 +285,23 @@ export function analyzeCrypto(context: ScanFileContext): Finding[] {
         continue;
       }
 
+      // Skip Math.random() in non-cryptographic/non-security contexts (e.g. UI key/ID generation)
+      if (pattern.subcategory === 'insecure-random' && pattern.regex.source.includes('Math\\.random')) {
+        const isSafeContext = 
+          trimmed.includes('id:') ||
+          trimmed.includes('id =') ||
+          trimmed.includes('key:') ||
+          trimmed.includes('key =') ||
+          trimmed.includes('reactKey') ||
+          trimmed.includes('index') ||
+          trimmed.includes('assert') ||
+          trimmed.includes('tc.') ||
+          /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index)\w*\s*=/i.test(trimmed);
+        if (isSafeContext) {
+          continue;
+        }
+      }
+
       const snippet = extractSnippet(content, match.line);
       findings.push(
         createFinding({

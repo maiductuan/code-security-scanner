@@ -131,8 +131,8 @@ rules:
       - https://docs.anthropic.com/en/api/messages
     tags:
       - anthropic
-  - id: anthropic-no- high-handling
-    name: anthropic-no- high-handling
+  - id: anthropic-no-error-handling
+    name: anthropic-no-error-handling
     description: >-
       Anthropic API call without error handling. Wrap API calls in try/except to handle rate limits, API errors, and
       network issues gracefully.
@@ -217,8 +217,8 @@ rules:
       - https://docs.cohere.com/docs/safety-modes
     tags:
       - cohere
-  - id: cohere-no- high-handling
-    name: cohere-no- high-handling
+  - id: cohere-no-error-handling
+    name: cohere-no-error-handling
     description: >-
       Cohere API call without error handling. Wrap API calls in try/except to handle rate limits, API errors, and
       network issues gracefully.
@@ -348,8 +348,8 @@ rules:
       - https://ai.google.dev/gemini-api/docs/safety-guidance
     tags:
       - gemini
-  - id: gemini-no- high-handling
-    name: gemini-no- high-handling
+  - id: gemini-no-error-handling
+    name: gemini-no-error-handling
     description: >-
       Google Gemini API call without error handling. Wrap API calls in try/except to handle API errors and network
       issues gracefully.
@@ -494,8 +494,8 @@ rules:
       - https://huggingface.co/docs/hub/en/security-tokens
     tags:
       - huggingface
-  - id: huggingface-no- high-handling
-    name: huggingface-no- high-handling
+  - id: huggingface-no-error-handling
+    name: huggingface-no-error-handling
     description: >-
       Hugging Face Inference API call without error handling. Wrap API calls in try/except to handle
       InferenceTimeoutError, HfHubHTTPError, and network issues gracefully.
@@ -753,8 +753,8 @@ rules:
       - https://docs.mistral.ai/capabilities/guardrailing/
     tags:
       - mistral
-  - id: mistral-no- high-handling
-    name: mistral-no- high-handling
+  - id: mistral-no-error-handling
+    name: mistral-no-error-handling
     description: >-
       Mistral API call without error handling. Wrap API calls in try/except to handle rate limits, API errors, and
       network issues gracefully.
@@ -977,8 +977,8 @@ rules:
       - https://developers.openai.com/api/docs/guides/safety-best-practices/
     tags:
       - openai
-  - id: openai-no- high-handling
-    name: openai-no- high-handling
+  - id: openai-no-error-handling
+    name: openai-no-error-handling
     description: >-
       OpenAI API call without error handling. Wrap API calls in try/except to handle rate limits (RateLimitError), API
       errors (APIError), and network issues gracefully.
@@ -6177,8 +6177,8 @@ rules:
       - https://docs.python.org/3/library/tempfile.html#tempfile.TemporaryFile
     tags:
       - python
-  - id: logging- high-without-handling
-    name: logging- high-without-handling
+  - id: logging-error-without-handling
+    name: logging-error-without-handling
     description: >-
       Errors should only be logged when handled. The code logs the error and propogates the exception, consider reducing
       the level to warning or info.

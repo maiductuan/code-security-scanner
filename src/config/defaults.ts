@@ -46,7 +46,14 @@ function loadDefaultConfig(): DeepScanConfig {
       },
       rules: { include: ['*'], exclude: [], custom: [] },
       languages: ['auto'],
-      paths: { include: ['**/*'], exclude: ['node_modules/', 'vendor/', 'dist/', 'build/', '.git/', '**/node_modules/**', '**/vendor/**', '**/dist/**', '**/build/**', '**/.git/**'] },
+      paths: {
+        include: ['**/*'],
+        exclude: [
+          'node_modules/', '.git/',
+          '**/node_modules/**', '**/.git/**',
+          '**/*.min.js', '**/*.min.css', '**/*.map', '**/*.lock', '**/package-lock.json',
+        ]
+      },
       output: { format: 'console', verbose: false, colors: true },
       ai: { enabled: false },
       context: { projectType: 'auto', frameworks: [], sensitivePatterns: [] }

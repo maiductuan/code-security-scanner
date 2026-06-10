@@ -45,7 +45,9 @@ const RulesSchema = z.object({
 const PathsSchema = z.object({
   include: z.array(z.string()).default(['**/*']),
   exclude: z.array(z.string()).default([
-    'node_modules/**', 'dist/**', 'build/**', '.git/**',
+    'node_modules/', '.git/',
+    '**/node_modules/**', '**/.git/**',
+    '**/*.min.js', '**/*.min.css', '**/*.map', '**/*.lock', '**/package-lock.json',
   ]),
 }).default({});
 
@@ -58,7 +60,7 @@ const OutputSchema = z.object({
 
 const AISchema = z.object({
   enabled: z.boolean().default(false),
-  provider: z.enum(['openai', 'anthropic', 'ollama']).default('openai'),
+  provider: z.enum(['openai', 'anthropic', 'ollama', 'google']).default('openai'),
   model: z.string().optional(),
   apiKey: z.string().optional(),
   baseUrl: z.string().optional(),

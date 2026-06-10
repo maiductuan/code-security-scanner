@@ -384,7 +384,7 @@ rules:
     owasp: []
     references:
       - >-
-        https://stackoverflow.com/questions/72771366/why-do-i-get- high-handler-and-runtime-must-be-set-when-packagetype-is-zip-whe
+        https://stackoverflow.com/questions/72771366/why-do-i-get-error-handler-and-runtime-must-be-set-when-packagetype-is-zip-whe
     tags:
       - aws
       - terraform
@@ -3868,8 +3868,8 @@ rules:
     tags:
       - terraform
       - azure
-  - id: azure-appservice-detailed- highmessages-enabled
-    name: azure-appservice-detailed- highmessages-enabled
+  - id: azure-appservice-detailed-errormessages-enabled
+    name: azure-appservice-detailed-errormessages-enabled
     description: Ensure that App service enables detailed error messages
     category: security
     severity: medium

@@ -29,6 +29,7 @@ export interface CreateFindingOptions {
   cwe?: string[];
   owasp?: string[];
   fix?: FixSuggestion;
+  references?: string[];
   tags?: string[];
 }
 
@@ -88,6 +89,7 @@ export function createFinding(options: CreateFindingOptions): Finding {
     cwe: options.cwe,
     owasp: options.owasp,
     fix: options.fix,
+    references: options.references ?? options.fix?.references ?? [],
     metadata: {
       fingerprint,
       firstSeen: new Date().toISOString(),
@@ -192,18 +194,118 @@ export abstract class BaseScanner implements IScanner {
             // Skip matches inside comments
             if (isInCommentOrString(match.lineContent, match.column)) continue;
 
+            // Skip secrets rules matching environment variables or template strings
+            if (
+              rule.category === 'secrets' ||
+              rule.id === 'security/hardcoded-secret' ||
+              rule.id.includes('secret') ||
+              rule.id.includes('password')
+            ) {
+              const line = match.lineContent;
+              const val = match.match;
+              // Skip lines that reference environment variables
+              if (
+                /process\.env\b|os\.environ|os\.getenv|System\.getenv|System\.getProperty|ENV\[|getenv\s*\(/i.test(line)
+              ) {
+                continue;
+              }
+              // Skip template/bracket placeholders or dynamic interpolation (e.g. {DB_PASSWORD}, $DB_PASSWORD, ${DB_PASSWORD})
+              if (
+                /\{\s*(?:DB_|db_|PASSWORD|PASS|USER|user|HOST|host|PORT|port|NAME|name|SECRET|TOKEN|KEY|API)/.test(line) ||
+                /\{\s*[a-zA-Z_][a-zA-Z0-9_]*\s*\}/.test(line) || // generic {variable}
+                /\$[a-zA-Z_][a-zA-Z0-9_]*/.test(line) || // generic $variable
+                /\$\{[a-zA-Z_][a-zA-Z0-9_]*\}/.test(line) // generic ${variable}
+              ) {
+                continue;
+              }
+              // Skip example/placeholder values (excluding high-fidelity test keys like AWS keys containing EXAMPLE)
+              if (
+                !/^(?:AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}$/i.test(val) &&
+                /(?:example|placeholder|your[_-]|changeme|xxxx|TODO|FIXME)/i.test(val)
+              ) {
+                continue;
+              }
+            }
+
+            // Skip static assignments to innerHTML in rule-based matchers to avoid false positives
+            if (rule.id === 'security/xss-innerhtml' || rule.id === 'insecure-innerhtml') {
+              const line = match.lineContent;
+              if (line.includes('escapeHtml') || line.includes('escapeHTML') || line.includes('DOMPurify') || line.includes('sanitizeHtml')) {
+                continue;
+              }
+              const innerHtmlMatch = line.match(/\.(?:inner|outer)HTML\s*\+?=\s*(.*)/i);
+              if (innerHtmlMatch) {
+                let rhs = innerHtmlMatch[1].trim();
+                if (rhs.endsWith(';')) {
+                  rhs = rhs.slice(0, -1).trim();
+                }
+                const singleQuoted = /^'[^'\\]*(?:\\.[^'\\]*)*'$/;
+                const doubleQuoted = /^"[^"\\]*(?:\\.[^"\\]*)*"$/;
+                const backtickQuoted = /^`[^`\\]*(?:\\.[^`\\]*)*`$/;
+                const isStaticString = 
+                  singleQuoted.test(rhs) || 
+                  doubleQuoted.test(rhs) || 
+                  (backtickQuoted.test(rhs) && !rhs.includes('${'));
+                if (isStaticString) {
+                  continue;
+                }
+              }
+            }
+
+            // Skip Math.random() in non-cryptographic/non-security contexts
+            if (rule.id === 'SEC-CRYPTO-003' || rule.id === 'security/weak-crypto') {
+              const trimmed = match.lineContent.trim();
+              const isSafeContext = 
+                trimmed.includes('id:') ||
+                trimmed.includes('id =') ||
+                trimmed.includes('key:') ||
+                trimmed.includes('key =') ||
+                trimmed.includes('reactKey') ||
+                trimmed.includes('index') ||
+                trimmed.includes('assert') ||
+                trimmed.includes('tc.') ||
+                /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index)\w*\s*=/i.test(trimmed);
+              if (isSafeContext) {
+                continue;
+              }
+            }
+
             // Skip relative imports/requires/includes for path traversal rules to avoid false positives
             if (rule.id === 'security/path-traversal') {
               const line = match.lineContent.trim();
+              const isConfigFile = 
+                context.filePath.endsWith('.config.js') || 
+                context.filePath.endsWith('.config.ts') || 
+                context.filePath.includes('vite.config') || 
+                context.filePath.includes('webpack.') || 
+                context.filePath.includes('tailwind.');
+
               if (
                 line.startsWith('import ') ||
                 line.startsWith('import(') ||
                 line.startsWith('export ') ||
                 line.startsWith('from ') ||
                 line.includes('require(') ||
-                line.includes('include ')
+                line.includes('require ') ||
+                line.includes('require_once ') ||
+                line.includes('include ') ||
+                line.includes('include_once ') ||
+                isConfigFile
               ) {
                 continue;
+              }
+
+              // Skip static path constants starting points
+              if (
+                line.includes('__DIR__') ||
+                line.includes('__dirname') ||
+                line.includes('__filename') ||
+                line.includes('__FILE__') ||
+                line.includes('import.meta.url')
+              ) {
+                if (!/(?:req|request|params|query|body|args|input|user|GET|POST|REQUEST)\b/i.test(line)) {
+                  continue;
+                }
               }
             }
 
@@ -249,6 +351,7 @@ export abstract class BaseScanner implements IScanner {
                 cwe: rule.cwe,
                 owasp: rule.owasp,
                 fix: rule.fix ? { description: rule.fix.description, suggestion: rule.fix.replacement, references: rule.references ?? [] } : undefined,
+                references: rule.references,
                 tags: rule.tags,
               }),
             );

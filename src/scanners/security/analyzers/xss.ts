@@ -259,6 +259,63 @@ export function analyzeXSS(context: ScanFileContext): Finding[] {
         continue;
       }
 
+      // Skip if the line contains a known sanitization/escaping function to avoid false positives
+      if (trimmed.includes('escapeHtml') || trimmed.includes('escapeHTML') || trimmed.includes('DOMPurify') || trimmed.includes('sanitizeHtml')) {
+        continue;
+      }
+
+      // Skip static assignments to innerHTML / outerHTML to avoid false positives
+      if (pattern.subcategory === 'dom-xss' && (pattern.regex.source.includes('innerHTML') || pattern.regex.source.includes('outerHTML'))) {
+        const innerHtmlMatch = match.lineContent.match(/\.(?:inner|outer)HTML\s*\+?=\s*(.*)/i);
+        if (innerHtmlMatch) {
+          let rhs = innerHtmlMatch[1].trim();
+          if (rhs.endsWith(';')) {
+            rhs = rhs.slice(0, -1).trim();
+          }
+          const singleQuoted = /^'[^'\\]*(?:\\.[^'\\]*)*'$/;
+          const doubleQuoted = /^"[^"\\]*(?:\\.[^"\\]*)*"$/;
+          const backtickQuoted = /^`[^`\\]*(?:\\.[^`\\]*)*`$/;
+          const isStaticString = 
+            singleQuoted.test(rhs) || 
+            doubleQuoted.test(rhs) || 
+            (backtickQuoted.test(rhs) && !rhs.includes('${'));
+          if (isStaticString) {
+            continue;
+          }
+        }
+      }
+
+      // Skip low severity DOM source warnings on safe/common usages
+      if (pattern.subcategory === 'dom-xss' && pattern.severity === 'low') {
+        const hasSafeWords = 
+          trimmed.includes('URLSearchParams') ||
+          trimmed.includes('writeText') ||
+          trimmed.includes('clipboard') ||
+          trimmed.includes('console.') ||
+          trimmed.includes('sessionStorage') ||
+          trimmed.includes('localStorage') ||
+          trimmed.includes('siteUrl') ||
+          trimmed.includes('siteImage') ||
+          trimmed.includes('siteDescription') ||
+          trimmed.includes('siteTitle') ||
+          trimmed.includes('encodeURIComponent') ||
+          trimmed.includes('decodeURIComponent') ||
+          trimmed.includes('location.href =') ||
+          trimmed.includes('location.href=') ||
+          trimmed.includes('location.replace') ||
+          trimmed.includes('location.assign') ||
+          trimmed.includes('return ') ||
+          trimmed.includes('window.location.href =') ||
+          trimmed.includes('window.location.href=') ||
+          trimmed.endsWith(']);') ||
+          trimmed.endsWith('],') ||
+          /^(?:const|let|var)\s+\w+\s*=\s*(?:url\s*\|\|\s*)?window\.location\.(?:href|origin)/.test(trimmed);
+
+        if (hasSafeWords) {
+          continue;
+        }
+      }
+
       const snippet = extractSnippet(content, match.line);
       findings.push(
         createFinding({

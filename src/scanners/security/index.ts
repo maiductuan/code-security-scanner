@@ -2,10 +2,11 @@
 // Bộ quét bảo mật – điều phối tất cả các analyzer bảo mật
 // Orchestrator that runs all security analyzers and implements IScanner
 
-import type { Finding } from '../../types/finding.js';
+import type { Finding, Severity } from '../../types/finding.js';
 import type { IScanner, ScanFileContext } from '../../types/scanner.js';
 import type { DeepScanConfig } from '../../types/config.js';
-import { BaseScanner } from '../base-scanner.js';
+import { BaseScanner, createFinding } from '../base-scanner.js';
+import { analyzeTaintFlow } from '../../core/taint-tracker.js';
 
 // Import all security analyzers
 import { analyzeInjection } from './analyzers/injection.js';
@@ -33,6 +34,18 @@ const ANALYZERS: SecurityAnalyzer[] = [
   { name: 'file-ops', analyze: analyzeFileOps },
   { name: 'api-sec', analyze: analyzeAPISec },
 ];
+
+const TAINT_METADATA: Record<string, { severity: Severity; cwe: string[]; title: string }> = {
+  code_injection: { severity: 'critical', cwe: ['CWE-94'], title: 'Code Injection via Taint Flow' },
+  command_injection: { severity: 'critical', cwe: ['CWE-78'], title: 'Command Injection via Taint Flow' },
+  sql_injection: { severity: 'critical', cwe: ['CWE-89'], title: 'SQL Injection via Taint Flow' },
+  xss: { severity: 'high', cwe: ['CWE-79'], title: 'Cross-Site Scripting (XSS) via Taint Flow' },
+  path_traversal: { severity: 'high', cwe: ['CWE-22'], title: 'Path Traversal via Taint Flow' },
+  deserialization: { severity: 'critical', cwe: ['CWE-502'], title: 'Insecure Deserialization via Taint Flow' },
+  buffer_overflow: { severity: 'high', cwe: ['CWE-120'], title: 'Buffer Overflow via Taint Flow' },
+  format_string: { severity: 'high', cwe: ['CWE-134'], title: 'Format String Vulnerability via Taint Flow' },
+  file_inclusion: { severity: 'critical', cwe: ['CWE-98'], title: 'File Inclusion via Taint Flow' },
+};
 
 // ─── Security Scanner Class ───────────────────────────────────────────────
 
@@ -79,6 +92,49 @@ export class SecurityScanner extends BaseScanner implements IScanner {
         // Log error but don't stop scanning
         // Ghi lỗi nhưng không dừng quét
         console.error(`[SecurityScanner] Error in ${analyzer.name} analyzer:`, error);
+      }
+    }
+
+    // Run taint flow analysis if deep analysis is enabled
+    if (context.config?.deep) {
+      try {
+        const taintResults = analyzeTaintFlow(context.content, context.filePath, context.language);
+        for (const res of taintResults) {
+          if (!res.hasTaintedSink || res.flow.length === 0) continue;
+          const sinkStep = res.flow[res.flow.length - 1];
+          const loc = sinkStep.location;
+          const meta = TAINT_METADATA[res.sinkType] || {
+            severity: 'high' as Severity,
+            cwe: [],
+            title: `Taint Flow: ${res.sinkType.replace(/_/g, ' ').toUpperCase()}`,
+          };
+
+          const finding = createFinding({
+            ruleId: `security/taint-${res.sinkType.replace(/_/g, '-')}`,
+            scanner: 'security',
+            severity: meta.severity,
+            confidence: 'high',
+            category: 'taint-flow',
+            subcategory: res.sinkType,
+            title: meta.title,
+            message: `Tainted data from source "${res.sourceType}" reaches sink "${res.sinkType}" via propagator.`,
+            filePath: context.filePath,
+            lineNumber: loc.startLine,
+            column: loc.startColumn,
+            snippet: loc.snippet,
+            cwe: meta.cwe,
+            owasp: ['A03:2021'],
+            fix: {
+              description: `Sanitize the tainted value before passing it to ${res.sinkType}.`,
+              references: [],
+            },
+            tags: ['taint-flow', 'security'],
+          });
+          finding.taintFlow = res.flow;
+          allFindings.push(finding);
+        }
+      } catch (error) {
+        console.error('[SecurityScanner] Error in taint flow analysis:', error);
       }
     }
 

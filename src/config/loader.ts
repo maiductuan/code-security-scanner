@@ -38,6 +38,16 @@ export async function loadConfig(options: {
     consola.debug(`Applied preset: ${preset}`);
   }
 
+  // Step 2.5: Dynamically detect and apply ecosystem-specific path exclusions
+  const searchDir = targetPath ? resolve(targetPath) : process.cwd();
+  const detectedExcludes = detectEcosystemExcludes(searchDir);
+  if (detectedExcludes.length > 0) {
+    if (!config.paths) config.paths = { include: ['**/*'], exclude: [] };
+    const currentExclude = (config.paths as any).exclude || [];
+    (config.paths as any).exclude = [...new Set([...currentExclude, ...detectedExcludes])];
+    consola.debug(`Applied ${detectedExcludes.length} auto-detected ecosystem path exclusions`);
+  }
+
   // Step 3: Load project config file
   const projectConfig = await loadProjectConfig(configPath, targetPath);
   if (projectConfig) {
@@ -190,4 +200,79 @@ function resolveEnvVars(obj: Record<string, unknown>): Record<string, unknown> {
   return result;
 }
 
-export { findConfigFile, parseConfigFile, deepMerge };
+/**
+ * Dynamically detect ecosystems and return relevant path exclusions
+ */
+function detectEcosystemExcludes(targetPath: string): string[] {
+  const excludes: string[] = [];
+
+  // 1. Node.js / JavaScript / TypeScript Ecosystem
+  if (
+    existsSync(resolve(targetPath, 'package.json')) ||
+    existsSync(resolve(targetPath, 'package-lock.json')) ||
+    existsSync(resolve(targetPath, 'yarn.lock')) ||
+    existsSync(resolve(targetPath, 'pnpm-lock.yaml'))
+  ) {
+    excludes.push(
+      'dist/', '**/dist/**',
+      'build/', '**/build/**',
+      '.next/', '**/.next/**',
+      '.nuxt/', '**/.nuxt/**',
+      '.cache/', '**/.cache/**',
+      '.turbo/', '**/.turbo/**',
+      'assets/', '**/assets/**',
+      'public/build/', '**/public/build/**',
+      'public/hot/', '**/public/hot/**',
+      'public/storage/', '**/public/storage/**'
+    );
+  }
+
+  // 2. PHP / Laravel Ecosystem
+  if (
+    existsSync(resolve(targetPath, 'composer.json')) ||
+    existsSync(resolve(targetPath, 'composer.lock')) ||
+    existsSync(resolve(targetPath, 'artisan'))
+  ) {
+    excludes.push(
+      'vendor/', '**/vendor/**',
+      'storage/', '**/storage/**',
+      'bootstrap/cache/', '**/bootstrap/cache/**',
+      'public/build/', '**/public/build/**',
+      'public/hot/', '**/public/hot/**',
+      'public/storage/', '**/public/storage/**'
+    );
+  }
+
+  // 3. Python Ecosystem
+  if (
+    existsSync(resolve(targetPath, 'requirements.txt')) ||
+    existsSync(resolve(targetPath, 'pyproject.toml')) ||
+    existsSync(resolve(targetPath, 'Pipfile')) ||
+    existsSync(resolve(targetPath, 'setup.py'))
+  ) {
+    excludes.push(
+      '__pycache__/', '**/__pycache__/**',
+      '.venv/', '**/.venv/**',
+      'venv/', '**/venv/**',
+      'tmp/', 'temp/', '.temp/', '.tmp/', '**/tmp/**', '**/temp/**', '**/.temp/**', '**/.tmp/**'
+    );
+  }
+
+  // 4. Java / Maven / Gradle / .NET Ecosystem
+  if (
+    existsSync(resolve(targetPath, 'pom.xml')) ||
+    existsSync(resolve(targetPath, 'build.gradle')) ||
+    existsSync(resolve(targetPath, 'build.gradle.kts')) ||
+    existsSync(resolve(targetPath, 'Directory.Build.props'))
+  ) {
+    excludes.push(
+      'target/', '**/target/**',
+      'bin/', '**/bin/**',
+      'obj/', '**/obj/**'
+    );
+  }
+
+  return excludes;
+}
+
+export { findConfigFile, parseConfigFile, deepMerge, detectEcosystemExcludes };

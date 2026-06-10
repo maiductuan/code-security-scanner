@@ -187,8 +187,8 @@ rules:
         https://github.com/byterocket/c4-common-issues/blob/main/0-Gas-Optimizations.md/#g011---unnecessary-checked-arithmetic-in-for-loop
     tags:
       - solidity
-  - id: use-custom- high-not-require
-    name: use-custom- high-not-require
+  - id: use-custom-error-not-require
+    name: use-custom-error-not-require
     description: >-
       Consider using custom errors as they are more gas efficient while allowing developers  to describe the error in
       detail using NatSpec.
@@ -205,7 +205,7 @@ rules:
     cwe: []
     owasp: []
     references:
-      - https://blog.soliditylang.org/2021/04/21/custom- highs/
+      - https://blog.soliditylang.org/2021/04/21/custom-errors/
     tags:
       - solidity
   - id: use-multiple-require

@@ -446,8 +446,11 @@ function detectSecretPattern(source: string, filePath: string, pattern: SecretPa
     if (/process\.env\b|os\.environ|System\.getenv|ENV\[/i.test(match.lineContent)) {
       continue;
     }
-    // Skip example/placeholder values
-    if (/(?:example|placeholder|your[_-]|changeme|xxxx|TODO|FIXME)/i.test(match.match)) {
+    // Skip example/placeholder values (excluding high-fidelity test keys like AWS keys containing EXAMPLE)
+    if (
+      !/^(?:AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}$/i.test(match.match) &&
+      /(?:example|placeholder|your[_-]|changeme|xxxx|TODO|FIXME)/i.test(match.match)
+    ) {
       continue;
     }
 

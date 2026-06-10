@@ -1,0 +1,3296 @@
+{
+  "$schema": "https://deepscan.dev/schemas/scan-result-v1.json",
+  "version": "1.0.0",
+  "tool": {
+    "name": "DeepScan",
+    "version": "1.0.0"
+  },
+  "target": "D:\\review_code_ai",
+  "config": "1.0",
+  "summary": {
+    "totalFindings": 75,
+    "bySeverity": {
+      "critical": 26,
+      "high": 30,
+      "medium": 18,
+      "low": 1
+    },
+    "byScanner": {
+      "security": 75,
+      "quality": 0,
+      "cve": 0
+    },
+    "byCategory": {
+      "injection": 18,
+      "file-ops": 26,
+      "api-security": 1,
+      "secrets": 5,
+      "crypto": 6,
+      "xss": 19
+    },
+    "filesScanned": 272,
+    "filesWithFindings": 30,
+    "scanDuration": 7763,
+    "timestamp": "2026-06-10T07:45:53.976Z"
+  },
+  "findings": [
+    {
+      "id": "security-81706e3836e8ccfb",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\access_tokens.py",
+        "startLine": 333,
+        "startColumn": 17,
+        "endLine": 333,
+        "endColumn": 17,
+        "snippet": "    db.commit()\r\n    db.refresh(token)\r\n\r\n    logger.info(f\"Updated access token {token_id} for workspace {workspace_id}\")\r\n\r\n    encryption_service = EncryptionService()\r\n    return _build_token_out(token, db, encryption_service)\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "81706e3836e8ccfb",
+        "firstSeen": "2026-06-10T07:45:53.571Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-ead8e9933a7f24a7",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\access_tokens.py",
+        "startLine": 376,
+        "startColumn": 17,
+        "endLine": 376,
+        "endColumn": 17,
+        "snippet": "    db.delete(token)\r\n    db.commit()\r\n\r\n    logger.info(f\"Deleted access token {token_id} from workspace {workspace_id}\")\r\n\r\n    return {\"message\": \"Access token deleted successfully\"}\r\n\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "ead8e9933a7f24a7",
+        "firstSeen": "2026-06-10T07:45:53.571Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-104f3a635efe613c",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "File operation with user-controlled path – vulnerable to path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\admin_email.py",
+        "startLine": 73,
+        "startColumn": 17,
+        "endLine": 73,
+        "endColumn": 17,
+        "snippet": "    from_name: Optional[str] = None\r\n\r\n\r\ndef check_admin_access(user: User):\r\n    \"\"\"Check if user has admin access.\"\"\"\r\n    if not user.is_active or not user.is_admin:\r\n        raise HTTPException(status_code=403, detail=\"Admin access required\")\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "104f3a635efe613c",
+        "firstSeen": "2026-06-10T07:45:53.427Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-180799b7daca9643",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\admin.py",
+        "startLine": 1416,
+        "startColumn": 44,
+        "endLine": 1416,
+        "endColumn": 44,
+        "snippet": "\r\n    logger.info(f\"Admin {current_user.username} cleared {deleted} API logs older than {days} days\")\r\n\r\n    return {\"deleted\": deleted, \"message\": f\"Deleted {deleted} logs older than {days} days\"}\r\n\r\n\r\n@router.get(\"/file-logs\")\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "180799b7daca9643",
+        "firstSeen": "2026-06-10T07:45:53.523Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-0604cbf99fba0f3b",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\ai_settings.py",
+        "startLine": 253,
+        "startColumn": 17,
+        "endLine": 253,
+        "endColumn": 17,
+        "snippet": "    db.commit()\r\n    db.refresh(config)\r\n    \r\n    logger.info(f\"Updated AI config {config_id}\")\r\n    \r\n    return AIConfigResponse(\r\n        id=config.id,\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "0604cbf99fba0f3b",
+        "firstSeen": "2026-06-10T07:45:53.370Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-9122b570c1ae6340",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\ai_settings.py",
+        "startLine": 287,
+        "startColumn": 17,
+        "endLine": 287,
+        "endColumn": 17,
+        "snippet": "    db.delete(config)\r\n    db.commit()\r\n    \r\n    logger.info(f\"Deleted AI config {config_id}\")\r\n    return None\r\n\r\n\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "9122b570c1ae6340",
+        "firstSeen": "2026-06-10T07:45:53.370Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-7b6325151c9fbf42",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\repositories.py",
+        "startLine": 1098,
+        "startColumn": 28,
+        "endLine": 1098,
+        "endColumn": 28,
+        "snippet": "            \r\n            return {\r\n                \"success\": True,\r\n                \"message\": f\"Updated language data for {repo.name}\",\r\n                \"languages\": api_languages,\r\n                \"gitlab_response\": project_languages\r\n            }\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "7b6325151c9fbf42",
+        "firstSeen": "2026-06-10T07:45:52.796Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-d30a19e0958a1ab6",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\routers\\scan_tasks.py",
+        "startLine": 329,
+        "startColumn": 25,
+        "endLine": 329,
+        "endColumn": 25,
+        "snippet": "                job_name=scan_task.k8s_job_name,\r\n                namespace=scan_task.k8s_namespace\r\n            )\r\n            logger.info(f\"Deleted K8s job: {scan_task.k8s_job_name}\")\r\n        except Exception as e:\r\n            logger.warning(f\"Failed to delete K8s job: {e}\")\r\n    \r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "d30a19e0958a1ab6",
+        "firstSeen": "2026-06-10T07:45:52.648Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-820a0fa84535358f",
+      "ruleId": "security/code-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "code",
+      "title": "Code Injection (eval)",
+      "message": "eval() usage detected",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\rule_engine.py",
+        "startLine": 448,
+        "startColumn": 32,
+        "endLine": 448,
+        "endColumn": 32,
+        "snippet": "    \r\n    # Common security patterns\r\n    security_patterns = [\r\n        (r'eval\\s*\\(', \"Use of eval() can lead to code injection\"),\r\n        (r'exec\\s*\\(', \"Use of exec() can lead to code injection\"),\r\n        (r'subprocess\\..*shell\\s*=\\s*True', \"Shell injection vulnerability\"),\r\n        (r'pickle\\.loads?\\s*\\(', \"Pickle deserialization can be unsafe\"),\r"
+      },
+      "cwe": [
+        "CWE-94",
+        "CWE-95"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Avoid eval() and dynamic code execution. Use JSON.parse() for data, or safe alternatives.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/94.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      "metadata": {
+        "fingerprint": "820a0fa84535358f",
+        "firstSeen": "2026-06-10T07:45:47.630Z",
+        "tags": [
+          "owasp-top-10",
+          "injection"
+        ]
+      }
+    },
+    {
+      "id": "security-a5105c93ab757185",
+      "ruleId": "security/code-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "code",
+      "title": "Code Injection (eval)",
+      "message": "eval() usage detected",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\rule_engine.py",
+        "startLine": 520,
+        "startColumn": 10,
+        "endLine": 520,
+        "endColumn": 10,
+        "snippet": "        'path traversal', 'directory traversal',  # A01: Broken Access Control\r\n        'insecure random', 'weak crypto', 'md5', 'sha1',  # A02: Cryptographic Failures\r\n        'deserialization', 'pickle', 'yaml.load',  # A08: Software and Data Integrity Failures\r\n        'eval(', 'exec(', 'os.system', 'subprocess.call'  # A03: Injection\r\n    ]):\r\n        is_owasp = True\r\n        \r"
+      },
+      "cwe": [
+        "CWE-94",
+        "CWE-95"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Avoid eval() and dynamic code execution. Use JSON.parse() for data, or safe alternatives.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/94.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      "metadata": {
+        "fingerprint": "a5105c93ab757185",
+        "firstSeen": "2026-06-10T07:45:47.630Z",
+        "tags": [
+          "owasp-top-10",
+          "injection"
+        ]
+      }
+    },
+    {
+      "id": "security-e36a57857f6d4aee",
+      "ruleId": "security/code-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "code",
+      "title": "Code Injection (eval)",
+      "message": "eval() usage detected",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\rule_engine.py",
+        "startLine": 525,
+        "startColumn": 104,
+        "endLine": 525,
+        "endColumn": 104,
+        "snippet": "        is_owasp = True\r\n        \r\n        # Determine OWASP category based on message content\r\n        if any(pattern in message for pattern in ['sql injection', 'injection vector', 'b608', 'xss', 'eval(', 'exec(', 'os.system']):\r\n            owasp_category = 'A03:2021'  # Injection\r\n        elif any(pattern in message for pattern in ['debug=true', 'debug enabled', 'werkzeug debugger']):\r\n            owasp_category = 'A05:2021'  # Security Misconfiguration\r"
+      },
+      "cwe": [
+        "CWE-94",
+        "CWE-95"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Avoid eval() and dynamic code execution. Use JSON.parse() for data, or safe alternatives.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/94.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      "metadata": {
+        "fingerprint": "e36a57857f6d4aee",
+        "firstSeen": "2026-06-10T07:45:47.630Z",
+        "tags": [
+          "owasp-top-10",
+          "injection"
+        ]
+      }
+    },
+    {
+      "id": "security-df89d03252f2b20d",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\embedding_db_service.py",
+        "startLine": 68,
+        "startColumn": 26,
+        "endLine": 68,
+        "endColumn": 26,
+        "snippet": "            existing.embedding_type = embedding_type\r\n            existing.updated_at = vietnam_now()\r\n            self.db.commit()\r\n            logger.debug(f\"Updated existing embedding for {source}\")\r\n            return existing\r\n        \r\n        # Create new embedding\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "df89d03252f2b20d",
+        "firstSeen": "2026-06-10T07:45:51.485Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-001f4f51127a8054",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\embedding_db_service.py",
+        "startLine": 395,
+        "startColumn": 21,
+        "endLine": 395,
+        "endColumn": 21,
+        "snippet": "        deleted_count = query.delete(synchronize_session=False)\r\n        \r\n        self.db.commit()\r\n        logger.info(f\"Deleted {deleted_count} embeddings for repo {repo_id} (preserve_uploaded={preserve_uploaded})\")\r\n        return deleted_count\r\n    \r\n    def delete_embeddings_by_source(self, repo_id: int, source_pattern: str) -> int:\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "001f4f51127a8054",
+        "firstSeen": "2026-06-10T07:45:51.485Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-9826516284611fb9",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\embedding_db_service.py",
+        "startLine": 417,
+        "startColumn": 21,
+        "endLine": 417,
+        "endColumn": 21,
+        "snippet": "        ).delete(synchronize_session=False)\r\n        \r\n        self.db.commit()\r\n        logger.info(f\"Deleted {deleted_count} embeddings matching pattern '{source_pattern}' for repo {repo_id}\")\r\n        return deleted_count"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "9826516284611fb9",
+        "firstSeen": "2026-06-10T07:45:51.485Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-697e3708ac39c72b",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\owasp_loader.py",
+        "startLine": 88,
+        "startColumn": 33,
+        "endLine": 88,
+        "endColumn": 33,
+        "snippet": "                    if patterns:\r\n                        existing_rule.pattern = \"|\".join(f\"({pattern})\" for pattern in patterns)\r\n                    \r\n                    logger.info(f\"Updated OWASP rule: {rule_data['rule_id']}\")\r\n                else:\r\n                    # Create new rule\r\n                    patterns = rule_data.get(\"patterns\", [])\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "697e3708ac39c72b",
+        "firstSeen": "2026-06-10T07:45:51.076Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-c27f96becbc39133",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\repository_cache.py",
+        "startLine": 131,
+        "startColumn": 26,
+        "endLine": 131,
+        "endColumn": 26,
+        "snippet": "        try:\r\n            with open(timestamp_file, 'w') as f:\r\n                f.write(str(time.time()))\r\n            logger.debug(f\"Updated cache timestamp for {cache_path}\")\r\n        except Exception as e:\r\n            logger.error(f\"Error updating cache timestamp: {e}\")\r\n    \r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "c27f96becbc39133",
+        "firstSeen": "2026-06-10T07:45:50.877Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-f3abec65697c4ced",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "File operation with user-controlled path – vulnerable to path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\redteam_worker\\config.py",
+        "startLine": 43,
+        "startColumn": 44,
+        "endLine": 43,
+        "endColumn": 44,
+        "snippet": "                    ctx.check_hostname = False\r\n                    ctx.verify_mode = ssl.CERT_NONE\r\n                    req = urllib.request.Request(config_url)\r\n                    with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:\r\n                        test_config_str = resp.read().decode('utf-8')\r\n                    logger.info(f\"✅ Fetched test config ({len(test_config_str)} bytes)\")\r\n                except Exception as e:\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "f3abec65697c4ced",
+        "firstSeen": "2026-06-10T07:45:47.495Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-d1f89dc05f98196d",
+      "ruleId": "SEC-SRF-002",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "api-security",
+      "subcategory": "ssrf",
+      "title": "Server-Side Request Forgery (SSRF)",
+      "message": "Python urlopen with potentially user-controlled URL – vulnerable to SSRF",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\redteam_worker\\config.py",
+        "startLine": 43,
+        "startColumn": 26,
+        "endLine": 43,
+        "endColumn": 26,
+        "snippet": "                    ctx.check_hostname = False\r\n                    ctx.verify_mode = ssl.CERT_NONE\r\n                    req = urllib.request.Request(config_url)\r\n                    with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:\r\n                        test_config_str = resp.read().decode('utf-8')\r\n                    logger.info(f\"✅ Fetched test config ({len(test_config_str)} bytes)\")\r\n                except Exception as e:\r"
+      },
+      "cwe": [
+        "CWE-918"
+      ],
+      "owasp": [
+        "A02:2021",
+        "A05:2021"
+      ],
+      "fix": {
+        "description": "Configure appropriate server parameters, validate target URLs, enable CSRF protection, and limit API requests.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "d1f89dc05f98196d",
+        "firstSeen": "2026-06-10T07:45:47.496Z",
+        "tags": [
+          "api-security",
+          "ssrf"
+        ]
+      }
+    },
+    {
+      "id": "security-47203ebaea936374",
+      "ruleId": "SEC-SEC-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "subcategory": "hardcoded-password",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded password or secret detected in source code",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 197,
+        "startColumn": 1,
+        "endLine": 197,
+        "endColumn": 1,
+        "snippet": "import subprocess\r\n\r\n# Test code with some issues\r\npassword = \"hardcoded_password\"  # Security issue\r\nunused_var = \"not used\"  # Unused variable\r\n\r\ndef bad_function():\r"
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Move secrets to environment variables, a vault service, or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "47203ebaea936374",
+        "firstSeen": "2026-06-10T07:45:46.996Z",
+        "tags": [
+          "secrets",
+          "credentials"
+        ]
+      }
+    },
+    {
+      "id": "security-71825d09b81d47b6",
+      "ruleId": "SEC-SEC-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "subcategory": "hardcoded-password",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded password or secret detected in source code",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 211,
+        "startColumn": 5,
+        "endLine": 211,
+        "endColumn": 5,
+        "snippet": "        # 2. JavaScript test file\r\n        js_file = Path(\"setup/test_scan.js\")\r\n        js_content = '''// Test JavaScript file\r\nvar password = \"hardcoded_password\";  // Security issue\r\nvar unused_var = \"not used\";  // Unused variable\r\n\r\nfunction badFunction() {\r"
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Move secrets to environment variables, a vault service, or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "71825d09b81d47b6",
+        "firstSeen": "2026-06-10T07:45:46.996Z",
+        "tags": [
+          "secrets",
+          "credentials"
+        ]
+      }
+    },
+    {
+      "id": "security-7e7eb950d4d61ad7",
+      "ruleId": "SEC-SEC-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "subcategory": "hardcoded-password",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded password or secret detected in source code",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 251,
+        "startColumn": 1,
+        "endLine": 251,
+        "endColumn": 1,
+        "snippet": "\r\n```python\r\n# Code block with issues\r\npassword = \"secret\"\r\n```\r\n'''\r\n        with open(md_file, 'w') as f:\r"
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Move secrets to environment variables, a vault service, or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "7e7eb950d4d61ad7",
+        "firstSeen": "2026-06-10T07:45:46.996Z",
+        "tags": [
+          "secrets",
+          "credentials"
+        ]
+      }
+    },
+    {
+      "id": "security-8cba63992dacc639",
+      "ruleId": "security/code-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "code",
+      "title": "Code Injection (eval)",
+      "message": "eval() usage detected",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 215,
+        "startColumn": 5,
+        "endLine": 215,
+        "endColumn": 5,
+        "snippet": "var unused_var = \"not used\";  // Unused variable\r\n\r\nfunction badFunction() {\r\n    eval(\"console.log('hello')\");  // Security issue\r\n    return null;\r\n}\r\n'''\r"
+      },
+      "cwe": [
+        "CWE-94",
+        "CWE-95"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Avoid eval() and dynamic code execution. Use JSON.parse() for data, or safe alternatives.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/94.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      "metadata": {
+        "fingerprint": "8cba63992dacc639",
+        "firstSeen": "2026-06-10T07:45:47.023Z",
+        "tags": [
+          "owasp-top-10",
+          "injection"
+        ]
+      }
+    },
+    {
+      "id": "security-b79dd610d12f9711",
+      "ruleId": "security/hardcoded-secret",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded secret value detected",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 197,
+        "startColumn": 1,
+        "endLine": 197,
+        "endColumn": 1,
+        "snippet": "import subprocess\r\n\r\n# Test code with some issues\r\npassword = \"hardcoded_password\"  # Security issue\r\nunused_var = \"not used\"  # Unused variable\r\n\r\ndef bad_function():\r"
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A07:2021"
+      ],
+      "fix": {
+        "description": "Use environment variables or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/"
+      ],
+      "metadata": {
+        "fingerprint": "b79dd610d12f9711",
+        "firstSeen": "2026-06-10T07:45:47.025Z",
+        "tags": [
+          "owasp-top-10",
+          "secrets",
+          "a07"
+        ]
+      }
+    },
+    {
+      "id": "security-780401992b616e31",
+      "ruleId": "security/hardcoded-secret",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded secret value detected",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 211,
+        "startColumn": 5,
+        "endLine": 211,
+        "endColumn": 5,
+        "snippet": "        # 2. JavaScript test file\r\n        js_file = Path(\"setup/test_scan.js\")\r\n        js_content = '''// Test JavaScript file\r\nvar password = \"hardcoded_password\";  // Security issue\r\nvar unused_var = \"not used\";  // Unused variable\r\n\r\nfunction badFunction() {\r"
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A07:2021"
+      ],
+      "fix": {
+        "description": "Use environment variables or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/"
+      ],
+      "metadata": {
+        "fingerprint": "780401992b616e31",
+        "firstSeen": "2026-06-10T07:45:47.025Z",
+        "tags": [
+          "owasp-top-10",
+          "secrets",
+          "a07"
+        ]
+      }
+    },
+    {
+      "id": "security-a14a9efb150d4c8b",
+      "ruleId": "SEC-INJ-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql-injection",
+      "title": "SQL Injection",
+      "message": "Python f-string used in SQL query – vulnerable to SQL injection",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\pages\\LandingPage.tsx",
+        "startLine": 332,
+        "startColumn": 82,
+        "endLine": 332,
+        "endColumn": 82,
+        "snippet": "                                    <div className=\"text-blue-400\">def <span className=\"text-yellow-200\">get_user_data</span>(user_id):</div>\r\n                                    <div className=\"pl-4 text-slate-500\"># Direct string formatting - SQL Injection Risk!</div>\r\n                                    <div className=\"pl-4 text-slate-300\">\r\n                                        query = <span className=\"text-green-300\">f\"SELECT * FROM users WHERE id = {`{user_id}`}\"</span>\r\n                                    </div>\r\n                                    <div className=\"pl-4 text-slate-300\">return db.execute(query)</div>\r\n\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "a14a9efb150d4c8b",
+        "firstSeen": "2026-06-10T07:45:49.477Z",
+        "tags": [
+          "sql",
+          "injection",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-55bdf3a9f0e5543e",
+      "ruleId": "security/sql-injection",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql",
+      "title": "SQL Injection",
+      "message": "SQL query with f-string interpolation (Python)",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\pages\\LandingPage.tsx",
+        "startLine": 332,
+        "startColumn": 82,
+        "endLine": 332,
+        "endColumn": 82,
+        "snippet": "                                    <div className=\"text-blue-400\">def <span className=\"text-yellow-200\">get_user_data</span>(user_id):</div>\r\n                                    <div className=\"pl-4 text-slate-500\"># Direct string formatting - SQL Injection Risk!</div>\r\n                                    <div className=\"pl-4 text-slate-300\">\r\n                                        query = <span className=\"text-green-300\">f\"SELECT * FROM users WHERE id = {`{user_id}`}\"</span>\r\n                                    </div>\r\n                                    <div className=\"pl-4 text-slate-300\">return db.execute(query)</div>\r\n\r"
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation",
+        "suggestion": "Use db.query(\"SELECT * FROM users WHERE id = ?\", [userId])",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/89.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "metadata": {
+        "fingerprint": "55bdf3a9f0e5543e",
+        "firstSeen": "2026-06-10T07:45:49.516Z",
+        "tags": [
+          "owasp-top-10",
+          "injection",
+          "a03"
+        ]
+      }
+    },
+    {
+      "id": "security-015737b96ed30b50",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\code_graph.py",
+        "startLine": 699,
+        "startColumn": 16,
+        "endLine": 699,
+        "endColumn": 16,
+        "snippet": "    def _compute_hash(self, content: str) -> str:\r\n        \"\"\"Compute hash of file content\"\"\"\r\n        import hashlib\r\n        return hashlib.md5(content.encode()).hexdigest()\r\n    \r\n    def get_file_summary(\r\n        self,\r"
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "015737b96ed30b50",
+        "firstSeen": "2026-06-10T07:45:51.937Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-9cbc717c31968516",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path traversal sequence detected",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\code_graph.py",
+        "startLine": 558,
+        "startColumn": 57,
+        "endLine": 558,
+        "endColumn": 57,
+        "snippet": "        Resolve JavaScript import to file path.\r\n        \r\n        Args:\r\n            import_path: Import path (e.g., \"./utils\", \"../services/api\")\r\n            current_file: Current file path\r\n            repo_path: Repository root path\r\n            \r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "9cbc717c31968516",
+        "firstSeen": "2026-06-10T07:45:51.961Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-f84f67fd2133cfda",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\code_graph.py",
+        "startLine": 473,
+        "startColumn": 25,
+        "endLine": 473,
+        "endColumn": 25,
+        "snippet": "        ]\r\n        \r\n        for path in possible_paths:\r\n            full_path = os.path.join(repo_path, path)\r\n            if os.path.exists(full_path):\r\n                # Return normalized relative path\r\n                return path.replace('\\\\', '/')\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "f84f67fd2133cfda",
+        "firstSeen": "2026-06-10T07:45:51.962Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-59adf16e483c14d0",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\compliance_service.py",
+        "startLine": 613,
+        "startColumn": 28,
+        "endLine": 613,
+        "endColumn": 28,
+        "snippet": "                return False\r\n            \r\n            # Generate content hash for deduplication\r\n            content_hash = hashlib.md5(doc_content.encode('utf-8')).hexdigest()\r\n            \r\n            # Check if embedding already exists\r\n            existing = self.db.query(DocumentEmbedding).filter(\r"
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "59adf16e483c14d0",
+        "firstSeen": "2026-06-10T07:45:51.760Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-e15aec8fc8e128c1",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\context_indexer.py",
+        "startLine": 667,
+        "startColumn": 16,
+        "endLine": 667,
+        "endColumn": 16,
+        "snippet": "    \r\n    def _compute_hash(self, content: str) -> str:\r\n        \"\"\"Compute MD5 hash of content\"\"\"\r\n        return hashlib.md5(content.encode()).hexdigest()\r\n"
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "e15aec8fc8e128c1",
+        "firstSeen": "2026-06-10T07:45:51.647Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-d5b1b566a6e9d421",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\context_indexer.py",
+        "startLine": 223,
+        "startColumn": 48,
+        "endLine": 223,
+        "endColumn": 48,
+        "snippet": "            \r\n            for file in files:\r\n                if any(file.endswith(ext.replace('*', '')) for ext in doc_patterns):\r\n                    rel_path = os.path.relpath(os.path.join(root, file), repo_path)\r\n                    doc_files.append(rel_path.replace('\\\\', '/'))\r\n        \r\n        logger.info(f\"Found {len(doc_files)} documentation files\")\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "d5b1b566a6e9d421",
+        "firstSeen": "2026-06-10T07:45:51.668Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-9225e85b51131a9c",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\embedding_db_service.py",
+        "startLine": 49,
+        "startColumn": 24,
+        "endLine": 49,
+        "endColumn": 24,
+        "snippet": "            Created Embedding object\r\n        \"\"\"\r\n        # Generate content hash for deduplication\r\n        content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()\r\n        \r\n        # Check if embedding already exists\r\n        existing = self.db.query(Embedding).filter(\r"
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "9225e85b51131a9c",
+        "firstSeen": "2026-06-10T07:45:51.478Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-3da7d0ff6959fcbb",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\git_service.py",
+        "startLine": 258,
+        "startColumn": 33,
+        "endLine": 258,
+        "endColumn": 33,
+        "snippet": "                            continue\r\n                    \r\n                    # Get relative path\r\n                    full_path = os.path.join(root, filename)\r\n                    rel_path = os.path.relpath(full_path, repo_path)\r\n                    \r\n                    # Normalize path separators for cross-platform\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "3da7d0ff6959fcbb",
+        "firstSeen": "2026-06-10T07:45:51.277Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-c9d8733c987a589f",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\repository_cache.py",
+        "startLine": 276,
+        "startColumn": 32,
+        "endLine": 276,
+        "endColumn": 32,
+        "snippet": "                dirnames[:] = [d for d in dirnames if not d.startswith('.')]\r\n                \r\n                for filename in filenames:\r\n                    filepath = os.path.join(dirpath, filename)\r\n                    if os.path.exists(filepath):\r\n                        total_size += os.path.getsize(filepath)\r\n            return total_size\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "c9d8733c987a589f",
+        "firstSeen": "2026-06-10T07:45:50.881Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-fc7b032b6ce8e822",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\treesitter_parser.py",
+        "startLine": 175,
+        "startColumn": 24,
+        "endLine": 175,
+        "endColumn": 24,
+        "snippet": "            return None\r\n        \r\n        # Check cache first\r\n        content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()\r\n        if content_hash in self.parsed_trees:\r\n            return self.parsed_trees[content_hash]\r\n        \r"
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "fc7b032b6ce8e822",
+        "firstSeen": "2026-06-10T07:45:50.559Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-64fff984164a1c44",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\treesitter_parser.py",
+        "startLine": 217,
+        "startColumn": 24,
+        "endLine": 217,
+        "endColumn": 24,
+        "snippet": "            return []\r\n        \r\n        # Check cache\r\n        cache_key = f\"{hashlib.md5(content.encode()).hexdigest()}_{language}_{hash(tuple(changed_lines or []))}\"\r\n        if cache_key in self.function_cache:\r\n            return self.function_cache[cache_key]\r\n        \r"
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "64fff984164a1c44",
+        "firstSeen": "2026-06-10T07:45:50.559Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-bf3caa9281dcc78b",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\scan_worker\\worker.py",
+        "startLine": 703,
+        "startColumn": 68,
+        "endLine": 703,
+        "endColumn": 68,
+        "snippet": "                                dirs[:] = [d for d in dirs if not d.startswith('.')]\r\n                                for file in files:\r\n                                    if file.endswith(('.py', '.js', '.ts', '.java', '.go')):\r\n                                        rel_path = os.path.relpath(os.path.join(root, file), temp_dir)\r\n                                        changed_files.append(rel_path)\r\n                            logger.info(f\"📁 Found {len(changed_files)} code files to scan\")\r\n                \r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "bf3caa9281dcc78b",
+        "firstSeen": "2026-06-10T07:45:47.150Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-4f33652852b14ddf",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\scan_worker\\worker.py",
+        "startLine": 814,
+        "startColumn": 56,
+        "endLine": 814,
+        "endColumn": 56,
+        "snippet": "                        for file in files:\r\n                            if file_count >= 20:  # Show first 20 files\r\n                                break\r\n                            rel_path = os.path.relpath(os.path.join(root, file), temp_dir)\r\n                            logger.info(f\"  - {rel_path}\")\r\n                            file_count += 1\r\n                        if file_count >= 20:\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "4f33652852b14ddf",
+        "firstSeen": "2026-06-10T07:45:47.150Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-812571ebcea4b2da",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path traversal sequence detected",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\components\\RedTeamingReport.tsx",
+        "startLine": 15,
+        "startColumn": 9,
+        "endLine": 15,
+        "endColumn": 9,
+        "snippet": "  RISK_LEVEL_COLORS,\r\n  type ScoreBreakdown,\r\n  type RiskLevel,\r\n} from '../utils/riskScoring';\r\n\r\n// ── Fallback defaults (used before API loads — kept minimal) ──\r\nconst DEFAULT_GROUP_COLORS: Record<string, { bg: string; border: string; text: string; icon: string }> = {\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "812571ebcea4b2da",
+        "firstSeen": "2026-06-10T07:45:50.180Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-b2cd834fe860cd67",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "React dangerouslySetInnerHTML usage",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\pages\\docs\\DocsPage.tsx",
+        "startLine": 274,
+        "startColumn": 29,
+        "endLine": 274,
+        "endColumn": 29,
+        "snippet": "                                prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:rounded-lg\r\n                                prose-blockquote:border-red-300 prose-blockquote:bg-red-50/50\r\n                                prose-img:rounded-lg prose-img:shadow-md\"\r\n                            dangerouslySetInnerHTML={{ __html: pageData.content }}\r\n                        />\r\n                    ) : (\r\n                        <div className=\"text-center py-12\">\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "b2cd834fe860cd67",
+        "firstSeen": "2026-06-10T07:45:53.882Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-10c023e4dab5a154",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path traversal sequence detected",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\pages\\RedTeamingPage.tsx",
+        "startLine": 13,
+        "startColumn": 9,
+        "endLine": 13,
+        "endColumn": 9,
+        "snippet": "  exportRedTeamingReport,\r\n  getPromptProviders,\r\n  retryRedTeamingTest\r\n} from '../services/api';\r\nimport type { RedTeamingTestSummary, TargetType } from '../services/api';\r\nimport { showSuccess, showError, showWarning, showDeleteConfirm } from '../utils/alert';\r\nimport Swal from 'sweetalert2';\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "10c023e4dab5a154",
+        "firstSeen": "2026-06-10T07:45:49.108Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-a6adce97f9da979d",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 1209,
+        "startColumn": 13,
+        "endLine": 1209,
+        "endColumn": 13,
+        "snippet": "          html += '<button class=\"btn-autofix\" data-fix-idx=\"' + issue._idx + '\">\\u{1F527} Auto Fix</button>';\r\n        }\r\n\r\n        item.innerHTML = html;\r\n        // Click to go to file/line\r\n        item.addEventListener('click', (e) => {\r\n          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { return; }\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "a6adce97f9da979d",
+        "firstSeen": "2026-06-10T07:45:46.725Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-7f6a9d18a98a6a6f",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 1338,
+        "startColumn": 13,
+        "endLine": 1338,
+        "endColumn": 13,
+        "snippet": "\r\n    const listEl = document.getElementById('progressSteps');\r\n    if (listEl) {\r\n      listEl.innerHTML = progressStepsState.map((s, i) => {\r\n        const cls = i < stepIdx ? 'done' : (i === stepIdx ? 'active' : '');\r\n        const icon = i < stepIdx ? '\\u2705' : (i === stepIdx ? '\\u23F3' : '\\u25CB');\r\n        return '<div class=\"progress-step-item ' + cls + '\"><span class=\"step-icon\">' + icon + '</span>' + s.label + '</div>';\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "7f6a9d18a98a6a6f",
+        "firstSeen": "2026-06-10T07:45:46.725Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-c924e70d82f3e028",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "innerHTML assignment can lead to XSS",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 1028,
+        "startColumn": 50,
+        "endLine": 1028,
+        "endColumn": 50,
+        "snippet": "      if (empty) {\r\n        empty.style.display = 'block';\r\n        empty.querySelector('.issues-empty-icon').textContent = '\\u274C';\r\n        empty.querySelector('.issues-empty-text').innerHTML =\r\n          '<strong>Review Error</strong><br>' + (msg.message || 'Unknown error');\r\n      }\r\n    }\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "c924e70d82f3e028",
+        "firstSeen": "2026-06-10T07:45:46.804Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-2585bb5b785fcd6e",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "innerHTML assignment can lead to XSS",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 1209,
+        "startColumn": 13,
+        "endLine": 1209,
+        "endColumn": 13,
+        "snippet": "          html += '<button class=\"btn-autofix\" data-fix-idx=\"' + issue._idx + '\">\\u{1F527} Auto Fix</button>';\r\n        }\r\n\r\n        item.innerHTML = html;\r\n        // Click to go to file/line\r\n        item.addEventListener('click', (e) => {\r\n          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { return; }\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "2585bb5b785fcd6e",
+        "firstSeen": "2026-06-10T07:45:46.804Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-31260e5bbdb63aef",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "innerHTML assignment can lead to XSS",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 1338,
+        "startColumn": 13,
+        "endLine": 1338,
+        "endColumn": 13,
+        "snippet": "\r\n    const listEl = document.getElementById('progressSteps');\r\n    if (listEl) {\r\n      listEl.innerHTML = progressStepsState.map((s, i) => {\r\n        const cls = i < stepIdx ? 'done' : (i === stepIdx ? 'active' : '');\r\n        const icon = i < stepIdx ? '\\u2705' : (i === stepIdx ? '\\u23F3' : '\\u25CB');\r\n        return '<div class=\"progress-step-item ' + cls + '\"><span class=\"step-icon\">' + icon + '</span>' + s.label + '</div>';\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "31260e5bbdb63aef",
+        "firstSeen": "2026-06-10T07:45:46.804Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-c46610b6fe5a8e90",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "React dangerouslySetInnerHTML usage",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 48,
+        "startColumn": 47,
+        "endLine": 48,
+        "endColumn": 47,
+        "snippet": "- Verify Promise/async error handling (missing .catch(), unhandled rejections)\r\n- Check for memory leaks (event listeners, timers, closures)\r\n- Validate null/undefined handling (use optional chaining ?.)\r\n- Check for injection risks (eval, innerHTML, dangerouslySetInnerHTML)\r\n- Verify proper use of const/let (no var)`,focus_areas:[\"security\",\"performance\",\"error_handling\",\"memory_leaks\"],exclude_patterns:[\"node_modules/**\",\"dist/**\",\"build/**\"]},java:{language:\"java\",ai_instructions:`Java review focus:\r\n- Check resource management (try-with-resources for Closeable)\r\n- Verify null safety (Optional usage, @Nullable annotations)\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "c46610b6fe5a8e90",
+        "firstSeen": "2026-06-10T07:45:46.806Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-4f99c14356bcb843",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "React dangerouslySetInnerHTML usage",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\config\\LanguageConfigSync.ts",
+        "startLine": 30,
+        "startColumn": 370,
+        "endLine": 30,
+        "endColumn": 370,
+        "snippet": "    },\r\n    javascript: {\r\n      language: 'javascript',\r\n      ai_instructions: 'JavaScript/TypeScript review focus:\\n- Check for prototype pollution and XSS vulnerabilities\\n- Verify Promise/async error handling (missing .catch(), unhandled rejections)\\n- Check for memory leaks (event listeners, timers, closures)\\n- Validate null/undefined handling (use optional chaining ?.)\\n- Check for injection risks (eval, innerHTML, dangerouslySetInnerHTML)\\n- Verify proper use of const/let (no var)',\r\n      focus_areas: ['security', 'performance', 'error_handling', 'memory_leaks'],\r\n      exclude_patterns: ['node_modules/**', 'dist/**', 'build/**'],\r\n    },\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "4f99c14356bcb843",
+        "firstSeen": "2026-06-10T07:45:48.120Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-67421852b6a5e4e5",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\config\\LanguageConfigSync.ts",
+        "startLine": 189,
+        "startColumn": 23,
+        "endLine": 189,
+        "endColumn": 23,
+        "snippet": "\r\n      // Remove local files to force fresh write\r\n      for (const file of fs.readdirSync(langDir)) {\r\n        fs.unlinkSync(path.join(langDir, file));\r\n      }\r\n    }\r\n\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "67421852b6a5e4e5",
+        "firstSeen": "2026-06-10T07:45:48.126Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-6133a98f24cddf91",
+      "ruleId": "security/path-traversal",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "file-ops",
+      "title": "Path Traversal",
+      "message": "Path construction with user input/variables",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\config\\LanguageConfigSync.ts",
+        "startLine": 205,
+        "startColumn": 38,
+        "endLine": 205,
+        "endColumn": 38,
+        "snippet": "          continue;\r\n        }\r\n        const lang = path.basename(file, path.extname(file));\r\n        const config = this.readYaml(path.join(langDir, file));\r\n        if (config) {\r\n          this.configs.set(lang, config);\r\n        }\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/22.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/22.html"
+      ],
+      "metadata": {
+        "fingerprint": "6133a98f24cddf91",
+        "firstSeen": "2026-06-10T07:45:48.126Z",
+        "tags": [
+          "file-ops",
+          "a01"
+        ]
+      }
+    },
+    {
+      "id": "security-f1ccf38c8b7e2142",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\sidebar\\SidebarProvider.ts",
+        "startLine": 1181,
+        "startColumn": 13,
+        "endLine": 1181,
+        "endColumn": 13,
+        "snippet": "          html += '<button class=\"btn-autofix\" data-fix-idx=\"' + issue._idx + '\">🔧 Auto Fix</button>';\r\n        }\r\n\r\n        item.innerHTML = html;\r\n        // Click to go to file/line\r\n        item.addEventListener('click', (e) => {\r\n          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { return; }\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "f1ccf38c8b7e2142",
+        "firstSeen": "2026-06-10T07:45:47.790Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-f8015006214a1467",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\sidebar\\SidebarProvider.ts",
+        "startLine": 1310,
+        "startColumn": 13,
+        "endLine": 1310,
+        "endColumn": 13,
+        "snippet": "\r\n    const listEl = document.getElementById('progressSteps');\r\n    if (listEl) {\r\n      listEl.innerHTML = progressStepsState.map((s, i) => {\r\n        const cls = i < stepIdx ? 'done' : (i === stepIdx ? 'active' : '');\r\n        const icon = i < stepIdx ? '✅' : (i === stepIdx ? '⏳' : '○');\r\n        return '<div class=\"progress-step-item ' + cls + '\"><span class=\"step-icon\">' + icon + '</span>' + s.label + '</div>';\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "f8015006214a1467",
+        "firstSeen": "2026-06-10T07:45:47.791Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-968fb9aa686d652a",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "innerHTML assignment can lead to XSS",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\sidebar\\SidebarProvider.ts",
+        "startLine": 1000,
+        "startColumn": 50,
+        "endLine": 1000,
+        "endColumn": 50,
+        "snippet": "      if (empty) {\r\n        empty.style.display = 'block';\r\n        empty.querySelector('.issues-empty-icon').textContent = '❌';\r\n        empty.querySelector('.issues-empty-text').innerHTML =\r\n          '<strong>Review Error</strong><br>' + (msg.message || 'Unknown error');\r\n      }\r\n    }\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "968fb9aa686d652a",
+        "firstSeen": "2026-06-10T07:45:47.860Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-76ec87f139b6e34e",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "innerHTML assignment can lead to XSS",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\sidebar\\SidebarProvider.ts",
+        "startLine": 1181,
+        "startColumn": 13,
+        "endLine": 1181,
+        "endColumn": 13,
+        "snippet": "          html += '<button class=\"btn-autofix\" data-fix-idx=\"' + issue._idx + '\">🔧 Auto Fix</button>';\r\n        }\r\n\r\n        item.innerHTML = html;\r\n        // Click to go to file/line\r\n        item.addEventListener('click', (e) => {\r\n          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { return; }\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "76ec87f139b6e34e",
+        "firstSeen": "2026-06-10T07:45:47.860Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-35fe467dcd37d520",
+      "ruleId": "security/xss-innerhtml",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "xss",
+      "title": "XSS via innerHTML",
+      "message": "innerHTML assignment can lead to XSS",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\sidebar\\SidebarProvider.ts",
+        "startLine": 1310,
+        "startColumn": 13,
+        "endLine": 1310,
+        "endColumn": 13,
+        "snippet": "\r\n    const listEl = document.getElementById('progressSteps');\r\n    if (listEl) {\r\n      listEl.innerHTML = progressStepsState.map((s, i) => {\r\n        const cls = i < stepIdx ? 'done' : (i === stepIdx ? 'active' : '');\r\n        const icon = i < stepIdx ? '✅' : (i === stepIdx ? '⏳' : '○');\r\n        return '<div class=\"progress-step-item ' + cls + '\"><span class=\"step-icon\">' + icon + '</span>' + s.label + '</div>';\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use textContent instead of innerHTML, or sanitize with DOMPurify",
+        "references": [
+          "https://owasp.org/Top10/A03_2021-Injection/",
+          "https://cwe.mitre.org/data/definitions/79.html"
+        ]
+      },
+      "references": [
+        "https://owasp.org/Top10/A03_2021-Injection/",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      "metadata": {
+        "fingerprint": "35fe467dcd37d520",
+        "firstSeen": "2026-06-10T07:45:47.860Z",
+        "tags": [
+          "owasp-top-10",
+          "xss"
+        ]
+      }
+    },
+    {
+      "id": "security-62b1d988885ab626",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\auto_eval_scan_service.py",
+        "startLine": 292,
+        "startColumn": 73,
+        "endLine": 292,
+        "endColumn": 73,
+        "snippet": "- \"is_prompt\": true/false\r\n- \"confidence\": 0.0 to 1.0\r\n- \"extracted_prompt\": the actual prompt text (cleaned, without code syntax)\r\n- \"has_variables\": true if the prompt contains template variables like {{{{var}}}}\r\n\r\n{snippets_text}\r\n\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "62b1d988885ab626",
+        "firstSeen": "2026-06-10T07:45:51.974Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-c3c21f832fd66edf",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\auto_eval_scan_service.py",
+        "startLine": 467,
+        "startColumn": 63,
+        "endLine": 467,
+        "endColumn": 63,
+        "snippet": "            # Check if prompt has template variables ({{var}})\r\n            has_variables = bool(re.findall(r'\\{\\{(\\w+)\\}\\}', prompt_text))\r\n            if not has_variables:\r\n                prompt_text = f\"{prompt_text}\\n\\nUser query: {{{{query}}}}\"\r\n\r\n            logger.info(\r\n                f\"📡 [AUTO-EVAL] Calling {self.api_base_url}/api/prompt-evaluation/run \"\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "c3c21f832fd66edf",
+        "firstSeen": "2026-06-10T07:45:51.974Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-4e984509754f383c",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\code_graph.py",
+        "startLine": 473,
+        "startColumn": 25,
+        "endLine": 473,
+        "endColumn": 25,
+        "snippet": "        ]\r\n        \r\n        for path in possible_paths:\r\n            full_path = os.path.join(repo_path, path)\r\n            if os.path.exists(full_path):\r\n                # Return normalized relative path\r\n                return path.replace('\\\\', '/')\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "4e984509754f383c",
+        "firstSeen": "2026-06-10T07:45:51.946Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-678f708f8bd21592",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\context_indexer.py",
+        "startLine": 223,
+        "startColumn": 48,
+        "endLine": 223,
+        "endColumn": 48,
+        "snippet": "            \r\n            for file in files:\r\n                if any(file.endswith(ext.replace('*', '')) for ext in doc_patterns):\r\n                    rel_path = os.path.relpath(os.path.join(root, file), repo_path)\r\n                    doc_files.append(rel_path.replace('\\\\', '/'))\r\n        \r\n        logger.info(f\"Found {len(doc_files)} documentation files\")\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "678f708f8bd21592",
+        "firstSeen": "2026-06-10T07:45:51.655Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-1e7b9896f6a8e5f9",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\git_service.py",
+        "startLine": 258,
+        "startColumn": 33,
+        "endLine": 258,
+        "endColumn": 33,
+        "snippet": "                            continue\r\n                    \r\n                    # Get relative path\r\n                    full_path = os.path.join(root, filename)\r\n                    rel_path = os.path.relpath(full_path, repo_path)\r\n                    \r\n                    # Normalize path separators for cross-platform\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "1e7b9896f6a8e5f9",
+        "firstSeen": "2026-06-10T07:45:51.269Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-7eed93e49a6e028b",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\prompt_evaluation_service.py",
+        "startLine": 738,
+        "startColumn": 63,
+        "endLine": 738,
+        "endColumn": 63,
+        "snippet": "                # Fill prompt with variables\r\n                filled_prompt = prompt\r\n                for var_name, var_value in tc[\"variables\"].items():\r\n                    filled_prompt = filled_prompt.replace(f\"{{{{{var_name}}}}}\", var_value)\r\n                \r\n                # Simulate API call\r\n                time.sleep(0.1)  # Simulate network delay\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "7eed93e49a6e028b",
+        "firstSeen": "2026-06-10T07:45:50.974Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-1147a5e9100c7026",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\prompt_evaluation_service.py",
+        "startLine": 1315,
+        "startColumn": 44,
+        "endLine": 1315,
+        "endColumn": 44,
+        "snippet": "## Your Task\r\n1. Analyze WHY the test cases failed based on the outputs and failure reasons\r\n2. Suggest an improved version of the prompt that would address these failures\r\n3. The improved prompt MUST keep the same {{{{variable}}}} placeholders as the original\r\n4. Focus on making the prompt more specific, adding constraints, or clarifying the expected output format\r\n\r\n## Response Format\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "1147a5e9100c7026",
+        "firstSeen": "2026-06-10T07:45:50.974Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-28a6f4d9373af740",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\prompt_evaluation_service.py",
+        "startLine": 1321,
+        "startColumn": 62,
+        "endLine": 1321,
+        "endColumn": 62,
+        "snippet": "## Response Format\r\nReturn ONLY a valid JSON object with these fields:\r\n{{\r\n  \"recommended_prompt\": \"the improved prompt text with same {{{{variables}}}}\",\r\n  \"analysis\": \"brief analysis of why tests failed (2-3 sentences)\",\r\n  \"changes_summary\": \"short summary of what was changed and why (1-2 sentences)\"\r\n}}\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "28a6f4d9373af740",
+        "firstSeen": "2026-06-10T07:45:50.974Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-6765c4897653d7af",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\repository_cache.py",
+        "startLine": 276,
+        "startColumn": 32,
+        "endLine": 276,
+        "endColumn": 32,
+        "snippet": "                dirnames[:] = [d for d in dirnames if not d.startswith('.')]\r\n                \r\n                for filename in filenames:\r\n                    filepath = os.path.join(dirpath, filename)\r\n                    if os.path.exists(filepath):\r\n                        total_size += os.path.getsize(filepath)\r\n            return total_size\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "6765c4897653d7af",
+        "firstSeen": "2026-06-10T07:45:50.875Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-c519a454a37d7430",
+      "ruleId": "SEC-FILE-003",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "temp-files",
+      "title": "File Operation Issue",
+      "message": "Use of predictable temporary file path – use mkdtemp/mkstemp for secure temp files",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\repository_file_service.py",
+        "startLine": 131,
+        "startColumn": 27,
+        "endLine": 131,
+        "endColumn": 27,
+        "snippet": "        \"\"\"Get files from local repository clone if available\"\"\"\r\n        try:\r\n            # Check if we have a local clone\r\n            repo_path = f\"/tmp/repos/{repo.name}\"  # Adjust path as needed\r\n            \r\n            if not os.path.exists(repo_path):\r\n                logger.debug(f\"No local clone found at {repo_path}\")\r"
+      },
+      "cwe": [
+        "CWE-377"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "c519a454a37d7430",
+        "firstSeen": "2026-06-10T07:45:50.833Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-ab62ab7f3b902f0f",
+      "ruleId": "SEC-FILE-003",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "temp-files",
+      "title": "File Operation Issue",
+      "message": "Temporary file not auto-deleted – may leave sensitive data on disk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\tool_config_service.py",
+        "startLine": 368,
+        "startColumn": 22,
+        "endLine": 368,
+        "endColumn": 22,
+        "snippet": "            if config:\r\n                # Write config to temp file\r\n                import tempfile\r\n                with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:\r\n                    f.write(config)\r\n                    cmd.extend([\"--config\", f.name])\r\n            \r"
+      },
+      "cwe": [
+        "CWE-459"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "ab62ab7f3b902f0f",
+        "firstSeen": "2026-06-10T07:45:50.622Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-6617182730daeec9",
+      "ruleId": "SEC-FILE-003",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "temp-files",
+      "title": "File Operation Issue",
+      "message": "Temporary file not auto-deleted – may leave sensitive data on disk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\tool_config_service.py",
+        "startLine": 429,
+        "startColumn": 26,
+        "endLine": 429,
+        "endColumn": 26,
+        "snippet": "                import tempfile\r\n                if YAML_AVAILABLE:\r\n                    import yaml as yaml_lib\r\n                    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:\r\n                        yaml_lib.dump(config, f)\r\n                        cmd.extend([\"-c\", f.name])\r\n                else:\r"
+      },
+      "cwe": [
+        "CWE-459"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "6617182730daeec9",
+        "firstSeen": "2026-06-10T07:45:50.622Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-ac38ec1764e8cbb9",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\scan_worker\\worker.py",
+        "startLine": 703,
+        "startColumn": 68,
+        "endLine": 703,
+        "endColumn": 68,
+        "snippet": "                                dirs[:] = [d for d in dirs if not d.startswith('.')]\r\n                                for file in files:\r\n                                    if file.endswith(('.py', '.js', '.ts', '.java', '.go')):\r\n                                        rel_path = os.path.relpath(os.path.join(root, file), temp_dir)\r\n                                        changed_files.append(rel_path)\r\n                            logger.info(f\"📁 Found {len(changed_files)} code files to scan\")\r\n                \r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "ac38ec1764e8cbb9",
+        "firstSeen": "2026-06-10T07:45:47.107Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-26b676299017d38e",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\scan_worker\\worker.py",
+        "startLine": 814,
+        "startColumn": 56,
+        "endLine": 814,
+        "endColumn": 56,
+        "snippet": "                        for file in files:\r\n                            if file_count >= 20:  # Show first 20 files\r\n                                break\r\n                            rel_path = os.path.relpath(os.path.join(root, file), temp_dir)\r\n                            logger.info(f\"  - {rel_path}\")\r\n                            file_count += 1\r\n                        if file_count >= 20:\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "26b676299017d38e",
+        "firstSeen": "2026-06-10T07:45:47.107Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-d5561f0402de94cf",
+      "ruleId": "SEC-FILE-004",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "file-upload",
+      "title": "File Operation Issue",
+      "message": "Original filename used directly – sanitize filenames to prevent directory traversal in uploads",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\components\\ContextManagementTab.tsx",
+        "startLine": 620,
+        "startColumn": 65,
+        "endLine": 620,
+        "endColumn": 65,
+        "snippet": "                    </div>\r\n                  </div>\r\n                  <button\r\n                    onClick={() => handleDeleteUploadedFile(file.filename)}\r\n                    className=\"btn btn-danger btn-sm flex items-center gap-1\"\r\n                    title=\"Delete file and its embeddings\"\r\n                  >\r"
+      },
+      "cwe": [
+        "CWE-434"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "d5561f0402de94cf",
+        "firstSeen": "2026-06-10T07:45:50.408Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-58b2e9647e148c9d",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "react-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "dangerouslySetInnerHTML in React component – ensure input is sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\pages\\docs\\DocsPage.tsx",
+        "startLine": 274,
+        "startColumn": 29,
+        "endLine": 274,
+        "endColumn": 29,
+        "snippet": "                                prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:rounded-lg\r\n                                prose-blockquote:border-red-300 prose-blockquote:bg-red-50/50\r\n                                prose-img:rounded-lg prose-img:shadow-md\"\r\n                            dangerouslySetInnerHTML={{ __html: pageData.content }}\r\n                        />\r\n                    ) : (\r\n                        <div className=\"text-center py-12\">\r"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "58b2e9647e148c9d",
+        "firstSeen": "2026-06-10T07:45:53.865Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-238b0cae7f1cf842",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\config\\LanguageConfigSync.ts",
+        "startLine": 189,
+        "startColumn": 23,
+        "endLine": 189,
+        "endColumn": 23,
+        "snippet": "\r\n      // Remove local files to force fresh write\r\n      for (const file of fs.readdirSync(langDir)) {\r\n        fs.unlinkSync(path.join(langDir, file));\r\n      }\r\n    }\r\n\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "238b0cae7f1cf842",
+        "firstSeen": "2026-06-10T07:45:48.114Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-24f2055ca2a9788b",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\config\\LanguageConfigSync.ts",
+        "startLine": 205,
+        "startColumn": 38,
+        "endLine": 205,
+        "endColumn": 38,
+        "snippet": "          continue;\r\n        }\r\n        const lang = path.basename(file, path.extname(file));\r\n        const config = this.readYaml(path.join(langDir, file));\r\n        if (config) {\r\n          this.configs.set(lang, config);\r\n        }\r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "24f2055ca2a9788b",
+        "firstSeen": "2026-06-10T07:45:48.114Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-94d7bb4eece711c3",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "low",
+      "confidence": "low",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Relative path traversal pattern (../) detected – verify this is safe",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\code_graph.py",
+        "startLine": 558,
+        "startColumn": 57,
+        "endLine": 558,
+        "endColumn": 57,
+        "snippet": "        Resolve JavaScript import to file path.\r\n        \r\n        Args:\r\n            import_path: Import path (e.g., \"./utils\", \"../services/api\")\r\n            current_file: Current file path\r\n            repo_path: Repository root path\r\n            \r"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "94d7bb4eece711c3",
+        "firstSeen": "2026-06-10T07:45:51.943Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    }
+  ],
+  "generatedAt": "2026-06-10T07:45:53.978Z"
+}

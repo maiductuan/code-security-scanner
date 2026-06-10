@@ -31,7 +31,7 @@ export interface CVEScannerConfig {
 /** AI validation configuration */
 export interface AIConfig {
   enabled: boolean;
-  provider: 'openai' | 'anthropic' | 'ollama';
+  provider: 'openai' | 'anthropic' | 'ollama' | 'google';
   model?: string;
   apiKey?: string;
   baseUrl?: string;

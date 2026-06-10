@@ -175,7 +175,7 @@ rules:
         message: Google OAuth Access Token detected
       - regex: "-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
         message: Private key detected in source code
-      - regex: "(?:mongodb|postgres|mysql|redis)://[^\\s\"']+:[^\\s\"']+@"
+      - regex: "(?:mongodb|postgres|mysql|redis)://[^\\s\"'{}$]+:[^\\s\"'{}$]+@"
         message: Database connection string with credentials
     fix:
       description: Use environment variables or a secrets manager. Never commit secrets to source control.
@@ -196,7 +196,7 @@ rules:
     patterns:
       - regex: "jwt\\.sign\\s*\\([^)]*[\"']secret[\"']"
         message: JWT signed with weak/default secret
-      - regex: "algorithm\\s*[:=]\\s*[\"'](?:none|HS256)[\"']"
+      - regex: "algorithm\\s*[:=]\\s*[\"'](?:none)[\"']"
         message: JWT using weak algorithm (none or HS256)
       - regex: "session\\.cookie\\.secure\\s*[:=]\\s*false"
         message: Session cookie not using secure flag

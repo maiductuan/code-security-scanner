@@ -30,7 +30,7 @@ export function createScanCommand(): Command {
     .option('--exclude <patterns>', 'Exclude file patterns (comma-separated)')
     .option('--deep', 'Enable deep analysis (taint tracking, semantic analysis)')
     .option('--ai', 'Enable AI-assisted validation (requires API key)')
-    .option('--ai-provider <provider>', 'AI provider: openai, anthropic, ollama')
+    .option('--ai-provider <provider>', 'AI provider: openai, anthropic, ollama, google')
     .option('--rules <path>', 'Path to custom rules directory')
     .option('--parallel <n>', 'Number of parallel workers', '4')
     .option('--incremental', 'Only scan changed files (git-based)')

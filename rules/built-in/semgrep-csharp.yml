@@ -717,7 +717,7 @@ rules:
       - A08:2021
       - A08:2025
     references:
-      - https://github.com/mgholam/fastJSON#security- medium-update
+      - https://github.com/mgholam/fastJSON#security-warning-update
     tags:
       - .net
   - id: insecure-fspickler-deserialization
