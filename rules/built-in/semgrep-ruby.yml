@@ -1,0 +1,2687 @@
+rules:
+  - id: anthropic-hardcoded-api-key-ruby
+    name: anthropic-hardcoded-api-key-ruby
+    description: Anthropic API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          Anthropic::Client.new(api_key: "$KEY", ...)
+        message: Anthropic API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/initial-setup
+    tags:
+      - anthropic
+  - id: llm-api-key-in-source-ruby
+    name: llm-api-key-in-source-ruby
+    description: >-
+      AI/LLM API key found hardcoded in source code. Detected key prefix matches a known AI provider (OpenAI, Anthropic,
+      Google, Hugging Face). Use environment variables or a secrets manager instead.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: $VAR = "$KEY"
+        message: >-
+          AI/LLM API key found hardcoded in source code. Detected key prefix matches a known AI provider (OpenAI,
+          Anthropic, Google, Hugging Face). Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+    tags:
+      - openai
+      - anthropic
+      - google
+      - huggingface
+  - id: openai-hardcoded-api-key-ruby
+    name: openai-hardcoded-api-key-ruby
+    description: OpenAI API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          OpenAI::Client.new(access_token: "$KEY", ...)
+        message: OpenAI API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety
+    tags:
+      - openai
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode
+  - id: bundler-gemfile-missing-cooldown
+    name: bundler-gemfile-missing-cooldown
+    description: >-
+      A Gemfile `source` declaration without a `cooldown` (or with a cooldown below 7 days) allows Bundler to resolve
+      newly published gem versions immediately, before the community has had time to detect malicious releases. The May
+      2026 RubyGems supply-chain attack demonstrated that threat actors can push compromised gem versions and have them
+      automatically pulled into builds within minutes. Add `cooldown: 7` to each public source declaration so Bundler
+      ignores gem versions published within the last 7 days during dependency resolution (e.g. `source
+      "https://rubygems.org", cooldown: 7`). If you operate an internal or private registry where the supply-chain risk
+      is lower, use `cooldown: 0` as an explicit bypass. Note: this feature requires Bundler >= 4.0.13. Cooldown only
+      applies during `bundle update` and `bundle add`; `bundle install` with an existing lockfile is unaffected.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          A Gemfile `source` declaration without a `cooldown` (or with a cooldown below 7 days) allows Bundler to
+          resolve newly published gem versions immediately, before the community has had time to detect malicious
+          releases. The May 2026 RubyGems supply-chain attack demonstrated that threat actors can push compromised gem
+          versions and have them automatically pulled into builds within minutes. Add `cooldown: 7` to each public
+          source declaration so Bundler ignores gem versions published within the last 7 days during dependency
+          resolution (e.g. `source "https://rubygems.org", cooldown: 7`). If you operate an internal or private registry
+          where the supply-chain risk is lower, use `cooldown: 0` as an explicit bypass. Note: this feature requires
+          Bundler >= 4.0.13. Cooldown only applies during `bundle update` and `bundle add`; `bundle install` with an
+          existing lockfile is unaffected.
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://blog.rubygems.org/2026/06/03/cooldown-let-new-gems-be-vetted.html
+    tags:
+      - bundler
+      - ruby
+  - id: http-client-requests
+    name: http-client-requests
+    description: >-
+      Checks for requests to http (unencrypted) sites using some of ruby's most popular REST/HTTP libraries, including
+      httparty and restclient.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          HTTParty.$PARTYVERB("=~/[hH][tT][tT][pP]://.*/", ...)
+        message: >-
+          Checks for requests to http (unencrypted) sites using some of ruby's most popular REST/HTTP libraries,
+          including httparty and restclient.
+      - pattern: |
+          $STRING = "=~/[hH][tT][tT][pP]://.*/"
+          ...
+          HTTParty.$PARTYVERB($STRING, ...)
+        message: >-
+          Checks for requests to http (unencrypted) sites using some of ruby's most popular REST/HTTP libraries,
+          including httparty and restclient.
+      - pattern: |
+          RestClient.$RESTVERB "=~/[hH][tT][tT][pP]://.*/", ...
+        message: >-
+          Checks for requests to http (unencrypted) sites using some of ruby's most popular REST/HTTP libraries,
+          including httparty and restclient.
+      - pattern: |
+          RestClient::Request.execute(..., url: "=~/[hH][tT][tT][pP]://.*/", ...)
+        message: >-
+          Checks for requests to http (unencrypted) sites using some of ruby's most popular REST/HTTP libraries,
+          including httparty and restclient.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://github.com/rest-client/rest-client
+      - https://github.com/jnunemaker/httparty/tree/master/docs
+    tags:
+      - httparty
+      - rest-client
+  - id: net-ftp-request
+    name: net-ftp-request
+    description: >-
+      Checks for outgoing connections to ftp servers with the 'net/ftp' package. FTP does not encrypt traffic, possibly
+      leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          $FTP = Net::FTP.new('...')
+          ...
+          $FTP.login
+        message: >-
+          Checks for outgoing connections to ftp servers with the 'net/ftp' package. FTP does not encrypt traffic,
+          possibly leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+      - pattern: |
+          Net::FTP.open('...') do |ftp|
+            ...
+            ftp.login
+          end
+        message: >-
+          Checks for outgoing connections to ftp servers with the 'net/ftp' package. FTP does not encrypt traffic,
+          possibly leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://docs.ruby-lang.org/en/2.0.0/Net/FTP.html
+    tags:
+      - ruby
+  - id: net-http-request
+    name: net-http-request
+    description: >-
+      Checks for requests sent to http:// URLs. This is dangerous as the server is attempting to connect to a website
+      that does not encrypt traffic with TLS. Instead, only send requests to https:// URLs.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for requests sent to http:// URLs. This is dangerous as the server is attempting to connect to a
+          website that does not encrypt traffic with TLS. Instead, only send requests to https:// URLs.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://ruby-doc.org/stdlib-2.6.5/libdoc/net/http/rdoc/Net/
+    tags:
+      - ruby
+  - id: net-telnet-request
+    name: net-telnet-request
+    description: >-
+      Checks for creation of telnet servers or attempts to connect through telnet. This is insecure as the telnet
+      protocol supports no encryption, and data passes through unencrypted.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          Net::Telnet::new(...)
+        message: >-
+          Checks for creation of telnet servers or attempts to connect through telnet. This is insecure as the telnet
+          protocol supports no encryption, and data passes through unencrypted.
+      - pattern: |
+          Net::SSH::Telnet.new(...)
+        message: >-
+          Checks for creation of telnet servers or attempts to connect through telnet. This is insecure as the telnet
+          protocol supports no encryption, and data passes through unencrypted.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://docs.ruby-lang.org/en/2.2.0/Net/Telnet.html
+      - https://www.rubydoc.info/gems/net-ssh-telnet2/0.1.0/Net/SSH/Telnet
+    tags:
+      - ruby
+  - id: openuri-request
+    name: openuri-request
+    description: Checks for requests to http and ftp (unencrypted) sites using OpenURI.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          URI.open('=~/[hH][tT][tT][pP]://.*/', ...)
+        message: Checks for requests to http and ftp (unencrypted) sites using OpenURI.
+      - pattern: |
+          $URI = URI.parse('=~/[hH][tT][tT][pP]://.*/', ...)
+          ...
+          $URI.open
+        message: Checks for requests to http and ftp (unencrypted) sites using OpenURI.
+      - pattern: |
+          URI.open('=~/^[fF][tT][pP]://.*/', ...)
+        message: Checks for requests to http and ftp (unencrypted) sites using OpenURI.
+      - pattern: |
+          $URI = URI.parse('=~/^[fF][tT][pP]://.*/', ...)
+          ...
+          $URI.open
+        message: Checks for requests to http and ftp (unencrypted) sites using OpenURI.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://ruby-doc.org/stdlib-2.6.3/libdoc/open-uri/rdoc/OpenURI.html
+    tags:
+      - open-uri
+  - id: activerecord-sqli
+    name: activerecord-sqli
+    description: >-
+      Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+      user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+      prepared statements instead. You can use parameterized statements like so: `Example.find_by_sql ["SELECT title
+      FROM posts WHERE author = ? AND created > ?", author_id, start_date]`
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+          user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+          prepared statements instead. You can use parameterized statements like so: `Example.find_by_sql ["SELECT title
+          FROM posts WHERE author = ? AND created > ?", author_id, start_date]`
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://guides.rubyonrails.org/active_record_querying.html#finding-by-sql
+    tags:
+      - aws-lambda
+      - active-record
+  - id: mysql2-sqli
+    name: mysql2-sqli
+    description: >-
+      Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+      user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+      prepared statements instead. You can use sanitize statements like so: `escaped = client.escape(user_input)`
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+          user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+          prepared statements instead. You can use sanitize statements like so: `escaped = client.escape(user_input)`
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/brianmario/mysql2
+    tags:
+      - aws-lambda
+      - mysql2
+  - id: pg-sqli
+    name: pg-sqli
+    description: >-
+      Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+      user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+      prepared statements instead. You can use parameterized statements like so: `conn.exec_params('SELECT $1 AS a, $2
+      AS b, $3 AS c', [1, 2, nil])`
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+          user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+          prepared statements instead. You can use parameterized statements like so: `conn.exec_params('SELECT $1 AS a,
+          $2 AS b, $3 AS c', [1, 2, nil])`
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.rubydoc.info/gems/pg/PG/Connection
+    tags:
+      - aws-lambda
+      - postgres
+      - pg
+  - id: sequel-sqli
+    name: sequel-sqli
+    description: >-
+      Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+      user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+      prepared statements instead. You can use parameterized statements like so: `DB['select * from items where name =
+      ?', name]`
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SQL statement that is tainted by `event` object. This could lead to SQL injection if the variable is
+          user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+          prepared statements instead. You can use parameterized statements like so: `DB['select * from items where name
+          = ?', name]`
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/jeremyevans/sequel#label-Arbitrary+SQL+queries
+    tags:
+      - aws-lambda
+      - sequel
+  - id: tainted-deserialization
+    name: tainted-deserialization
+    description: >-
+      Deserialization of a string tainted by `event` object found. Objects in Ruby can be serialized into strings, then
+      later loaded from strings. However, uses of `load` can cause remote code execution. Loading user input with
+      MARSHAL, YAML or CSV can potentially be dangerous. If you need to deserialize untrusted data, you should use JSON
+      as it is only capable of returning 'primitive' types such as strings, arrays, hashes, numbers and nil.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Deserialization of a string tainted by `event` object found. Objects in Ruby can be serialized into strings,
+          then later loaded from strings. However, uses of `load` can cause remote code execution. Loading user input
+          with MARSHAL, YAML or CSV can potentially be dangerous. If you need to deserialize untrusted data, you should
+          use JSON as it is only capable of returning 'primitive' types such as strings, arrays, hashes, numbers and
+          nil.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://ruby-doc.org/core-3.1.2/doc/security_rdoc.html
+      - https://groups.google.com/g/rubyonrails-security/c/61bkgvnSGTQ/m/nehwjA8tQ8EJ
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_deserialize.rb
+    tags:
+      - ruby
+      - aws-lambda
+  - id: tainted-sql-string
+    name: tainted-sql-string
+    description: >-
+      Detected user input used to manually construct a SQL string. This is usually bad practice because manual
+      construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or
+      modify contents of the database. Instead, use a parameterized query which is available by default in most database
+      engines. Alternatively, consider using an object-relational mapper (ORM) such as Sequelize which will protect your
+      queries.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input used to manually construct a SQL string. This is usually bad practice because manual
+          construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or
+          modify contents of the database. Instead, use a parameterized query which is available by default in most
+          database engines. Alternatively, consider using an object-relational mapper (ORM) such as Sequelize which will
+          protect your queries.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://rorsecurity.info/portfolio/ruby-on-rails-sql-injection-cheat-sheet
+    tags:
+      - aws-lambda
+  - id: ruby-jwt-decode-without-verify
+    name: ruby-jwt-decode-without-verify
+    description: >-
+      Detected the decoding of a JWT token without a verify step. JWT tokens must be verified before use, otherwise the
+      token's integrity is unknown. This means a malicious actor could forge a JWT token with any claims.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: JWT.decode($PAYLOAD,$SECRET,false,...)
+        message: >-
+          Detected the decoding of a JWT token without a verify step. JWT tokens must be verified before use, otherwise
+          the token's integrity is unknown. This means a malicious actor could forge a JWT token with any claims.
+    cwe:
+      - CWE-345
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures
+    tags:
+      - jwt
+  - id: ruby-jwt-exposed-data
+    name: ruby-jwt-exposed-data
+    description: >-
+      The object is passed strictly to jsonwebtoken.sign(...) Make sure that sensitive information is not exposed
+      through JWT token payload.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          JWT.encode($INPUT,...)
+        message: >-
+          The object is passed strictly to jsonwebtoken.sign(...) Make sure that sensitive information is not exposed
+          through JWT token payload.
+    cwe:
+      - CWE-522
+    owasp:
+      - A02:2017
+      - A04:2021
+      - A06:2025
+    references:
+      - https://owasp.org/Top10/A04_2021-Insecure_Design
+    tags:
+      - jwt
+  - id: ruby-jwt-exposed-credentials
+    name: ruby-jwt-exposed-credentials
+    description: >-
+      Password is exposed through JWT token payload. This is not encrypted and the password could be compromised. Do not
+      store passwords in JWT tokens.
+    category: auth
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          $PAYLOAD = {...,password:...,...}
+          ...
+          JWT.encode($PAYLOAD,...)
+        message: >-
+          Password is exposed through JWT token payload. This is not encrypted and the password could be compromised. Do
+          not store passwords in JWT tokens.
+    cwe:
+      - CWE-522
+    owasp:
+      - A02:2017
+      - A04:2021
+      - A06:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/522.html
+    tags:
+      - jwt
+  - id: ruby-jwt-hardcoded-secret
+    name: ruby-jwt-hardcoded-secret
+    description: >-
+      Hardcoded JWT secret or private key is used. This is a Insufficiently Protected Credentials weakness:
+      https://cwe.mitre.org/data/definitions/522.html Consider using an appropriate security mechanism to protect the
+      credentials (e.g. keeping secrets in environment variables)
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Hardcoded JWT secret or private key is used. This is a Insufficiently Protected Credentials weakness:
+          https://cwe.mitre.org/data/definitions/522.html Consider using an appropriate security mechanism to protect
+          the credentials (e.g. keeping secrets in environment variables)
+    cwe:
+      - CWE-522
+    owasp:
+      - A02:2017
+      - A04:2021
+      - A06:2025
+    references:
+      - https://owasp.org/Top10/A04_2021-Insecure_Design
+    tags:
+      - jwt
+  - id: ruby-jwt-none-alg
+    name: ruby-jwt-none-alg
+    description: >-
+      Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token has
+      already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+      verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    category: auth
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          JWT.encode($PAYLOAD, $SECRET, 'none', ...)
+        message: >-
+          Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token
+          has already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+          verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - jwt
+  - id: sha224-hash
+    name: sha224-hash
+    description: >-
+      This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+      updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: Digest::SHA224.$FUNC
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: OpenSSL::Digest::SHA224.$FUNC
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: SHA3::Digest::SHA224(...)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar3.ipd.pdf
+      - >-
+        https://www.cyber.gov.au/resources-business-and-government/essential-cyber-security/ism/cyber-security-guidelines/guidelines-cryptography
+    tags:
+      - ruby
+  - id: bad-deserialization-env
+    name: bad-deserialization-env
+    description: >-
+      Checks for unsafe deserialization. Objects in Ruby can be serialized into strings, then later loaded from strings.
+      However, uses of load and object_load can cause remote code execution. Loading user input with MARSHAL or CSV can
+      potentially be dangerous. Use JSON in a secure fashion instead.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for unsafe deserialization. Objects in Ruby can be serialized into strings, then later loaded from
+          strings. However, uses of load and object_load can cause remote code execution. Loading user input with
+          MARSHAL or CSV can potentially be dangerous. Use JSON in a secure fashion instead.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://groups.google.com/g/rubyonrails-security/c/61bkgvnSGTQ/m/nehwjA8tQ8EJ
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_deserialize.rb
+    tags:
+      - ruby
+  - id: bad-deserialization-yaml
+    name: bad-deserialization-yaml
+    description: >-
+      Unsafe deserialization from YAML. Objects in Ruby can be serialized into strings, then later loaded from strings.
+      However, uses of load and object_load can cause remote code execution. Loading user input with YAML can
+      potentially be dangerous. Use JSON in a secure fashion instead. However, loading YAML from a static file is not
+      dangerous and should not be flagged.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          YAML.load($...ARGS)
+        message: >-
+          Unsafe deserialization from YAML. Objects in Ruby can be serialized into strings, then later loaded from
+          strings. However, uses of load and object_load can cause remote code execution. Loading user input with YAML
+          can potentially be dangerous. Use JSON in a secure fashion instead. However, loading YAML from a static file
+          is not dangerous and should not be flagged.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://groups.google.com/g/rubyonrails-security/c/61bkgvnSGTQ/m/nehwjA8tQ8EJ
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_deserialize.rb
+    tags:
+      - ruby
+      - yaml
+  - id: bad-deserialization
+    name: bad-deserialization
+    description: >-
+      Checks for unsafe deserialization. Objects in Ruby can be serialized into strings, then later loaded from strings.
+      However, uses of load and object_load can cause remote code execution. Loading user input with MARSHAL or CSV can
+      potentially be dangerous. Use JSON in a secure fashion instead.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for unsafe deserialization. Objects in Ruby can be serialized into strings, then later loaded from
+          strings. However, uses of load and object_load can cause remote code execution. Loading user input with
+          MARSHAL or CSV can potentially be dangerous. Use JSON in a secure fashion instead.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://groups.google.com/g/rubyonrails-security/c/61bkgvnSGTQ/m/nehwjA8tQ8EJ
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_deserialize.rb
+    tags:
+      - ruby
+  - id: cookie-serialization
+    name: cookie-serialization
+    description: >-
+      Checks if code allows cookies to be deserialized using Marshal. If the attacker can craft a valid cookie, this
+      could lead to remote code execution. The hybrid check is just to warn users to migrate to :json for best practice.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          Rails.application.config.action_dispatch.cookies_serializer = :marshal
+        message: >-
+          Checks if code allows cookies to be deserialized using Marshal. If the attacker can craft a valid cookie, this
+          could lead to remote code execution. The hybrid check is just to warn users to migrate to :json for best
+          practice.
+      - pattern: |
+          Rails.application.config.action_dispatch.cookies_serializer = :hybrid
+        message: >-
+          Checks if code allows cookies to be deserialized using Marshal. If the attacker can craft a valid cookie, this
+          could lead to remote code execution. The hybrid check is just to warn users to migrate to :json for best
+          practice.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_cookie_serialization.rb
+      - https://robertheaton.com/2013/07/22/how-to-hack-a-rails-app-using-its-secret-token/
+    tags:
+      - ruby
+  - id: create-with
+    name: create-with
+    description: >-
+      Checks for strong parameter bypass through usage of create_with. Create_with bypasses strong parameter protection,
+      which could allow attackers to set arbitrary attributes on models. To fix this vulnerability, either remove all
+      create_with calls or use the permit function to specify tags that are allowed to be set.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          $FUNC.create_with($PARAMSA)
+        message: >-
+          Checks for strong parameter bypass through usage of create_with. Create_with bypasses strong parameter
+          protection, which could allow attackers to set arbitrary attributes on models. To fix this vulnerability,
+          either remove all create_with calls or use the permit function to specify tags that are allowed to be set.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_create_with.rb
+      - https://groups.google.com/g/rubyonrails-security/c/M4chq5Sb540/m/CC1Fh0Y_NWwJ
+    tags:
+      - ruby
+  - id: dangerous-exec
+    name: dangerous-exec
+    description: >-
+      Detected non-static command inside $EXEC. Audit the input to '$EXEC'. If unverified user data can reach this call
+      site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute arbitrary
+      code.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected non-static command inside $EXEC. Audit the input to '$EXEC'. If unverified user data can reach this
+          call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+          arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://guides.rubyonrails.org/security.html#command-line-injection
+    tags:
+      - ruby
+      - rails
+  - id: dangerous-open
+    name: dangerous-open
+    description: >-
+      Detected non-static command inside 'open'. Audit the input to 'open'. If unverified user data can reach this call
+      site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute arbitrary
+      code.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          open($CMD,...)
+        message: >-
+          Detected non-static command inside 'open'. Audit the input to 'open'. If unverified user data can reach this
+          call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+          arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ruby
+  - id: dangerous-open3-pipeline
+    name: dangerous-open3-pipeline
+    description: >-
+      Detected non-static command inside $PIPE. Audit the input to '$PIPE'. If unverified user data can reach this call
+      site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute arbitrary
+      code.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          Open3.$PIPE(...)
+        message: >-
+          Detected non-static command inside $PIPE. Audit the input to '$PIPE'. If unverified user data can reach this
+          call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+          arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ruby
+  - id: dangerous-subshell
+    name: dangerous-subshell
+    description: >-
+      Detected non-static command inside `...`. If unverified user data can reach this call site, this is a code
+      injection vulnerability. A malicious actor can inject a malicious script to execute arbitrary code.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          `...#{$VAL}...`
+        message: >-
+          Detected non-static command inside `...`. If unverified user data can reach this call site, this is a code
+          injection vulnerability. A malicious actor can inject a malicious script to execute arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ruby
+  - id: dangerous-syscall
+    name: dangerous-syscall
+    description: >-
+      'syscall' is essentially unsafe and unportable. The DL (https://apidock.com/ruby/Fiddle) library is preferred for
+      safer and a bit more portable programming.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          syscall
+        message: >-
+          'syscall' is essentially unsafe and unportable. The DL (https://apidock.com/ruby/Fiddle) library is preferred
+          for safer and a bit more portable programming.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ruby
+  - id: divide-by-zero
+    name: divide-by-zero
+    description: Detected a possible ZeroDivisionError.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: Detected a possible ZeroDivisionError.
+    cwe:
+      - CWE-369
+    owasp: []
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_divide_by_zero.rb
+    tags:
+      - ruby
+  - id: file-disclosure
+    name: file-disclosure
+    description: >-
+      Special requests can determine whether a file exists on a filesystem that's outside the Rails app's root
+      directory. To fix this, set config.serve_static_assets = false.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: config.serve_static_assets = true
+        message: >-
+          Special requests can determine whether a file exists on a filesystem that's outside the Rails app's root
+          directory. To fix this, set config.serve_static_assets = false.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_file_disclosure.rb
+      - https://groups.google.com/g/rubyonrails-security/c/23fiuwb1NBA/m/MQVM1-5GkPMJ
+    tags:
+      - ruby
+  - id: filter-skipping
+    name: filter-skipping
+    description: >-
+      Checks for use of action in Ruby routes. This can cause Rails to render an arbitrary view if an attacker creates
+      an URL accurately. Affects 3.0 applications. Can avoid the vulnerability by providing additional constraints.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          $CALL "=~/.*(/:action.*).*/"
+        message: >-
+          Checks for use of action in Ruby routes. This can cause Rails to render an arbitrary view if an attacker
+          creates an URL accurately. Affects 3.0 applications. Can avoid the vulnerability by providing additional
+          constraints.
+    cwe:
+      - CWE-1021
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_filter_skipping.rb
+      - https://groups.google.com/g/rubyonrails-security/c/NCCsca7TEtY
+    tags:
+      - ruby
+  - id: force-ssl-false
+    name: force-ssl-false
+    description: >-
+      Checks for configuration setting of force_ssl to false. Force_ssl forces usage of HTTPS, which could lead to
+      network interception of unencrypted application traffic. To fix, set config.force_ssl = true.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: config.force_ssl = false
+        message: >-
+          Checks for configuration setting of force_ssl to false. Force_ssl forces usage of HTTPS, which could lead to
+          network interception of unencrypted application traffic. To fix, set config.force_ssl = true.
+    cwe:
+      - CWE-311
+    owasp:
+      - A03:2017
+      - A04:2021
+      - A06:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_force_ssl.rb
+    tags:
+      - ruby
+  - id: hardcoded-http-auth-in-controller
+    name: hardcoded-http-auth-in-controller
+    description: >-
+      Detected hardcoded password used in basic authentication in a controller class. Including this password in version
+      control could expose this credential. Consider refactoring to use environment variables or configuration files.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected hardcoded password used in basic authentication in a controller class. Including this password in
+          version control could expose this credential. Consider refactoring to use environment variables or
+          configuration files.
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+    tags:
+      - ruby
+      - secrets
+  - id: hardcoded-secret-rsa-passphrase
+    name: hardcoded-secret-rsa-passphrase
+    description: >-
+      Found the use of an hardcoded passphrase for RSA. The passphrase can be easily discovered, and therefore should
+      not be stored in source-code. It is recommended to remove the passphrase from source-code, and use system
+      environment variables or a restricted configuration file.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found the use of an hardcoded passphrase for RSA. The passphrase can be easily discovered, and therefore
+          should not be stored in source-code. It is recommended to remove the passphrase from source-code, and use
+          system environment variables or a restricted configuration file.
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/522.html
+    tags:
+      - ruby
+      - secrets
+  - id: insufficient-rsa-key-size
+    name: insufficient-rsa-key-size
+    description: The RSA key size $SIZE is insufficent by NIST standards. It is recommended to use a key length of 2048 or higher.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          The RSA key size $SIZE is insufficent by NIST standards. It is recommended to use a key length of 2048 or
+          higher.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57Pt3r1.pdf
+    tags:
+      - ruby
+  - id: json-entity-escape
+    name: json-entity-escape
+    description: Checks if HTML escaping is globally disabled for JSON output. This could lead to XSS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          ActiveSupport.escape_html_entities_in_json = false
+        message: Checks if HTML escaping is globally disabled for JSON output. This could lead to XSS.
+      - pattern: |
+          config.active_support.escape_html_entities_in_json = false
+        message: Checks if HTML escaping is globally disabled for JSON output. This could lead to XSS.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ruby
+  - id: mass-assignment-protection-disabled
+    name: mass-assignment-protection-disabled
+    description: >-
+      Mass assignment protection disabled for '$MODEL'. This could permit assignment to sensitive model fields without
+      intention. Instead, use 'attr_accessible' for the model or disable mass assigment using
+      'config.active_record.whitelist_attributes = true'. ':without_protection => true' must be removed for this to take
+      effect.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: $MODEL.new(params[...], ..., :without_protection => true, ...)
+        message: >-
+          Mass assignment protection disabled for '$MODEL'. This could permit assignment to sensitive model fields
+          without intention. Instead, use 'attr_accessible' for the model or disable mass assigment using
+          'config.active_record.whitelist_attributes = true'. ':without_protection => true' must be removed for this to
+          take effect.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures
+    tags:
+      - ruby
+  - id: md5-used-as-password
+    name: md5-used-as-password
+    description: >-
+      It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+      cracked by an attacker in a short amount of time. Instead, use a suitable password hashing function such as
+      bcrypt. You can use the `bcrypt` gem.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+          cracked by an attacker in a short amount of time. Instead, use a suitable password hashing function such as
+          bcrypt. You can use the `bcrypt` gem.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://tools.ietf.org/id/draft-lvelvindron-tls-md5-sha1-deprecate-01.html
+      - https://security.stackexchange.com/questions/211/how-to-securely-hash-passwords
+      - https://github.com/returntocorp/semgrep-rules/issues/1609
+    tags:
+      - md5
+  - id: missing-csrf-protection
+    name: missing-csrf-protection
+    description: >-
+      Detected controller which does not enable cross-site request forgery protections using 'protect_from_forgery'. Add
+      'protect_from_forgery :with => :exception' to your controller class.
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          class $CONTROLLER < ActionController::Base
+            ...
+          end
+        message: >-
+          Detected controller which does not enable cross-site request forgery protections using 'protect_from_forgery'.
+          Add 'protect_from_forgery :with => :exception' to your controller class.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - ruby
+  - id: model-attr-accessible
+    name: model-attr-accessible
+    description: >-
+      Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+      allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned, role,
+      and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow admin, banned,
+      role, and account_id using permit or attr_accessible.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          ....permit(..., :admin, ...)
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          ....permit(..., :role, ...)
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          ....permit(..., :banned, ...)
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          ....permit(..., :account_id, ...)
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          attr_accessible ..., :admin, ...
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          attr_accessible ..., :role, ...
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          attr_accessible ..., :banned, ...
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          attr_accessible ..., :account_id, ...
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+      - pattern: |
+          params.permit!
+        message: >-
+          Checks for dangerous permitted attributes that can lead to mass assignment vulnerabilities. Query parameters
+          allowed using permit and attr_accessible are checked for allowance of dangerous attributes admin, banned,
+          role, and account_id. Also checks for usages of params.permit!, which allows everything. Fix: don't allow
+          admin, banned, role, and account_id using permit or attr_accessible.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_model_attr_accessible.rb
+    tags:
+      - ruby
+  - id: model-attributes-attr-accessible
+    name: model-attributes-attr-accessible
+    description: >-
+      Checks for models that do not use attr_accessible. This means there is no limiting of which variables can be
+      manipulated through mass assignment. For newer Rails applications, parameters should be allowlisted using strong
+      parameters. For older Rails versions, they should be allowlisted using strong_attributes.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          class $CLASS < $TYPE
+          ...
+          end
+          ...
+          $CLASS.$FUNC(...)
+        message: >-
+          Checks for models that do not use attr_accessible. This means there is no limiting of which variables can be
+          manipulated through mass assignment. For newer Rails applications, parameters should be allowlisted using
+          strong parameters. For older Rails versions, they should be allowlisted using strong_attributes.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_model_attributes.rb
+    tags:
+      - rails
+  - id: ruby-eval
+    name: ruby-eval
+    description: >-
+      Use of eval with user-controllable input detected. This can lead  to attackers running arbitrary code. Ensure
+      external data does not  reach here, otherwise this is a security vulnerability. Consider  other ways to do this
+      without eval.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Use of eval with user-controllable input detected. This can lead  to attackers running arbitrary code. Ensure
+          external data does not  reach here, otherwise this is a security vulnerability. Consider  other ways to do
+          this without eval.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ruby
+      - rails
+  - id: bad-send
+    name: bad-send
+    description: >-
+      Checks for unsafe use of Object#send, try, __send__, and public_send. These only account for unsafe use of a
+      method, not target. This can lead to arbitrary calling of exit, along with arbitrary code execution. Please be
+      sure to sanitize input in order to avoid this.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          $PARAM = params[...]
+          ...
+          $RES = $MOD.send($PARAM.$FUNC)
+        message: >-
+          Checks for unsafe use of Object#send, try, __send__, and public_send. These only account for unsafe use of a
+          method, not target. This can lead to arbitrary calling of exit, along with arbitrary code execution. Please be
+          sure to sanitize input in order to avoid this.
+      - pattern: |
+          $PARAM = params[...]
+          ...
+          $RES = $MOD.try($PARAM.$FUNC)
+        message: >-
+          Checks for unsafe use of Object#send, try, __send__, and public_send. These only account for unsafe use of a
+          method, not target. This can lead to arbitrary calling of exit, along with arbitrary code execution. Please be
+          sure to sanitize input in order to avoid this.
+      - pattern: |
+          $PARAM = params[...]
+          ...
+          $RES = $MOD.__send__($PARAM.$FUNC)
+        message: >-
+          Checks for unsafe use of Object#send, try, __send__, and public_send. These only account for unsafe use of a
+          method, not target. This can lead to arbitrary calling of exit, along with arbitrary code execution. Please be
+          sure to sanitize input in order to avoid this.
+      - pattern: |
+          $PARAM = params[...]
+          ...
+          $RES = $MOD.public_send($PARAM.$FUNC)
+        message: >-
+          Checks for unsafe use of Object#send, try, __send__, and public_send. These only account for unsafe use of a
+          method, not target. This can lead to arbitrary calling of exit, along with arbitrary code execution. Please be
+          sure to sanitize input in order to avoid this.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_send.rb
+      - https://the.igreque.info/posts/2016/01-object-send-considered-harmful-en.html
+    tags:
+      - ruby
+  - id: ssl-mode-no-verify
+    name: ssl-mode-no-verify
+    description: >-
+      Detected SSL that will accept an unverified connection. This makes the connections susceptible to
+      man-in-the-middle attacks. Use 'OpenSSL::SSL::VERIFY_PEER' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: OpenSSL::SSL::VERIFY_NONE
+        message: >-
+          Detected SSL that will accept an unverified connection. This makes the connections susceptible to
+          man-in-the-middle attacks. Use 'OpenSSL::SSL::VERIFY_PEER' instead.
+    cwe:
+      - CWE-295
+    owasp:
+      - A03:2017
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - ruby
+  - id: mass-assignment-vuln
+    name: mass-assignment-vuln
+    description: >-
+      Checks for calls to without_protection during mass assignment (which allows record creation from hash values).
+      This can lead to users bypassing permissions protections. For Rails 4 and higher, mass protection is on by
+      default. Fix: Don't use :without_protection => true. Instead, configure attr_accessible to control attribute
+      access.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for calls to without_protection during mass assignment (which allows record creation from hash values).
+          This can lead to users bypassing permissions protections. For Rails 4 and higher, mass protection is on by
+          default. Fix: Don't use :without_protection => true. Instead, configure attr_accessible to control attribute
+          access.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/lib/brakeman/checks/check_without_protection.rb
+      - https://www.acunetix.com/vulnerabilities/web/rails-mass-assignment/
+    tags:
+      - ruby
+  - id: weak-hashes-md5
+    name: weak-hashes-md5
+    description: >-
+      Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+      Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+      instead.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: Digest::MD5.base64digest $X
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+      - pattern: Digest::MD5.hexdigest $X
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+      - pattern: Digest::MD5.digest $X
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+      - pattern: Digest::MD5.new
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+      - pattern: OpenSSL::Digest::MD5.base64digest $X
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+      - pattern: OpenSSL::Digest::MD5.hexdigest $X
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+      - pattern: OpenSSL::Digest::MD5.digest $X
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+      - pattern: OpenSSL::Digest::MD5.new
+        message: >-
+          Should not use md5 to generate hashes. md5 is proven to be vulnerable through the use of brute-force attacks.
+          Could also result in collisions, leading to potential collision attacks. Use SHA256 or other hashing functions
+          instead.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - >-
+        https://www.ibm.com/support/pages/security-bulletin-vulnerability-md5-signature-and-hash-algorithm-affects-sterling-integrator-and-sterling-file-gateway-cve-2015-7575
+    tags:
+      - ruby
+  - id: weak-hashes-sha1
+    name: weak-hashes-sha1
+    description: >-
+      Should not use SHA1 to generate hashes. There is a proven SHA1 hash collision by Google, which could lead to
+      vulnerabilities. Use SHA256, SHA3 or other hashing functions instead.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: Digest::SHA1.$FUNC
+        message: >-
+          Should not use SHA1 to generate hashes. There is a proven SHA1 hash collision by Google, which could lead to
+          vulnerabilities. Use SHA256, SHA3 or other hashing functions instead.
+      - pattern: OpenSSL::Digest::SHA1.$FUNC
+        message: >-
+          Should not use SHA1 to generate hashes. There is a proven SHA1 hash collision by Google, which could lead to
+          vulnerabilities. Use SHA256, SHA3 or other hashing functions instead.
+      - pattern: OpenSSL::HMAC.$FUNC("sha1",...)
+        message: >-
+          Should not use SHA1 to generate hashes. There is a proven SHA1 hash collision by Google, which could lead to
+          vulnerabilities. Use SHA256, SHA3 or other hashing functions instead.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html
+      - https://shattered.io/
+    tags:
+      - ruby
+  - id: rails-no-render-after-save
+    name: rails-no-render-after-save
+    description: >-
+      Found a call to `render $T` after calling `$T.save`. Do not call `render` after calling `save` on an ActiveRecord
+      object. Reloading the page will cause the state-changing operation to be repeated which may cause undesirable side
+      effects. Use `redirect_to` instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found a call to `render $T` after calling `$T.save`. Do not call `render` after calling `save` on an
+          ActiveRecord object. Reloading the page will cause the state-changing operation to be repeated which may cause
+          undesirable side effects. Use `redirect_to` instead.
+    cwe: []
+    owasp: []
+    references:
+      - https://guides.rubyonrails.org/getting_started.html#creating-a-new-article
+    tags:
+      - rails
+      - ruby
+      - activerecord
+  - id: ruby-rails-performance-indexes-are-beneficial
+    name: ruby-rails-performance-indexes-are-beneficial
+    description: >-
+      The $COLUMN column appears to be a foreign key. Would it benefit from an index? Having an index can improve
+      performance.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          add_column $TABLE, $COLUMN, $TYPE, ...
+        message: >-
+          The $COLUMN column appears to be a foreign key. Would it benefit from an index? Having an index can improve
+          performance.
+    cwe: []
+    owasp: []
+    references:
+      - https://archive.is/i7SLO
+    tags:
+      - rails
+  - id: avoid-logging-everything
+    name: avoid-logging-everything
+    description: >-
+      Avoid logging `params` and `params.inspect` as this bypasses Rails filter_parameters and may inadvertently log
+      sensitive data. Instead, reference specific fields to ensure only expected data is logged.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Avoid logging `params` and `params.inspect` as this bypasses Rails filter_parameters and may inadvertently log
+          sensitive data. Instead, reference specific fields to ensure only expected data is logged.
+    cwe:
+      - CWE-532
+    owasp: []
+    references:
+      - https://guides.rubyonrails.org/configuring.html#config-filter-parameters
+      - https://api.rubyonrails.org/v7.1/classes/ActiveSupport/ParameterFilter.html
+    tags:
+      - rails
+  - id: avoid-session-manipulation
+    name: avoid-session-manipulation
+    description: >-
+      This gets data from session using user inputs. A malicious user may be able to retrieve information from your
+      session that you didn't intend them to. Do not use user input as a session key.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          This gets data from session using user inputs. A malicious user may be able to retrieve information from your
+          session that you didn't intend them to. Do not use user input as a session key.
+    cwe:
+      - CWE-276
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://brakemanscanner.org/docs/warning_types/session_manipulation/
+    tags:
+      - rails
+  - id: avoid-tainted-file-access
+    name: avoid-tainted-file-access
+    description: >-
+      Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+      access files they have no right to.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+          access files they have no right to.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/file_access/index.markdown
+    tags:
+      - rails
+  - id: avoid-tainted-ftp-call
+    name: avoid-tainted-ftp-call
+    description: >-
+      Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+      access files they have no right to.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+          access files they have no right to.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/file_access/index.markdown
+    tags:
+      - rails
+  - id: avoid-tainted-http-request
+    name: avoid-tainted-http-request
+    description: >-
+      Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+      access files they have no right to.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+          access files they have no right to.
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+      - A01:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/file_access/index.markdown
+    tags:
+      - rails
+  - id: avoid-tainted-shell-call
+    name: avoid-tainted-shell-call
+    description: >-
+      Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+      access files they have no right to.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Using user input when accessing files is potentially dangerous. A malicious actor could use this to modify or
+          access files they have no right to.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/file_access/index.markdown
+    tags:
+      - rails
+  - id: detailed-exceptions
+    name: detailed-exceptions
+    description: >-
+      Found that the setting for providing detailed exception reports in Rails is set to true. This can lead to
+      information exposure, where sensitive system or internal information is displayed to the end user. Instead, turn
+      this setting off.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found that the setting for providing detailed exception reports in Rails is set to true. This can lead to
+          information exposure, where sensitive system or internal information is displayed to the end user. Instead,
+          turn this setting off.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - rails
+  - id: rails-skip-forgery-protection
+    name: rails-skip-forgery-protection
+    description: This call turns off CSRF protection allowing CSRF attacks against the application
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: skip_forgery_protection
+        message: This call turns off CSRF protection allowing CSRF attacks against the application
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://api.rubyonrails.org/classes/ActionController/RequestForgeryProtection/ClassMethods.html#method-i-skip_forgery_protection
+    tags:
+      - rails
+  - id: ruby-pg-sqli
+    name: ruby-pg-sqli
+    description: >-
+      Detected string concatenation with a non-literal variable in a pg Ruby SQL statement. This could lead to SQL
+      injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection, use
+      parameterized queries or prepared statements instead. You can use parameterized queries like so:
+      `conn.exec_params('SELECT $1 AS a, $2 AS b, $3 AS c', [1, 2, nil])` And you can use prepared statements with
+      `exec_prepared`.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected string concatenation with a non-literal variable in a pg Ruby SQL statement. This could lead to SQL
+          injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection,
+          use parameterized queries or prepared statements instead. You can use parameterized queries like so:
+          `conn.exec_params('SELECT $1 AS a, $2 AS b, $3 AS c', [1, 2, nil])` And you can use prepared statements with
+          `exec_prepared`.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.rubydoc.info/gems/pg/PG/Connection
+    tags:
+      - rails
+  - id: avoid-content-tag
+    name: avoid-content-tag
+    description: >-
+      'content_tag()' bypasses HTML escaping for some portion of the content. If external data can reach here, this
+      exposes your application to cross-site scripting (XSS) attacks. Ensure no external data reaches here. If you must
+      do this, create your HTML manually and use 'html_safe'. Ensure no external data enters the HTML-safe string!
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: content_tag(...)
+        message: >-
+          'content_tag()' bypasses HTML escaping for some portion of the content. If external data can reach here, this
+          exposes your application to cross-site scripting (XSS) attacks. Ensure no external data reaches here. If you
+          must do this, create your HTML manually and use 'html_safe'. Ensure no external data enters the HTML-safe
+          string!
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/template_injection/index.markdown
+      - https://www.netsparker.com/blog/web-security/preventing-xss-ruby-on-rails-web-applications/
+    tags:
+      - rails
+  - id: avoid-default-routes
+    name: avoid-default-routes
+    description: >-
+      Default routes are enabled in this routes file. This means any public method on a controller can be called as an
+      action. It is very easy to accidentally expose a method you didn't mean to. Instead, remove this line and
+      explicitly include all routes you intend external users to follow.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Default routes are enabled in this routes file. This means any public method on a controller can be called as
+          an action. It is very easy to accidentally expose a method you didn't mean to. Instead, remove this line and
+          explicitly include all routes you intend external users to follow.
+    cwe:
+      - CWE-276
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/default_routes/index.markdown
+    tags:
+      - rails
+  - id: avoid-html-safe
+    name: avoid-html-safe
+    description: >-
+      'html_safe()' does not make the supplied string safe. 'html_safe()' bypasses HTML escaping. If external data can
+      reach here, this exposes your application to cross-site scripting (XSS) attacks. Ensure no external data reaches
+      here.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: $STR.html_safe
+        message: >-
+          'html_safe()' does not make the supplied string safe. 'html_safe()' bypasses HTML escaping. If external data
+          can reach here, this exposes your application to cross-site scripting (XSS) attacks. Ensure no external data
+          reaches here.
+      - pattern: $STR.html_safe.$MORE
+        message: >-
+          'html_safe()' does not make the supplied string safe. 'html_safe()' bypasses HTML escaping. If external data
+          can reach here, this exposes your application to cross-site scripting (XSS) attacks. Ensure no external data
+          reaches here.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/cross_site_scripting/index.markdown
+      - https://www.netsparker.com/blog/web-security/preventing-xss-ruby-on-rails-web-applications/
+    tags:
+      - rails
+  - id: avoid-link-to
+    name: avoid-link-to
+    description: >-
+      This code includes user input in `link_to`. In Rails 2.x, the body of `link_to` is not escaped. This means that
+      user input which reaches the body will be executed when the HTML is rendered. Even in other versions, values
+      starting with `javascript:` or `data:` are not escaped. It is better to create and use a safer function which
+      checks the body argument.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          This code includes user input in `link_to`. In Rails 2.x, the body of `link_to` is not escaped. This means
+          that user input which reaches the body will be executed when the HTML is rendered. Even in other versions,
+          values starting with `javascript:` or `data:` are not escaped. It is better to create and use a safer function
+          which checks the body argument.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://brakemanscanner.org/docs/warning_types/link_to/
+      - https://brakemanscanner.org/docs/warning_types/link_to_href/
+    tags:
+      - rails
+  - id: avoid-raw
+    name: avoid-raw
+    description: >-
+      'raw()' bypasses HTML escaping. If external data can reach here, this exposes your application to cross-site
+      scripting (XSS) attacks. If you must do this, construct individual strings and mark them as safe for HTML
+      rendering with `html_safe()`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: raw(...)
+        message: >-
+          'raw()' bypasses HTML escaping. If external data can reach here, this exposes your application to cross-site
+          scripting (XSS) attacks. If you must do this, construct individual strings and mark them as safe for HTML
+          rendering with `html_safe()`.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://api.rubyonrails.org/classes/ActionView/Helpers/OutputSafetyHelper.html#method-i-raw
+      - https://www.netsparker.com/blog/web-security/preventing-xss-ruby-on-rails-web-applications/
+    tags:
+      - rails
+  - id: avoid-redirect
+    name: avoid-redirect
+    description: >-
+      When a redirect uses user input, a malicious user can spoof a website under a trusted URL or access restricted
+      parts of a site. When using user-supplied values, sanitize the value before using it for the redirect.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          When a redirect uses user input, a malicious user can spoof a website under a trusted URL or access restricted
+          parts of a site. When using user-supplied values, sanitize the value before using it for the redirect.
+    cwe:
+      - CWE-601
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://brakemanscanner.org/docs/warning_types/redirect/
+    tags:
+      - rails
+  - id: avoid-render-dynamic-path
+    name: avoid-render-dynamic-path
+    description: >-
+      Avoid rendering user input. It may be possible for a malicious user to input a path that lets them access a
+      template they shouldn't. To prevent this, check dynamic template paths against a predefined allowlist to make sure
+      it's an allowed template.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Avoid rendering user input. It may be possible for a malicious user to input a path that lets them access a
+          template they shouldn't. To prevent this, check dynamic template paths against a predefined allowlist to make
+          sure it's an allowed template.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://brakemanscanner.org/docs/warning_types/dynamic_render_paths/
+    tags:
+      - rails
+  - id: avoid-render-inline
+    name: avoid-render-inline
+    description: >-
+      'render inline: ...' renders an entire ERB template inline and is dangerous. If external data can reach here, this
+      exposes your application to server-side template injection (SSTI) or cross-site scripting (XSS) attacks. Instead,
+      consider using a partial or another safe rendering method.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: 'render inline: ...'
+        message: >-
+          'render inline: ...' renders an entire ERB template inline and is dangerous. If external data can reach here,
+          this exposes your application to server-side template injection (SSTI) or cross-site scripting (XSS) attacks.
+          Instead, consider using a partial or another safe rendering method.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://brakemanpro.com/2017/09/08/cross-site-scripting-in-rails#inline-renders---even-worse-than-xss
+    tags:
+      - rails
+  - id: avoid-render-text
+    name: avoid-render-text
+    description: >-
+      'render text: ...' actually sets the content-type to 'text/html'. If external data can reach here, this exposes
+      your application to cross-site scripting (XSS) attacks. Instead, use 'render plain: ...' to render non-HTML text.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: 'render text: ...'
+        message: >-
+          'render text: ...' actually sets the content-type to 'text/html'. If external data can reach here, this
+          exposes your application to cross-site scripting (XSS) attacks. Instead, use 'render plain: ...' to render
+          non-HTML text.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://brakemanpro.com/2017/09/08/cross-site-scripting-in-rails#inline-renders---even-worse-than-xss
+    tags:
+      - rails
+  - id: manual-template-creation
+    name: manual-template-creation
+    description: >-
+      Detected manual creation of an ERB template. Manual creation of templates may expose your application to
+      server-side template injection (SSTI) or cross-site scripting (XSS) attacks if user input is used to create the
+      template. Instead, create a '.erb' template file and use 'render'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: ERB.new(...)
+        message: >-
+          Detected manual creation of an ERB template. Manual creation of templates may expose your application to
+          server-side template injection (SSTI) or cross-site scripting (XSS) attacks if user input is used to create
+          the template. Instead, create a '.erb' template file and use 'render'.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/docs/warning_types/template_injection/index.markdown
+    tags:
+      - rails
+  - id: libxml-backend
+    name: libxml-backend
+    description: >-
+      This application is using LibXML as the XML backend. LibXML can be vulnerable to XML External Entities (XXE)
+      vulnerabilities. Use the built-in Rails XML parser, REXML, instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: ActiveSupport::XmlMini.backend = "LibXML"
+        message: >-
+          This application is using LibXML as the XML backend. LibXML can be vulnerable to XML External Entities (XXE)
+          vulnerabilities. Use the built-in Rails XML parser, REXML, instead.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://www.stackhawk.com/blog/rails-xml-external-entities-xxe-guide-examples-and-prevention/
+      - https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+    tags:
+      - rails
+      - libxml
+  - id: xml-external-entities-enabled
+    name: xml-external-entities-enabled
+    description: >-
+      This application is explicitly enabling external entities enabling an attacker to inject malicious XML to exploit
+      an XML External Entities (XXE) vulnerability. This could let the attacker cause a denial-of-service by forcing the
+      parser to parse large files, or at worst, let the attacker download sensitive files or user data. Use the built-in
+      Rails XML parser, REXML, instead.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: XML.default_substitute_entities = true
+        message: >-
+          This application is explicitly enabling external entities enabling an attacker to inject malicious XML to
+          exploit an XML External Entities (XXE) vulnerability. This could let the attacker cause a denial-of-service by
+          forcing the parser to parse large files, or at worst, let the attacker download sensitive files or user data.
+          Use the built-in Rails XML parser, REXML, instead.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://www.stackhawk.com/blog/rails-xml-external-entities-xxe-guide-examples-and-prevention/
+      - https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+    tags:
+      - rails
+      - libxml
+  - id: check-before-filter
+    name: check-before-filter
+    description: >-
+      Disabled-by-default Rails controller checks make it much easier to introduce access control mistakes. Prefer an
+      allowlist approach with `:only => [...]` rather than `except: => [...]`
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Disabled-by-default Rails controller checks make it much easier to introduce access control mistakes. Prefer
+          an allowlist approach with `:only => [...]` rather than `except: => [...]`
+    cwe:
+      - CWE-284
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - ruby
+      - rails
+  - id: check-cookie-store-session-security-attributes
+    name: check-cookie-store-session-security-attributes
+    description: >-
+      Found a Rails `cookie_store` session configuration setting the `$KEY` attribute to `false`. If using a
+      cookie-based session store, the HttpOnly and Secure flags should be set.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found a Rails `cookie_store` session configuration setting the `$KEY` attribute to `false`. If using a
+          cookie-based session store, the HttpOnly and Secure flags should be set.
+    cwe:
+      - CWE-1004
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - >-
+        https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes
+    tags:
+      - ruby
+      - rails
+  - id: check-http-verb-confusion
+    name: check-http-verb-confusion
+    description: >-
+      Found an improperly constructed control flow block with `request.get?`. Rails will route HEAD requests as GET
+      requests but they will fail the `request.get?` check, potentially causing unexpected behavior unless an `elif`
+      condition is used.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: |
+          if request.get?
+            ...
+          else
+            ...
+          end
+        message: >-
+          Found an improperly constructed control flow block with `request.get?`. Rails will route HEAD requests as GET
+          requests but they will fail the `request.get?` check, potentially causing unexpected behavior unless an `elif`
+          condition is used.
+    cwe:
+      - CWE-650
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails6/app/controllers/accounts_controller.rb
+    tags:
+      - ruby
+      - rails
+  - id: check-permit-attributes-high
+    name: check-permit-attributes-high
+    description: >-
+      Calling `permit` on security-critical properties like `$ATTRIBUTE` may leave your application vulnerable to mass
+      assignment.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: $P.permit($ATTRIBUTE)
+        message: >-
+          Calling `permit` on security-critical properties like `$ATTRIBUTE` may leave your application vulnerable to
+          mass assignment.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html
+    tags:
+      - ruby
+      - rails
+  - id: check-permit-attributes-medium
+    name: check-permit-attributes-medium
+    description: >-
+      Calling `permit` on security-critical properties like `$ATTRIBUTE` may leave your application vulnerable to mass
+      assignment.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: $P.permit($ATTRIBUTE)
+        message: >-
+          Calling `permit` on security-critical properties like `$ATTRIBUTE` may leave your application vulnerable to
+          mass assignment.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html
+    tags:
+      - ruby
+      - rails
+  - id: check-rails-session-secret-handling
+    name: check-rails-session-secret-handling
+    description: >-
+      Found a string literal assignment to a Rails session secret `$KEY`. Do not commit secret values to source control!
+      Any user in possession of this value may falsify arbitrary session data in your application. Read this value from
+      an environment variable, KMS, or file on disk outside of source control.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found a string literal assignment to a Rails session secret `$KEY`. Do not commit secret values to source
+          control! Any user in possession of this value may falsify arbitrary session data in your application. Read
+          this value from an environment variable, KMS, or file on disk outside of source control.
+    cwe:
+      - CWE-540
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes
+      - >-
+        https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails4_with_engines/config/initializers/secret_token.rb
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails3/config/initializers/secret_token.rb
+    tags:
+      - ruby
+      - rails
+  - id: check-redirect-to
+    name: check-redirect-to
+    description: >-
+      Found potentially unsafe handling of redirect behavior $X. Do not pass `params` to `redirect_to` without the
+      `:only_path => true` hash value.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found potentially unsafe handling of redirect behavior $X. Do not pass `params` to `redirect_to` without the
+          `:only_path => true` hash value.
+    cwe:
+      - CWE-601
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
+    tags:
+      - ruby
+      - rails
+  - id: check-regex-dos
+    name: check-regex-dos
+    description: >-
+      Found a potentially user-controllable argument in the construction of a regular expressions. This may result in
+      excessive resource consumption when applied to certain inputs, or when the user is allowed to control the match
+      target. Avoid allowing users to specify regular expressions processed by the server. If you must support
+      user-controllable input in a regular expression, use an allow-list to restrict the expressions users may supply to
+      limit catastrophic backtracking.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found a potentially user-controllable argument in the construction of a regular expressions. This may result
+          in excessive resource consumption when applied to certain inputs, or when the user is allowed to control the
+          match target. Avoid allowing users to specify regular expressions processed by the server. If you must support
+          user-controllable input in a regular expression, use an allow-list to restrict the expressions users may
+          supply to limit catastrophic backtracking.
+    cwe:
+      - CWE-1333
+    owasp:
+      - A03:2017
+    references:
+      - https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS
+    tags:
+      - ruby
+      - rails
+  - id: check-render-local-file-include
+    name: check-render-local-file-include
+    description: >-
+      Found request parameters in a call to `render`. This can allow end users to request arbitrary local files which
+      may result in leaking sensitive information persisted on disk. Where possible, avoid letting users specify
+      template paths for `render`. If you must allow user input, use an allow-list of known templates or normalize the
+      user-supplied value with `File.basename(...)`.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found request parameters in a call to `render`. This can allow end users to request arbitrary local files
+          which may result in leaking sensitive information persisted on disk. Where possible, avoid letting users
+          specify template paths for `render`. If you must allow user input, use an allow-list of known templates or
+          normalize the user-supplied value with `File.basename(...)`.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion
+      - >-
+        https://github.com/presidentbeef/brakeman/blob/f74cb53/test/apps/rails2/app/controllers/home_controller.rb#L48-L60
+    tags:
+      - ruby
+      - rails
+  - id: check-secrets
+    name: check-secrets
+    description: >-
+      Found a Brakeman-style secret - a variable with the name password/secret/api_key/rest_auth_site_key and a
+      non-empty string literal value.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - pattern: $VAR = "$VALUE"
+        message: >-
+          Found a Brakeman-style secret - a variable with the name password/secret/api_key/rest_auth_site_key and a
+          non-empty string literal value.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+      - >-
+        https://github.com/presidentbeef/brakeman/blob/3f5d5d5f00864cdf7769c50f5bd26f1769a4ba75/test/apps/rails3.1/app/controllers/users_controller.rb
+    tags:
+      - ruby
+      - rails
+  - id: check-send-file
+    name: check-send-file
+    description: >-
+      Allowing user input to `send_file` allows a malicious user to potentially read arbitrary files from the server.
+      Avoid accepting user input in `send_file` or normalize with `File.basename(...)`
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Allowing user input to `send_file` allows a malicious user to potentially read arbitrary files from the
+          server. Avoid accepting user input in `send_file` or normalize with `File.basename(...)`
+    cwe:
+      - CWE-73
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://owasp.org/www-community/attacks/Path_Traversal
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control/
+    tags:
+      - ruby
+      - rails
+  - id: check-sql
+    name: check-sql
+    description: >-
+      Found potential SQL injection due to unsafe SQL query construction via $X. Where possible, prefer parameterized
+      queries.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found potential SQL injection due to unsafe SQL query construction via $X. Where possible, prefer
+          parameterized queries.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/www-community/attacks/SQL_Injection
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails3.1/app/models/product.rb
+    tags:
+      - ruby
+      - rails
+  - id: check-unsafe-reflection-methods
+    name: check-unsafe-reflection-methods
+    description: >-
+      Found user-controllable input to a reflection method. This may allow a user to alter program behavior and
+      potentially execute arbitrary instructions in the context of the process. Do not provide arbitrary user input to
+      `tap`, `method`, or `to_proc`
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found user-controllable input to a reflection method. This may allow a user to alter program behavior and
+          potentially execute arbitrary instructions in the context of the process. Do not provide arbitrary user input
+          to `tap`, `method`, or `to_proc`
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails6/app/controllers/groups_controller.rb
+    tags:
+      - ruby
+      - rails
+  - id: check-unsafe-reflection
+    name: check-unsafe-reflection
+    description: >-
+      Found user-controllable input to Ruby reflection functionality. This allows a remote user to influence runtime
+      behavior, up to and including arbitrary remote code execution. Do not provide user-controllable input to
+      reflection functionality. Do not call symbol conversion on user-controllable input.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found user-controllable input to Ruby reflection functionality. This allows a remote user to influence runtime
+          behavior, up to and including arbitrary remote code execution. Do not provide user-controllable input to
+          reflection functionality. Do not call symbol conversion on user-controllable input.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails2/app/controllers/application_controller.rb
+    tags:
+      - ruby
+      - rails
+  - id: check-unscoped-find
+    name: check-unscoped-find
+    description: >-
+      Found an unscoped `find(...)` with user-controllable input. If the ActiveRecord model being searched against is
+      sensitive, this may lead to Insecure Direct Object Reference (IDOR) behavior and allow users to read arbitrary
+      records. Scope the find to the current user, e.g. `current_user.accounts.find(params[:id])`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Found an unscoped `find(...)` with user-controllable input. If the ActiveRecord model being searched against
+          is sensitive, this may lead to Insecure Direct Object Reference (IDOR) behavior and allow users to read
+          arbitrary records. Scope the find to the current user, e.g. `current_user.accounts.find(params[:id])`.
+    cwe:
+      - CWE-639
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://brakemanscanner.org/docs/warning_types/unscoped_find/
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails3.1/app/controllers/users_controller.rb
+    tags:
+      - ruby
+      - rails
+  - id: check-validation-regex
+    name: check-validation-regex
+    description: >-
+      $V Found an incorrectly-bounded regex passed to `validates_format_of` or `validate ... format => ...`. Ruby regex
+      behavior is multiline by default and lines should be terminated by `\A` for beginning of line and `\Z` for end of
+      line, respectively.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          $V Found an incorrectly-bounded regex passed to `validates_format_of` or `validate ... format => ...`. Ruby
+          regex behavior is multiline by default and lines should be terminated by `\A` for beginning of line and `\Z`
+          for end of line, respectively.
+    cwe:
+      - CWE-185
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://brakemanscanner.org/docs/warning_types/format_validation/
+      - >-
+        https://github.com/presidentbeef/brakeman/blob/aef6253a8b7bcb97116f2af1ed2a561a6ae35bd5/test/apps/rails3/app/models/account.rb
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails3.1/app/models/account.rb
+    tags:
+      - ruby
+      - rails
+  - id: raw-html-format
+    name: raw-html-format
+    description: >-
+      Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure
+      methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting
+      vulnerability, which could let attackers steal sensitive user data. Use the `render template` and make template
+      files which will safely render HTML instead, or inspect that the HTML is absolutely rendered safely with a
+      function like `sanitize`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure
+          methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting
+          vulnerability, which could let attackers steal sensitive user data. Use the `render template` and make
+          template files which will safely render HTML instead, or inspect that the HTML is absolutely rendered safely
+          with a function like `sanitize`.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.netsparker.com/blog/web-security/preventing-xss-ruby-on-rails-web-applications/
+      - https://api.rubyonrails.org/classes/ActionView/Helpers/SanitizeHelper.html
+    tags:
+      - rails
+  - id: tainted-url-host
+    name: tainted-url-host
+    description: >-
+      User data flows into the host portion of this manually-constructed URL. This could allow an attacker to send data
+      to their own server, potentially exposing sensitive data such as cookies or authorization information sent with
+      this request. They could also probe internal servers or other resources that the server running this code can
+      access. (This is called server-side request forgery, or SSRF.) Do not allow arbitrary hosts. Use the `ssrf_filter`
+      gem and guard the url construction with `SsrfFilter(...)`, or create an allowlist for approved hosts.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ruby
+    patterns:
+      - regex: .*
+        message: >-
+          User data flows into the host portion of this manually-constructed URL. This could allow an attacker to send
+          data to their own server, potentially exposing sensitive data such as cookies or authorization information
+          sent with this request. They could also probe internal servers or other resources that the server running this
+          code can access. (This is called server-side request forgery, or SSRF.) Do not allow arbitrary hosts. Use the
+          `ssrf_filter` gem and guard the url construction with `SsrfFilter(...)`, or create an allowlist for approved
+          hosts.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+      - https://github.com/arkadiyt/ssrf_filter
+    tags:
+      - rails

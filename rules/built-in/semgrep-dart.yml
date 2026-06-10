@@ -1,0 +1,21 @@
+rules:
+  - id: detect-gemini
+    name: detect-gemini
+    description: 'Possibly found usage of AI: Gemini'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dart
+    patterns:
+      - pattern: import 'package:google_generative_ai';
+        message: 'Possibly found usage of AI: Gemini'
+      - pattern: final $MODEL = GenerativeModel(...);
+        message: 'Possibly found usage of AI: Gemini'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs

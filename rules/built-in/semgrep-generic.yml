@@ -1,0 +1,2945 @@
+rules:
+  - id: ai-config-hidden-unicode-generic
+    name: ai-config-hidden-unicode-generic
+    description: >-
+      Invisible or zero-width Unicode character detected in AI coding assistant config file. These characters can be
+      used in "Rules File Backdoor" attacks to inject hidden malicious instructions that are invisible to developers but
+      interpreted by AI assistants. Remove all zero-width and bidirectional override characters from this file.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: '[\x{200B}\x{200C}\x{200D}\x{2063}\x{FEFF}\x{202A}-\x{202E}]'
+        message: >-
+          Invisible or zero-width Unicode character detected in AI coding assistant config file. These characters can be
+          used in "Rules File Backdoor" attacks to inject hidden malicious instructions that are invisible to developers
+          but interpreted by AI assistants. Remove all zero-width and bidirectional override characters from this file.
+    cwe:
+      - CWE-116
+    owasp: []
+    references:
+      - >-
+        https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents
+    tags:
+      - cursor
+      - github-copilot
+      - windsurf
+      - claude-code
+  - id: claude-settings-auto-enable-mcp-generic
+    name: claude-settings-auto-enable-mcp-generic
+    description: >-
+      "enableAllProjectMcpServers" is set to true in settings. This automatically enables all MCP servers defined in
+      project configuration without user confirmation, allowing malicious repositories to register arbitrary MCP servers
+      that execute code on your machine. Remove this setting or set it to false so that MCP servers require explicit
+      approval.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: '"enableAllProjectMcpServers"\s*:\s*true'
+        message: >-
+          "enableAllProjectMcpServers" is set to true in settings. This automatically enables all MCP servers defined in
+          project configuration without user confirmation, allowing malicious repositories to register arbitrary MCP
+          servers that execute code on your machine. Remove this setting or set it to false so that MCP servers require
+          explicit approval.
+    cwe:
+      - CWE-862
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/security
+    tags:
+      - claude-code
+  - id: claude-settings-bypass-permissions-generic
+    name: claude-settings-bypass-permissions-generic
+    description: >-
+      Dangerous permission bypass detected in Claude Code or Cursor settings. Settings like "bypassPermissions",
+      "allowUnsandboxedCommands: true", or "enableWeakerNestedSandbox: true" disable critical security controls that
+      protect against malicious tool use. Remove these settings or set them to false to maintain proper sandboxing and
+      permission checks.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: '"bypassPermissions"'
+        message: >-
+          Dangerous permission bypass detected in Claude Code or Cursor settings. Settings like "bypassPermissions",
+          "allowUnsandboxedCommands: true", or "enableWeakerNestedSandbox: true" disable critical security controls that
+          protect against malicious tool use. Remove these settings or set them to false to maintain proper sandboxing
+          and permission checks.
+      - regex: '"allowUnsandboxedCommands"\s*:\s*true'
+        message: >-
+          Dangerous permission bypass detected in Claude Code or Cursor settings. Settings like "bypassPermissions",
+          "allowUnsandboxedCommands: true", or "enableWeakerNestedSandbox: true" disable critical security controls that
+          protect against malicious tool use. Remove these settings or set them to false to maintain proper sandboxing
+          and permission checks.
+      - regex: '"enableWeakerNestedSandbox"\s*:\s*true'
+        message: >-
+          Dangerous permission bypass detected in Claude Code or Cursor settings. Settings like "bypassPermissions",
+          "allowUnsandboxedCommands: true", or "enableWeakerNestedSandbox: true" disable critical security controls that
+          protect against malicious tool use. Remove these settings or set them to false to maintain proper sandboxing
+          and permission checks.
+    cwe:
+      - CWE-862
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/security
+    tags:
+      - claude-code
+      - cursor
+  - id: claude-settings-env-url-override-generic
+    name: claude-settings-env-url-override-generic
+    description: >-
+      API base URL override detected in settings or environment file. ANTHROPIC_BASE_URL or OPENAI_BASE_URL overrides
+      can redirect all API traffic to an attacker-controlled server, exposing prompts, code, and API keys. Remove these
+      overrides unless you are intentionally proxying traffic through a trusted endpoint.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: (ANTHROPIC_BASE_URL|OPENAI_BASE_URL)\s*"?\s*[=:]\s*"?\s*\S+
+        message: >-
+          API base URL override detected in settings or environment file. ANTHROPIC_BASE_URL or OPENAI_BASE_URL
+          overrides can redirect all API traffic to an attacker-controlled server, exposing prompts, code, and API keys.
+          Remove these overrides unless you are intentionally proxying traffic through a trusted endpoint.
+    cwe:
+      - CWE-923
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/security
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-dns-exfiltration-generic
+    name: hooks-dns-exfiltration-generic
+    description: >-
+      DNS lookup command uses a variable in the hostname, which could exfiltrate sensitive data via DNS queries. In
+      Claude Code and Cursor hooks, this pattern can leak secrets or environment data to attacker-controlled domains.
+      Use static hostnames only in DNS commands.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: \b(ping|nslookup|dig|host)\s+.*\$
+        message: >-
+          DNS lookup command uses a variable in the hostname, which could exfiltrate sensitive data via DNS queries. In
+          Claude Code and Cursor hooks, this pattern can leak secrets or environment data to attacker-controlled
+          domains. Use static hostnames only in DNS commands.
+    cwe:
+      - CWE-201
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-sensitive-file-access-bash
+    name: hooks-sensitive-file-access-bash
+    description: >-
+      Hook input from jq flows into a file operation without checking for sensitive files. Claude Code and Cursor hooks
+      receive JSON input that may reference sensitive files such as ~/.ssh/*, ~/.aws/credentials, or .env files. Filter
+      or block access to sensitive paths using realpath and a validation check before performing file operations.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: \$\(.*\|\s*jq\b[^)]*\)[\s\S]*?\n\s*(cat|rm|cp|mv)\s+\$
+        message: >-
+          Hook input from jq flows into a file operation without checking for sensitive files. Claude Code and Cursor
+          hooks receive JSON input that may reference sensitive files such as ~/.ssh/*, ~/.aws/credentials, or .env
+          files. Filter or block access to sensitive paths using realpath and a validation check before performing file
+          operations.
+    cwe:
+      - CWE-538
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-stop-missing-active-check-generic
+    name: hooks-stop-missing-active-check-generic
+    description: >-
+      Stop hook outputs a "block" decision. Ensure you check stop_hook_active first and exit 0 if true, otherwise the
+      hook will cause an infinite loop by blocking its own stop attempts.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: '"decision".*"block"'
+        message: >-
+          Stop hook outputs a "block" decision. Ensure you check stop_hook_active first and exit 0 if true, otherwise
+          the hook will cause an infinite loop by blocking its own stop attempts.
+    cwe:
+      - CWE-835
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-unconditional-allow-generic
+    name: hooks-unconditional-allow-generic
+    description: >-
+      Hook unconditionally allows tool execution by outputting a permissionDecision of "allow" without any conditional
+      check. This bypasses the entire permission system. Add a conditional check to validate the tool or command before
+      allowing.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: permissionDecision.*allow
+        message: >-
+          Hook unconditionally allows tool execution by outputting a permissionDecision of "allow" without any
+          conditional check. This bypasses the entire permission system. Add a conditional check to validate the tool or
+          command before allowing.
+    cwe:
+      - CWE-862
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-wget-pipe-bash-generic
+    name: hooks-wget-pipe-bash-generic
+    description: >-
+      Remote script is fetched and piped directly to a shell interpreter. In Claude Code and Cursor hooks, this enables
+      remote code execution from untrusted sources. Download the script first, inspect it, then execute it separately.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: (curl|wget)\s+.*\|\s*(bash|sh|zsh)\b
+        message: >-
+          Remote script is fetched and piped directly to a shell interpreter. In Claude Code and Cursor hooks, this
+          enables remote code execution from untrusted sources. Download the script first, inspect it, then execute it
+          separately.
+    cwe:
+      - CWE-829
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: ide-settings-executable-path-generic
+    name: ide-settings-executable-path-generic
+    description: >-
+      Executable path override detected in VS Code settings pointing to a project-relative path. A malicious repository
+      can override interpreter or tool paths in workspace settings to execute arbitrary code when the project is opened.
+      Use absolute system paths instead of relative paths for executable settings, and review .vscode/settings.json in
+      untrusted repos.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: >-
+          "[^"]*(?:executablePath|ExecutablePath|defaultInterpreterPath|pythonPath|terminal\.integrated\.shell\.\w+)"\s*:\s*"\.\.?/
+        message: >-
+          Executable path override detected in VS Code settings pointing to a project-relative path. A malicious
+          repository can override interpreter or tool paths in workspace settings to execute arbitrary code when the
+          project is opened. Use absolute system paths instead of relative paths for executable settings, and review
+          .vscode/settings.json in untrusted repos.
+    cwe:
+      - CWE-94
+    owasp: []
+    references:
+      - https://blog.vipyrsec.com/posts/idesaster/
+    tags:
+      - vscode
+  - id: mcp-hardcoded-config-secret-generic
+    name: mcp-hardcoded-config-secret-generic
+    description: >-
+      Plaintext API key or token detected in MCP configuration file. Hardcoded secrets in config files risk exposure
+      through version control or file sharing. Use environment variable references or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: ':\s*"sk-[a-zA-Z0-9]{20,}"'
+        message: >-
+          Plaintext API key or token detected in MCP configuration file. Hardcoded secrets in config files risk exposure
+          through version control or file sharing. Use environment variable references or a secrets manager instead.
+      - regex: ':\s*"sk-ant-[a-zA-Z0-9\-]{20,}"'
+        message: >-
+          Plaintext API key or token detected in MCP configuration file. Hardcoded secrets in config files risk exposure
+          through version control or file sharing. Use environment variable references or a secrets manager instead.
+      - regex: ':\s*"sk-proj-[a-zA-Z0-9\-]{20,}"'
+        message: >-
+          Plaintext API key or token detected in MCP configuration file. Hardcoded secrets in config files risk exposure
+          through version control or file sharing. Use environment variable references or a secrets manager instead.
+      - regex: ':\s*"hf_[a-zA-Z0-9]{20,}"'
+        message: >-
+          Plaintext API key or token detected in MCP configuration file. Hardcoded secrets in config files risk exposure
+          through version control or file sharing. Use environment variable references or a secrets manager instead.
+      - regex: ':\s*"AIza[a-zA-Z0-9\-_]{20,}"'
+        message: >-
+          Plaintext API key or token detected in MCP configuration file. Hardcoded secrets in config files risk exposure
+          through version control or file sharing. Use environment variable references or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://modelcontextprotocol.io/specification/draft/basic/security_best_practices
+    tags:
+      - mcp
+  - id: mcp-tool-poisoning-generic
+    name: mcp-tool-poisoning-generic
+    description: >-
+      MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+      instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files. Review
+      the tool description for hidden instructions or social engineering.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: '"""[^"]*<IMPORTANT>[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+      - regex: '"""[^"]*~/\.ssh[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+      - regex: '"""[^"]*~/\.cursor/mcp\.json[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+      - regex: '"""[^"]*(?:/etc/shadow)[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+      - regex: '"""[^"]*(?:read|cat|load|parse|open|access)\s+\.env[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+      - regex: '"""[^"]*do not mention[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+      - regex: '"""[^"]*do not tell the user[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+      - regex: '"""[^"]*ignore previous instructions[^"]*"""'
+        message: >-
+          MCP tool docstring contains suspicious directives that may indicate tool poisoning. Attackers can embed hidden
+          instructions in tool descriptions to manipulate LLM behavior, exfiltrate data, or access sensitive files.
+          Review the tool description for hidden instructions or social engineering.
+    cwe:
+      - CWE-77
+    owasp: []
+    references:
+      - https://modelcontextprotocol.io/specification/draft/basic/security_best_practices
+    tags:
+      - mcp
+  - id: detect-generic-ai-anthprop
+    name: detect-generic-ai-anthprop
+    description: 'Possibly found usage of AI: Anthropic'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: anthropic
+        message: 'Possibly found usage of AI: Anthropic'
+      - pattern: Anthropic
+        message: 'Possibly found usage of AI: Anthropic'
+      - pattern: claude
+        message: 'Possibly found usage of AI: Anthropic'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: detect-generic-ai-api
+    name: detect-generic-ai-api
+    description: 'Possibly found usage of AI: HTTP Request'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: /chat/completions
+        message: 'Possibly found usage of AI: HTTP Request'
+      - pattern: api.openai.com
+        message: 'Possibly found usage of AI: HTTP Request'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: detect-generic-ai-gem
+    name: detect-generic-ai-gem
+    description: 'Possibly found usage of AI: Gemini'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: google/generative-ai
+        message: 'Possibly found usage of AI: Gemini'
+      - pattern: GoogleGenerativeAI
+        message: 'Possibly found usage of AI: Gemini'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: detect-generic-ai-oai
+    name: detect-generic-ai-oai
+    description: 'Possibly found usage of AI: OpenAI'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: openai
+        message: 'Possibly found usage of AI: OpenAI'
+      - pattern: OpenAI
+        message: 'Possibly found usage of AI: OpenAI'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: use-assert-class
+    name: use-assert-class
+    description: >-
+      Assert methods in the System class have been replaced with the Assert class:
+      https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_Assert.htm
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: System\.assert
+        message: >-
+          Assert methods in the System class have been replaced with the Assert class:
+          https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_Assert.htm
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_Assert.htm
+    tags:
+      - salesforce
+  - id: avoid-native-dml-in-loops
+    name: avoid-native-dml-in-loops
+    description: >-
+      Avoid DML statements inside loops to avoid hitting the DML governor limit. Instead, try to batch up the data into
+      a list and invoke your DML once on that list of data outside the loop.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Avoid DML statements inside loops to avoid hitting the DML governor limit. Instead, try to batch up the data
+          into a list and invoke your DML once on that list of data outside the loop.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm
+    tags:
+      - salesforce
+  - id: avoid-operations-with-limits-in-loops
+    name: avoid-operations-with-limits-in-loops
+    description: >-
+      Database class methods, DML operations, SOQL queries, SOSL queries, Approval class methods, Email sending, async
+      scheduling or queueing within loops can cause governor limit exceptions. Instead, try to batch up the data into a
+      list and invoke the operation once on that list of data outside the loop.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Database class methods, DML operations, SOQL queries, SOSL queries, Approval class methods, Email sending,
+          async scheduling or queueing within loops can cause governor limit exceptions. Instead, try to batch up the
+          data into a list and invoke the operation once on that list of data outside the loop.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm
+    tags:
+      - salesforce
+  - id: avoid-soql-in-loops
+    name: avoid-soql-in-loops
+    description: >-
+      Database class methods, DML operations, SOQL queries, SOSL queries, Approval class methods, Email sending, async
+      scheduling or queueing within loops can cause governor limit exceptions. Instead, try to batch up the data into a
+      list and invoke the operation once on that list of data outside the loop.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          $OBJECTS = [...SELECT...FROM...];
+        message: >-
+          Database class methods, DML operations, SOQL queries, SOSL queries, Approval class methods, Email sending,
+          async scheduling or queueing within loops can cause governor limit exceptions. Instead, try to batch up the
+          data into a list and invoke the operation once on that list of data outside the loop.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm
+    tags:
+      - salesforce
+  - id: avoid-sosl-in-loops
+    name: avoid-sosl-in-loops
+    description: >-
+      Database class methods, DML operations, SOQL queries, SOSL queries, Approval class methods, Email sending, async
+      scheduling or queueing within loops can cause governor limit exceptions. Instead, try to batch up the data into a
+      list and invoke the operation once on that list of data outside the loop.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Database class methods, DML operations, SOQL queries, SOSL queries, Approval class methods, Email sending,
+          async scheduling or queueing within loops can cause governor limit exceptions. Instead, try to batch up the
+          data into a list and invoke the operation once on that list of data outside the loop.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_gov_limits.htm
+    tags:
+      - salesforce
+  - id: apex-csrf-static-constructor
+    name: apex-csrf-static-constructor
+    description: >-
+      Having DML operations in Apex class constructor or initializers can have unexpected side effects: By just
+      accessing a page, the DML statements would be executed and the database would be modified. Just querying the
+      database is permitted.
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Having DML operations in Apex class constructor or initializers can have unexpected side effects: By just
+          accessing a page, the DML statements would be executed and the database would be modified. Just querying the
+          database is permitted.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/352.html
+    tags:
+      - salesforce
+  - id: razor-use-of-htmlstring
+    name: razor-use-of-htmlstring
+    description: >-
+      ASP.NET Core MVC provides an HtmlString class which isn't automatically encoded upon output. This should never be
+      used in combination with untrusted input as this will expose an XSS vulnerability.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          ASP.NET Core MVC provides an HtmlString class which isn't automatically encoded upon output. This should never
+          be used in combination with untrusted input as this will expose an XSS vulnerability.
+    cwe:
+      - CWE-116
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/116.html
+      - https://owasp.org/Top10/A03_2021-Injection/
+      - >-
+        https://docs.microsoft.com/en-us/aspnet/core/security/cross-site-scripting?view=aspnetcore-6.0#html-encoding-using-razor
+    tags:
+      - .net
+  - id: net-webconfig-debug
+    name: net-webconfig-debug
+    description: >-
+      ASP.NET applications built with `debug` set to true in production may leak debug information to attackers. Debug
+      mode also affects performance and reliability. Set `debug` to `false` or remove it from `<compilation ... />`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <compilation ... debug = "true" ... />
+        message: >-
+          ASP.NET applications built with `debug` set to true in production may leak debug information to attackers.
+          Debug mode also affects performance and reliability. Set `debug` to `false` or remove it from `<compilation
+          ... />`
+    cwe:
+      - CWE-11
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - >-
+        https://web.archive.org/web/20190919105353/https://blogs.msdn.microsoft.com/prashant_upadhyay/2011/07/14/why-debugfalse-in-asp-net-applications-in-production-environment/
+      - https://msdn.microsoft.com/en-us/library/e8z01xdh.aspx
+    tags:
+      - .net
+  - id: net-webconfig-trace-enabled
+    name: net-webconfig-trace-enabled
+    description: >-
+      OWASP guidance recommends disabling tracing for production applications to prevent accidental leakage of sensitive
+      application information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <trace ... enabled = "true" ... />
+        message: >-
+          OWASP guidance recommends disabling tracing for production applications to prevent accidental leakage of
+          sensitive application information.
+    cwe:
+      - CWE-1323
+    owasp:
+      - A05:2021
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/DotNet_Security_Cheat_Sheet.html#asp-net-web-forms-guidance
+      - https://msdn.microsoft.com/en-us/library/e8z01xdh.aspx
+    tags:
+      - .net
+  - id: web-config-insecure-cookie-settings
+    name: web-config-insecure-cookie-settings
+    description: >-
+      Cookie Secure flag is explicitly disabled. You should enforce this value to avoid accidentally presenting
+      sensitive cookie values over plaintext HTTP connections.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Cookie Secure flag is explicitly disabled. You should enforce this value to avoid accidentally presenting
+          sensitive cookie values over plaintext HTTP connections.
+    cwe:
+      - CWE-614
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://docs.microsoft.com/en-us/aspnet/web-api/overview/advanced/http-cookies
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.web.security.formsauthentication.requiressl?redirectedfrom=MSDN&view=netframework-4.8#System_Web_Security_FormsAuthentication_RequireSSL
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.web.security.roles.cookierequiressl?redirectedfrom=MSDN&view=netframework-4.8#System_Web_Security_Roles_CookieRequireSSL
+    tags:
+      - .net
+      - asp
+      - webforms
+  - id: html-raw-json
+    name: html-raw-json
+    description: Unencoded JSON in HTML context is vulnerable to cross-site scripting, because `</script>` is not properly encoded.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Unencoded JSON in HTML context is vulnerable to cross-site scripting, because `</script>` is not properly
+          encoded.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - razor
+  - id: secure-parameter-for-secrets
+    name: secure-parameter-for-secrets
+    description: >-
+      Mark sensitive parameters with the @secure() decorator. This avoids logging the value or displaying it in the
+      Azure portal, Azure CLI, or Azure PowerShell.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: param $NAME string
+        message: >-
+          Mark sensitive parameters with the @secure() decorator. This avoids logging the value or displaying it in the
+          Azure portal, Azure CLI, or Azure PowerShell.
+    cwe:
+      - CWE-532
+    owasp:
+      - A09:2021
+      - A09:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/532.html
+      - https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
+    tags:
+      - bicep
+  - id: changed-semgrepignore
+    name: changed-semgrepignore
+    description: >-
+      `$1` has been added to the .semgrepignore list of ignored paths. Someone from app-sec may want to audit these
+      changes.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: |
+          ^(.*)$
+        message: >-
+          `$1` has been added to the .semgrepignore list of ignored paths. Someone from app-sec may want to audit these
+          changes.
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/ignoring-files-folders-code/
+    tags:
+      - semgrep
+  - id: bash_reverse_shell
+    name: bash_reverse_shell
+    description: Semgrep found a bash reverse shell
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          sh -i >& /dev/udp/.../... 0>&1
+        message: Semgrep found a bash reverse shell
+      - pattern: |
+          <...>/dev/tcp/.../...; sh <&... >&... 2>&
+        message: Semgrep found a bash reverse shell
+      - pattern: |
+          <...>/dev/tcp/.../...; cat <&... | while read line; do $line 2>&... >&...;done
+        message: Semgrep found a bash reverse shell
+      - pattern: |
+          sh -i ...<...> /dev/tcp/.../... ...<&... 1>&... 2>&
+        message: Semgrep found a bash reverse shell
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ci
+  - id: missing-yum-clean-all
+    name: missing-yum-clean-all
+    description: >-
+      This yum command does not end with '&& yum clean all'. Running 'yum clean all' will remove cached data and reduce
+      package size. (This must be performed in the same RUN step.)
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: yum $COMMAND
+        message: >-
+          This yum command does not end with '&& yum clean all'. Running 'yum clean all' will remove cached data and
+          reduce package size. (This must be performed in the same RUN step.)
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3032
+    tags:
+      - dockerfile
+  - id: use-absolute-workdir
+    name: use-absolute-workdir
+    description: >-
+      Detected a relative WORKDIR. Use absolute paths. This prevents issues based on assumptions about the WORKDIR of
+      previous containers.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a relative WORKDIR. Use absolute paths. This prevents issues based on assumptions about the WORKDIR
+          of previous containers.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3000
+    tags:
+      - dockerfile
+  - id: alias-must-be-unique
+    name: alias-must-be-unique
+    description: Image aliases must have a unique name, and '$REF' is used twice. Use another name for '$REF'.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: Image aliases must have a unique name, and '$REF' is used twice. Use another name for '$REF'.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3024
+    tags:
+      - dockerfile
+  - id: copy-from-own-alias
+    name: copy-from-own-alias
+    description: >-
+      COPY instructions cannot copy from its own alias. The '$REF' alias is used before switching to a new image. If you
+      meant to switch to a new image, include a new 'FROM' statement. Otherwise, remove the '--from=$REF' from the COPY
+      statement.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          FROM $IMAGE:$TAG as $REF
+          ...
+          COPY --from=$REF
+          ...
+          FROM
+        message: >-
+          COPY instructions cannot copy from its own alias. The '$REF' alias is used before switching to a new image. If
+          you meant to switch to a new image, include a new 'FROM' statement. Otherwise, remove the '--from=$REF' from
+          the COPY statement.
+      - pattern: |
+          FROM $IMAGE:$TAG AS $REF
+          ...
+          COPY --from=$REF
+          ...
+          FROM
+        message: >-
+          COPY instructions cannot copy from its own alias. The '$REF' alias is used before switching to a new image. If
+          you meant to switch to a new image, include a new 'FROM' statement. Otherwise, remove the '--from=$REF' from
+          the COPY statement.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3023
+    tags:
+      - dockerfile
+  - id: build-gradle-password-hardcoded
+    name: build-gradle-password-hardcoded
+    description: >-
+      A secret is hard-coded in the application. Secrets stored in source code, such as credentials, identifiers, and
+      other types of sensitive data, can be leaked and used by internal or external malicious actors. It is recommended
+      to rotate the secret and retrieve them from a secure secret vault or Hardware Security Module (HSM), alternatively
+      environment variables can be used if allowed by your company policy.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          password = env[...] ?: "$SECRET"
+        message: >-
+          A secret is hard-coded in the application. Secrets stored in source code, such as credentials, identifiers,
+          and other types of sensitive data, can be leaked and used by internal or external malicious actors. It is
+          recommended to rotate the secret and retrieve them from a secure secret vault or Hardware Security Module
+          (HSM), alternatively environment variables can be used if allowed by your company policy.
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - secrets
+  - id: unquoted-attribute-var
+    name: unquoted-attribute-var
+    description: >-
+      Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom
+      JavaScript handlers. To fix this, add quotes around the template expression, like this: "{{ expr }}".
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: '{{ ... }}'
+        message: >-
+          Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom
+          JavaScript handlers. To fix this, add quotes around the template expression, like this: "{{ expr }}".
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://flask.palletsprojects.com/en/1.1.x/security/#cross-site-scripting-xss
+    tags:
+      - html-templates
+  - id: var-in-href
+    name: var-in-href
+    description: >-
+      Detected a template variable used in an anchor tag with the 'href' attribute. This allows a malicious actor to
+      input the 'javascript:' URI and is subject to cross- site scripting (XSS) attacks. If using Flask, use 'url_for()'
+      to safely generate a URL. If using Django, use the 'url' filter to safely generate a URL. If using Mustache, use a
+      URL encoding library, or prepend a slash '/' to the variable for relative links (`href="/{{link}}"`). You may also
+      consider setting the Content Security Policy (CSP) header.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a template variable used in an anchor tag with the 'href' attribute. This allows a malicious actor to
+          input the 'javascript:' URI and is subject to cross- site scripting (XSS) attacks. If using Flask, use
+          'url_for()' to safely generate a URL. If using Django, use the 'url' filter to safely generate a URL. If using
+          Mustache, use a URL encoding library, or prepend a slash '/' to the variable for relative links
+          (`href="/{{link}}"`). You may also consider setting the Content Security Policy (CSP) header.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://flask.palletsprojects.com/en/1.1.x/security/#cross-site-scripting-xss#:~:text=javascript:%20URI
+      - https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#url
+      - https://github.com/pugjs/pug/issues/2952
+      - https://content-security-policy.com/
+    tags:
+      - html-templates
+  - id: var-in-script-src
+    name: var-in-script-src
+    description: >-
+      Detected a template variable used as the 'src' in a script tag. Although template variables are HTML escaped, HTML
+      escaping does not always prevent malicious URLs from being injected and could results in a cross-site scripting
+      (XSS) vulnerability. Prefer not to dynamically generate the 'src' attribute and use static URLs instead. If you
+      must do this, carefully check URLs against an allowlist and be sure to URL-encode the result.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: '{{ ... }}'
+        message: >-
+          Detected a template variable used as the 'src' in a script tag. Although template variables are HTML escaped,
+          HTML escaping does not always prevent malicious URLs from being injected and could results in a cross-site
+          scripting (XSS) vulnerability. Prefer not to dynamically generate the 'src' attribute and use static URLs
+          instead. If you must do this, carefully check URLs against an allowlist and be sure to URL-encode the result.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://adamj.eu/tech/2020/02/18/safely-including-data-for-javascript-in-a-django-template/?utm_campaign=Django%2BNewsletter&utm_medium=rss&utm_source=Django_Newsletter_12A
+      - https://www.veracode.com/blog/secure-development/nodejs-template-engines-why-default-encoders-are-not-enough
+      - https://github.com/ESAPI/owasp-esapi-js
+    tags:
+      - html-templates
+  - id: var-in-script-tag
+    name: var-in-script-tag
+    description: >-
+      Detected a template variable used in a script tag. Although template variables are HTML escaped, HTML escaping
+      does not always prevent cross-site scripting (XSS) attacks when used directly in JavaScript. If you need this data
+      on the rendered page, consider placing it in the HTML portion (outside of a script tag). Alternatively, use a
+      JavaScript-specific encoder, such as the one available in OWASP ESAPI. For Django, you may also consider using the
+      'json_script' template tag and retrieving the data in your script by using the element ID (e.g.,
+      `document.getElementById`).
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: '{{ ... }}'
+        message: >-
+          Detected a template variable used in a script tag. Although template variables are HTML escaped, HTML escaping
+          does not always prevent cross-site scripting (XSS) attacks when used directly in JavaScript. If you need this
+          data on the rendered page, consider placing it in the HTML portion (outside of a script tag). Alternatively,
+          use a JavaScript-specific encoder, such as the one available in OWASP ESAPI. For Django, you may also consider
+          using the 'json_script' template tag and retrieving the data in your script by using the element ID (e.g.,
+          `document.getElementById`).
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://adamj.eu/tech/2020/02/18/safely-including-data-for-javascript-in-a-django-template/?utm_campaign=Django%2BNewsletter&utm_medium=rss&utm_source=Django_Newsletter_12A
+      - https://www.veracode.com/blog/secure-development/nodejs-template-engines-why-default-encoders-are-not-enough
+      - https://github.com/ESAPI/owasp-esapi-js
+    tags:
+      - html-templates
+  - id: invalid-base-url
+    name: invalid-base-url
+    description: >-
+      The 'baseURL' is invalid. This may cause links to not work if deployed. Include the scheme (e.g., http:// or
+      https://).
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: baseURL = "..."
+        message: >-
+          The 'baseURL' is invalid. This may cause links to not work if deployed. Include the scheme (e.g., http:// or
+          https://).
+    cwe: []
+    owasp: []
+    references:
+      - https://gohugo.io/
+    tags:
+      - hugo
+  - id: localhost-base-url
+    name: localhost-base-url
+    description: The 'baseURL' is set to localhost. This may cause links to not work if deployed.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: baseURL = "..."
+        message: The 'baseURL' is set to localhost. This may cause links to not work if deployed.
+      - regex: .*(localhost|127\.0\.0\.1).*
+        message: The 'baseURL' is set to localhost. This may cause links to not work if deployed.
+    cwe: []
+    owasp: []
+    references:
+      - https://gohugo.io/
+    tags:
+      - hugo
+  - id: alias-path-traversal
+    name: alias-path-traversal
+    description: >-
+      The alias in this location block is subject to a path traversal because the location path does not end in a path
+      separator (e.g., '/'). To fix, add a path separator to the end of the path.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          location $...LOCATION {
+            ...
+            alias .../;
+            ...
+          }
+        message: >-
+          The alias in this location block is subject to a path traversal because the location path does not end in a
+          path separator (e.g., '/'). To fix, add a path separator to the end of the path.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+      - https://www.acunetix.com/vulnerabilities/web/path-traversal-via-misconfigured-nginx-alias/
+      - https://www.youtube.com/watch?v=CIhHpkybYsY
+      - >-
+        https://github.com/orangetw/My-Presentation-Slides/blob/main/data/2018-Breaking-Parser-Logic-Take-Your-Path-Normalization-Off-And-Pop-0days-Out.pdf
+    tags:
+      - nginx
+  - id: dynamic-proxy-host
+    name: dynamic-proxy-host
+    description: >-
+      The host for this proxy URL is dynamically determined. This can be dangerous if the host can be injected by an
+      attacker because it may forcibly alter destination of the proxy. Consider hardcoding acceptable destinations and
+      retrieving them with 'map' or something similar.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: proxy_pass $SCHEME://$$HOST ...;
+        message: >-
+          The host for this proxy URL is dynamically determined. This can be dangerous if the host can be injected by an
+          attacker because it may forcibly alter destination of the proxy. Consider hardcoding acceptable destinations
+          and retrieving them with 'map' or something similar.
+      - pattern: proxy_pass $$SCHEME://$$HOST ...;
+        message: >-
+          The host for this proxy URL is dynamically determined. This can be dangerous if the host can be injected by an
+          attacker because it may forcibly alter destination of the proxy. Consider hardcoding acceptable destinations
+          and retrieving them with 'map' or something similar.
+    cwe:
+      - CWE-441
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://nginx.org/en/docs/http/ngx_http_map_module.html
+    tags:
+      - nginx
+  - id: dynamic-proxy-scheme
+    name: dynamic-proxy-scheme
+    description: >-
+      The protocol scheme for this proxy is dynamically determined. This can be dangerous if the scheme can be injected
+      by an attacker because it may forcibly alter the connection scheme. Consider hardcoding a scheme for this proxy.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: proxy_pass $$SCHEME:// ...;
+        message: >-
+          The protocol scheme for this proxy is dynamically determined. This can be dangerous if the scheme can be
+          injected by an attacker because it may forcibly alter the connection scheme. Consider hardcoding a scheme for
+          this proxy.
+    cwe:
+      - CWE-16
+    owasp:
+      - A06:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/yandex/gixy/blob/master/docs/en/plugins/ssrf.md
+    tags:
+      - nginx
+  - id: header-injection
+    name: header-injection
+    description: >-
+      The $$VARIABLE path parameter is added as a header in the response. This could allow an attacker to inject a
+      newline and add a new header into the response. This is called HTTP response splitting. To fix, do not allow
+      whitespace in the path parameter: '[^\s]+'.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          location ... <$VARIABLE> ... {
+            ...
+            add_header ... $$VARIABLE
+            ...
+          }
+        message: >-
+          The $$VARIABLE path parameter is added as a header in the response. This could allow an attacker to inject a
+          newline and add a new header into the response. This is called HTTP response splitting. To fix, do not allow
+          whitespace in the path parameter: '[^\s]+'.
+    cwe:
+      - CWE-113
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/yandex/gixy/blob/master/docs/en/plugins/httpsplitting.md
+      - https://owasp.org/www-community/attacks/HTTP_Response_Splitting
+    tags:
+      - nginx
+  - id: header-redefinition
+    name: header-redefinition
+    description: >-
+      The 'add_header' directive is called in a 'location' block after headers have been set at the server block.
+      Calling 'add_header' in the location block will actually overwrite the headers defined in the server block, no
+      matter which headers are set. To fix this, explicitly set all headers or set all headers in the server block.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: add_header ...;
+        message: >-
+          The 'add_header' directive is called in a 'location' block after headers have been set at the server block.
+          Calling 'add_header' in the location block will actually overwrite the headers defined in the server block, no
+          matter which headers are set. To fix this, explicitly set all headers or set all headers in the server block.
+    cwe:
+      - CWE-16
+    owasp:
+      - A06:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/yandex/gixy/blob/master/docs/en/plugins/addheaderredefinition.md
+    tags:
+      - nginx
+  - id: insecure-redirect
+    name: insecure-redirect
+    description: >-
+      Detected an insecure redirect in this nginx configuration. If no scheme is specified, nginx will forward the
+      request with the incoming scheme. This could result in unencrypted communications. To fix this, include the
+      'https' scheme.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Detected an insecure redirect in this nginx configuration. If no scheme is specified, nginx will forward the
+          request with the incoming scheme. This could result in unencrypted communications. To fix this, include the
+          'https' scheme.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - nginx
+  - id: insecure-ssl-version
+    name: insecure-ssl-version
+    description: >-
+      Detected use of an insecure SSL version. Secure SSL versions are TLSv1.2 and TLS1.3; older versions are known to
+      be broken and are susceptible to attacks. Prefer use of TLSv1.2 or later.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: ssl_protocols ...;
+        message: >-
+          Detected use of an insecure SSL version. Secure SSL versions are TLSv1.2 and TLS1.3; older versions are known
+          to be broken and are susceptible to attacks. Prefer use of TLSv1.2 or later.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://www.acunetix.com/blog/web-security-zone/hardening-nginx/
+      - https://www.acunetix.com/blog/articles/tls-ssl-cipher-hardening/
+    tags:
+      - nginx
+  - id: missing-internal
+    name: missing-internal
+    description: >-
+      This location block contains a 'proxy_pass' directive but does not contain the 'internal' directive. The
+      'internal' directive restricts access to this location to internal requests. Without 'internal', an attacker could
+      use your server for server-side request forgeries (SSRF). Include the 'internal' directive in this block to limit
+      exposure.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: proxy_pass $...URL;
+        message: >-
+          This location block contains a 'proxy_pass' directive but does not contain the 'internal' directive. The
+          'internal' directive restricts access to this location to internal requests. Without 'internal', an attacker
+          could use your server for server-side request forgeries (SSRF). Include the 'internal' directive in this block
+          to limit exposure.
+    cwe:
+      - CWE-16
+    owasp:
+      - A06:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/yandex/gixy/blob/master/docs/en/plugins/ssrf.md
+      - https://nginx.org/en/docs/http/ngx_http_core_module.html#internal
+    tags:
+      - nginx
+  - id: missing-ssl-version
+    name: missing-ssl-version
+    description: >-
+      This server configuration is missing the 'ssl_protocols' directive. By default, this server will use
+      'ssl_protocols TLSv1 TLSv1.1 TLSv1.2', and versions older than TLSv1.2 are known to be broken. Explicitly specify
+      'ssl_protocols TLSv1.2 TLSv1.3' to use secure TLS versions.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: server { ... listen $PORT ssl; ... }
+        message: >-
+          This server configuration is missing the 'ssl_protocols' directive. By default, this server will use
+          'ssl_protocols TLSv1 TLSv1.1 TLSv1.2', and versions older than TLSv1.2 are known to be broken. Explicitly
+          specify 'ssl_protocols TLSv1.2 TLSv1.3' to use secure TLS versions.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://www.acunetix.com/blog/web-security-zone/hardening-nginx/
+      - https://nginx.org/en/docs/http/configuring_https_servers.html
+    tags:
+      - nginx
+  - id: possible-nginx-h2c-smuggling
+    name: possible-nginx-h2c-smuggling
+    description: >-
+      Conditions for Nginx H2C smuggling identified. H2C smuggling allows upgrading HTTP/1.1 connections to lesser-known
+      HTTP/2 over cleartext (h2c) connections which can allow a bypass of reverse proxy access controls, and lead to
+      long-lived, unrestricted HTTP traffic directly to back-end servers. To mitigate: WebSocket support required: Allow
+      only the value websocket for HTTP/1.1 upgrade headers (e.g., Upgrade: websocket). WebSocket support not required:
+      Do not forward Upgrade headers.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Conditions for Nginx H2C smuggling identified. H2C smuggling allows upgrading HTTP/1.1 connections to
+          lesser-known HTTP/2 over cleartext (h2c) connections which can allow a bypass of reverse proxy access
+          controls, and lead to long-lived, unrestricted HTTP traffic directly to back-end servers. To mitigate:
+          WebSocket support required: Allow only the value websocket for HTTP/1.1 upgrade headers (e.g., Upgrade:
+          websocket). WebSocket support not required: Do not forward Upgrade headers.
+    cwe:
+      - CWE-444
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://labs.bishopfox.com/tech-blog/h2c-smuggling-request-smuggling-via-http/2-cleartext-h2c
+    tags:
+      - nginx
+  - id: request-host-used
+    name: request-host-used
+    description: >-
+      '$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host' request header.
+      Use an explicitly configured host value or a allow list for validation.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: $http_host
+        message: >-
+          '$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host' request
+          header. Use an explicitly configured host value or a allow list for validation.
+      - pattern: $host
+        message: >-
+          '$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host' request
+          header. Use an explicitly configured host value or a allow list for validation.
+    cwe:
+      - CWE-290
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://github.com/yandex/gixy/blob/master/docs/en/plugins/hostspoofing.md
+      - https://portswigger.net/web-security/host-header
+    tags:
+      - nginx
+  - id: detected-aws-account-id
+    name: detected-aws-account-id
+    description: >-
+      AWS Account ID detected. While not considered sensitive information, it is important to use them and share them
+      carefully. For that reason it would be preferrable avoiding to hardcoded it here. Instead, read the value from an
+      environment variable or keep the value in a separate, private file.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          AWS Account ID detected. While not considered sensitive information, it is important to use them and share
+          them carefully. For that reason it would be preferrable avoiding to hardcoded it here. Instead, read the value
+          from an environment variable or keep the value in a separate, private file.
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - secrets
+      - aws
+  - id: detected-github-token
+    name: detected-github-token
+    description: GitHub Token detected
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: GitHub Token detected
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - secrets
+      - github
+  - id: detected-npm-registry-auth-token
+    name: detected-npm-registry-auth-token
+    description: NPM registry authentication token detected
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: $AUTHTOKEN = $VALUE
+        message: NPM registry authentication token detected
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - secrets
+      - npm
+  - id: detected-private-key
+    name: detected-private-key
+    description: >-
+      Private Key detected. This is a sensitive credential and should not be hardcoded here. Instead, store this in a
+      separate, private file.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Private Key detected. This is a sensitive credential and should not be hardcoded here. Instead, store this in
+          a separate, private file.
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - secrets
+  - id: detected-username-and-password-in-uri
+    name: detected-username-and-password-in-uri
+    description: Username and password in URI detected
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: $PROTOCOL://$...USERNAME:$...PASSWORD@$END
+        message: Username and password in URI detected
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://github.com/grab/secret-scanner/blob/master/scanner/signatures/pattern.go
+    tags:
+      - secrets
+  - id: google-maps-apikeyleak
+    name: google-maps-apikeyleak
+    description: Detects potential Google Maps API keys in code
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: ^(AIza[0-9A-Za-z_-]{35}(?!\S))$
+        message: Detects potential Google Maps API keys in code
+    cwe:
+      - CWE-538
+    owasp:
+      - A3:2017
+    references:
+      - https://ozguralp.medium.com/unauthorized-google-maps-api-key-usage-cases-and-why-you-need-to-care-1ccb28bf21e
+    tags:
+      - Google Maps
+  - id: use-SRI-for-CDNs
+    name: use-SRI-for-CDNs
+    description: >-
+      Consuming CDNs without including a SubResource Integrity (SRI) can expose your application and its users to
+      compromised code. SRIs allow you to consume specific versions of content where if even a single byte is
+      compromised, the resource will not be loaded. Add an integrity attribute to your <script> and <link> tags pointing
+      to CDN content to ensure the resources have not been compromised. A crossorigin attribute should also be added.
+      For a more thorough explanation along with explicit instructions on remediating, follow the directions from
+      Mozilla here: https://developer.mozilla.org/en-US/blog/securing-cdn-using-sri-why-how/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Consuming CDNs without including a SubResource Integrity (SRI) can expose your application and its users to
+          compromised code. SRIs allow you to consume specific versions of content where if even a single byte is
+          compromised, the resource will not be loaded. Add an integrity attribute to your <script> and <link> tags
+          pointing to CDN content to ensure the resources have not been compromised. A crossorigin attribute should also
+          be added. For a more thorough explanation along with explicit instructions on remediating, follow the
+          directions from Mozilla here: https://developer.mozilla.org/en-US/blog/securing-cdn-using-sri-why-how/
+    cwe:
+      - CWE-346
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/352.html
+      - https://developer.mozilla.org/en-US/blog/securing-cdn-using-sri-why-how/
+    tags:
+      - salesforce
+      - visualforce
+  - id: xss-from-unescaped-url-param
+    name: xss-from-unescaped-url-param
+    description: >-
+      To remediate this issue, ensure that all URL parameters are properly escaped before including them in scripts.
+      Please update your code to use either the JSENCODE method to escape URL parameters or the escape="true" attribute
+      on <apex:outputText> tags. Passing URL parameters directly into scripts and DOM sinks creates an opportunity for
+      Cross-Site Scripting attacks. Cross-Site Scripting (XSS) attacks are a type of injection, in which malicious
+      scripts are injected into otherwise benign and trusted websites. To remediate this issue, ensure that all URL
+      parameters are properly escaped before including them in scripts.
+    category: xss
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          To remediate this issue, ensure that all URL parameters are properly escaped before including them in scripts.
+          Please update your code to use either the JSENCODE method to escape URL parameters or the escape="true"
+          attribute on <apex:outputText> tags. Passing URL parameters directly into scripts and DOM sinks creates an
+          opportunity for Cross-Site Scripting attacks. Cross-Site Scripting (XSS) attacks are a type of injection, in
+          which malicious scripts are injected into otherwise benign and trusted websites. To remediate this issue,
+          ensure that all URL parameters are properly escaped before including them in scripts.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/pages_security_tips_xss.htm
+    tags:
+      - salesforce
+      - visualforce
+  - id: csp-header-attribute
+    name: csp-header-attribute
+    description: >-
+      Visualforce Pages must have the cspHeader attribute set to true. This attribute is available in API version 55 or
+      higher.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <apex:page...>...</apex:page>
+        message: >-
+          Visualforce Pages must have the cspHeader attribute set to true. This attribute is available in API version 55
+          or higher.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://help.salesforce.com/s/articleView?id=sf.csp_trusted_sites.htm&type=5
+    tags:
+      - salesforce
+      - visualforce
+  - id: visualforce-page-api-version
+    name: visualforce-page-api-version
+    description: Visualforce Pages must use API version 55 or higher for required use of the cspHeader attribute set to true.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: Visualforce Pages must use API version 55 or higher for required use of the cspHeader attribute set to true.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_pages.htm
+    tags:
+      - salesforce
+      - visualforce
+  - id: no-interpolation-in-tag
+    name: no-interpolation-in-tag
+    description: >-
+      Detected template variable interpolation in an HTML tag. This is potentially vulnerable to cross-site scripting
+      (XSS) attacks because a malicious actor has control over HTML but without the need to use escaped characters. Use
+      explicit tags instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <{{ ... }} ... >
+        message: >-
+          Detected template variable interpolation in an HTML tag. This is potentially vulnerable to cross-site
+          scripting (XSS) attacks because a malicious actor has control over HTML but without the need to use escaped
+          characters. Use explicit tags instead.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/golang/go/issues/19669
+      - https://blogtitle.github.io/robn-go-security-pearls-cross-site-scripting-xss/
+    tags:
+      - generic
+  - id: no-interpolation-js-template-string
+    name: no-interpolation-js-template-string
+    description: >-
+      Detected template variable interpolation in a JavaScript template string. This is potentially vulnerable to
+      cross-site scripting (XSS) attacks because a malicious actor has control over JavaScript but without the need to
+      use escaped characters. Instead, obtain this variable outside of the template string and ensure your template is
+      properly escaped.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: '` ... {{ ... }} ...`'
+        message: >-
+          Detected template variable interpolation in a JavaScript template string. This is potentially vulnerable to
+          cross-site scripting (XSS) attacks because a malicious actor has control over JavaScript but without the need
+          to use escaped characters. Instead, obtain this variable outside of the template string and ensure your
+          template is properly escaped.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/golang/go/issues/9200#issuecomment-66100328
+      - https://blogtitle.github.io/robn-go-security-pearls-cross-site-scripting-xss/
+    tags:
+      - generic
+  - id: robots-denied
+    name: robots-denied
+    description: This page denies crawlers from indexing the page. Remove the robots 'meta' tag.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <meta name="robots" ...>
+        message: This page denies crawlers from indexing the page. Remove the robots 'meta' tag.
+      - pattern: <META NAME="ROBOTS" ...>
+        message: This page denies crawlers from indexing the page. Remove the robots 'meta' tag.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - html
+  - id: missing-integrity
+    name: missing-integrity
+    description: >-
+      This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the
+      browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected
+      manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to
+      XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource
+      (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the
+          browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected
+          manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could
+          lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the
+          resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted
+          files.
+    cwe:
+      - CWE-353
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures
+    tags:
+      - html
+  - id: manifest-usesCleartextTraffic-true
+    name: manifest-usesCleartextTraffic-true
+    description: >-
+      The Android manifest is configured to allow non-encrypted connections. Evaluate if this is necessary for your app,
+      and disable it if appropriate. This flag is ignored on Android 7 (API 24) and above if a Network Security Config
+      is present.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          android:usesCleartextTraffic="true"
+        message: >-
+          The Android manifest is configured to allow non-encrypted connections. Evaluate if this is necessary for your
+          app, and disable it if appropriate. This flag is ignored on Android 7 (API 24) and above if a Network Security
+          Config is present.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic
+      - https://developer.android.com/training/articles/security-config
+    tags:
+      - android
+  - id: manifest-usesCleartextTraffic-ignored-by-nsc
+    name: manifest-usesCleartextTraffic-ignored-by-nsc
+    description: >-
+      Manifest uses both `android:usesCleartextTraffic` and Network Security Config. The `usesCleartextTraffic`
+      directive is ignored on Android 7 (API 24) and above if a Network Security Config is present.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Manifest uses both `android:usesCleartextTraffic` and Network Security Config. The `usesCleartextTraffic`
+          directive is ignored on Android 7 (API 24) and above if a Network Security Config is present.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic
+      - https://developer.android.com/training/articles/security-config
+    tags:
+      - android
+  - id: nsc-allows-plaintext-traffic
+    name: nsc-allows-plaintext-traffic
+    description: >-
+      The Network Security Config is set to allow non-encrypted connections. Evaluate if this is necessary for your app,
+      and disable it if appropriate. (To hide this warning, set `xmlns:tools="http://schemas.android.com/tools"
+      tools:ignore="InsecureBaseConfiguration"` as parameters to your `<network-security-config>`)
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <base-config ... cleartextTrafficPermitted="true" ... >
+        message: >-
+          The Network Security Config is set to allow non-encrypted connections. Evaluate if this is necessary for your
+          app, and disable it if appropriate. (To hide this warning, set `xmlns:tools="http://schemas.android.com/tools"
+          tools:ignore="InsecureBaseConfiguration"` as parameters to your `<network-security-config>`)
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.android.com/training/articles/security-config
+      - >-
+        https://www.nowsecure.com/blog/2018/08/15/a-security-analysts-guide-to-network-security-configuration-in-android-p/
+    tags:
+      - android
+  - id: nsc-pinning-without-backup
+    name: nsc-pinning-without-backup
+    description: >-
+      Your app uses TLS public key pinning without specifying a backup key. If you are forced to change TLS keys or CAs
+      on short notice, not having a backup pin can lead to connectivity issues until you can push out an update. It is
+      considered best practice to add at least one additional pin as a backup.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <pin ...>...</pin>
+        message: >-
+          Your app uses TLS public key pinning without specifying a backup key. If you are forced to change TLS keys or
+          CAs on short notice, not having a backup pin can lead to connectivity issues until you can push out an update.
+          It is considered best practice to add at least one additional pin as a backup.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.android.com/training/articles/security-config#CertificatePinning
+      - >-
+        https://www.nowsecure.com/blog/2018/08/15/a-security-analysts-guide-to-network-security-configuration-in-android-p/
+    tags:
+      - android
+  - id: nsc-pinning-without-expiration
+    name: nsc-pinning-without-expiration
+    description: >-
+      Your app uses TLS public key pinning without specifying an expiration date. If your users do not update the app to
+      receive new pins in time, expired or replaced certificates can lead to connectivity issues until they install an
+      update. It is considered best practice to set an expiration time, after which the system will default to trusting
+      system CAs and disregard the pin.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <pin-set ...>... ... ...</pin-set>
+        message: >-
+          Your app uses TLS public key pinning without specifying an expiration date. If your users do not update the
+          app to receive new pins in time, expired or replaced certificates can lead to connectivity issues until they
+          install an update. It is considered best practice to set an expiration time, after which the system will
+          default to trusting system CAs and disregard the pin.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.android.com/training/articles/security-config#CertificatePinning
+      - >-
+        https://www.nowsecure.com/blog/2018/08/15/a-security-analysts-guide-to-network-security-configuration-in-android-p/
+    tags:
+      - android
+  - id: nsc-allows-user-ca-certs
+    name: nsc-allows-user-ca-certs
+    description: >-
+      The Network Security Config is set to accept user-installed CAs. Evaluate if this is necessary for your app, and
+      disable it if appropriate. (To hide this warning, set `xmlns:tools="http://schemas.android.com/tools"
+      tools:ignore="AcceptsUserCertificates"` as parameters to your `<network-security-config>`)
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <certificates ... user ... />
+        message: >-
+          The Network Security Config is set to accept user-installed CAs. Evaluate if this is necessary for your app,
+          and disable it if appropriate. (To hide this warning, set `xmlns:tools="http://schemas.android.com/tools"
+          tools:ignore="AcceptsUserCertificates"` as parameters to your `<network-security-config>`)
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.android.com/training/articles/security-config
+      - >-
+        https://www.nowsecure.com/blog/2018/08/15/a-security-analysts-guide-to-network-security-configuration-in-android-p/
+    tags:
+      - android
+  - id: nsc-allows-user-ca-certs-for-domain
+    name: nsc-allows-user-ca-certs-for-domain
+    description: >-
+      The Network Security Config is set to accept user-installed CAs for the domain `$DOMAIN`. Evaluate if this is
+      necessary for your app, and disable it if appropriate. (To hide this warning, set
+      `xmlns:tools="http://schemas.android.com/tools" tools:ignore="AcceptsUserCertificates"` as parameters to your
+      `<network-security-config>`)
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <certificates src="user" ... />
+        message: >-
+          The Network Security Config is set to accept user-installed CAs for the domain `$DOMAIN`. Evaluate if this is
+          necessary for your app, and disable it if appropriate. (To hide this warning, set
+          `xmlns:tools="http://schemas.android.com/tools" tools:ignore="AcceptsUserCertificates"` as parameters to your
+          `<network-security-config>`)
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.android.com/training/articles/security-config
+      - >-
+        https://www.nowsecure.com/blog/2018/08/15/a-security-analysts-guide-to-network-security-configuration-in-android-p/
+    tags:
+      - android
+  - id: exported_activity
+    name: exported_activity
+    description: >-
+      The application exports an activity. Any application on the device can launch the exported activity which may
+      compromise the integrity of your application or its data.  Ensure that any exported activities do not have
+      privileged access to your application's control plane.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          The application exports an activity. Any application on the device can launch the exported activity which may
+          compromise the integrity of your application or its data.  Ensure that any exported activities do not have
+          privileged access to your application's control plane.
+    cwe:
+      - CWE-926
+    owasp:
+      - A5:2021
+    references:
+      - https://cwe.mitre.org/data/definitions/926.html
+    tags:
+      - Android
+  - id: spring-actuator-fully-enabled
+    name: spring-actuator-fully-enabled
+    description: >-
+      Spring Boot Actuator is fully enabled. This exposes sensitive endpoints such as /actuator/env, /actuator/logfile,
+      /actuator/heapdump and others. Unless you have Spring Security enabled or another means to protect these
+      endpoints, this functionality is available without authentication, causing a significant security risk.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: management.endpoints.web.exposure.include=*
+        message: >-
+          Spring Boot Actuator is fully enabled. This exposes sensitive endpoints such as /actuator/env,
+          /actuator/logfile, /actuator/heapdump and others. Unless you have Spring Security enabled or another means to
+          protect these endpoints, this functionality is available without authentication, causing a significant
+          security risk.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-endpoints-exposing-endpoints
+      - https://medium.com/walmartglobaltech/perils-of-spring-boot-actuators-misconfiguration-185c43a0f785
+      - https://blog.maass.xyz/spring-actuator-security-part-1-stealing-secrets-using-spring-actuators
+    tags:
+      - spring
+  - id: spring-actuator-dangerous-endpoints-enabled
+    name: spring-actuator-dangerous-endpoints-enabled
+    description: >-
+      Spring Boot Actuators "$...ACTUATORS" are enabled. Depending on the actuators, this can pose a significant
+      security risk. Please double-check if the actuators are needed and properly secured.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: management.endpoints.web.exposure.include=$...ACTUATORS
+        message: >-
+          Spring Boot Actuators "$...ACTUATORS" are enabled. Depending on the actuators, this can pose a significant
+          security risk. Please double-check if the actuators are needed and properly secured.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-endpoints-exposing-endpoints
+      - https://medium.com/walmartglobaltech/perils-of-spring-boot-actuators-misconfiguration-185c43a0f785
+      - https://blog.maass.xyz/spring-actuator-security-part-1-stealing-secrets-using-spring-actuators
+    tags:
+      - spring
+  - id: spring-jsp-eval
+    name: spring-jsp-eval
+    description: >-
+      A Spring expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+      unfiltered values fall into this risky code evaluation.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          <spring:eval ... expression=...>
+        message: >-
+          A Spring expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+          unfiltered values fall into this risky code evaluation.
+    cwe:
+      - CWE-95
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - spring
+  - id: bun-missing-minimum-release-age
+    name: bun-missing-minimum-release-age
+    description: >-
+      This bunfig.toml does not set a minimum release age or sets it too low. Newly published packages can be malicious
+      or unstable. Add `minimumReleaseAge = 604800` under the `[install]` section to wait 7 days before resolving newly
+      published package versions. Added in: v1.3 Reference: https://bun.sh/docs/runtime/bunfig
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          This bunfig.toml does not set a minimum release age or sets it too low. Newly published packages can be
+          malicious or unstable. Add `minimumReleaseAge = 604800` under the `[install]` section to wait 7 days before
+          resolving newly published package versions. Added in: v1.3 Reference: https://bun.sh/docs/runtime/bunfig
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://bun.sh/docs/runtime/bunfig
+    tags:
+      - bun
+      - javascript
+  - id: npm-missing-minimum-release-age
+    name: npm-missing-minimum-release-age
+    description: >-
+      This .npmrc does not set a minimum release age or sets it too low. Newly published packages can be malicious or
+      unstable. Add `min-release-age = 7` to wait 7 days before resolving newly published package versions. Added in:
+      v11.10 Reference:
+      https://github.blog/changelog/2026-02-18-npm-bulk-trusted-publishing-config-and-script-security-now-generally-available/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          This .npmrc does not set a minimum release age or sets it too low. Newly published packages can be malicious
+          or unstable. Add `min-release-age = 7` to wait 7 days before resolving newly published package versions. Added
+          in: v11.10 Reference:
+          https://github.blog/changelog/2026-02-18-npm-bulk-trusted-publishing-config-and-script-security-now-generally-available/
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - >-
+        https://github.blog/changelog/2026-02-18-npm-bulk-trusted-publishing-config-and-script-security-now-generally-available/
+      - https://github.com/npm/cli/pull/8965
+    tags:
+      - npm
+      - javascript
+  - id: poetry-missing-solver-min-release-age
+    name: poetry-missing-solver-min-release-age
+    description: >-
+      This poetry.toml does not set a dependency cooldown via `solver.min-release-age`. Without a cooldown, Poetry may
+      resolve newly published package versions that have not yet been vetted by the community. Supply chain attacks
+      frequently involve publishing a malicious version of a popular package and waiting for it to be pulled in — most
+      are detected and removed within days. Set `min-release-age = 7` under `[solver]` to require that package versions
+      are at least 7 days old before they are considered during dependency resolution. Added in: v2.4.0
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: (?m)^\[solver\]\n(?:^(?!min-release-age|\[|---).*\n)*(?=^\[|^---|\z)
+        message: >-
+          This poetry.toml does not set a dependency cooldown via `solver.min-release-age`. Without a cooldown, Poetry
+          may resolve newly published package versions that have not yet been vetted by the community. Supply chain
+          attacks frequently involve publishing a malicious version of a popular package and waiting for it to be pulled
+          in — most are detected and removed within days. Set `min-release-age = 7` under `[solver]` to require that
+          package versions are at least 7 days old before they are considered during dependency resolution. Added in:
+          v2.4.0
+      - regex: (?ms)^\[solver\](?:[^\[]*?)min-release-age\s*=\s*(?P<TARGET>"[^"]*"|[0-6](?:\s|#|$)|false)
+        message: >-
+          This poetry.toml does not set a dependency cooldown via `solver.min-release-age`. Without a cooldown, Poetry
+          may resolve newly published package versions that have not yet been vetted by the community. Supply chain
+          attacks frequently involve publishing a malicious version of a popular package and waiting for it to be pulled
+          in — most are detected and removed within days. Set `min-release-age = 7` under `[solver]` to require that
+          package versions are at least 7 days old before they are considered during dependency resolution. Added in:
+          v2.4.0
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://python-poetry.org/docs/configuration/#solvermin-release-age
+    tags:
+      - poetry
+      - python
+  - id: uv-missing-dependency-cooldown
+    name: uv-missing-dependency-cooldown
+    description: >-
+      This pyproject.toml configures uv but does not set a dependency cooldown. Newly published packages can be
+      malicious or unstable. Add `exclude-newer = "7 days"` under `[tool.uv]` to wait 7 days before resolving newly
+      published package versions. Added in: 0.9.17 Reference:
+      https://docs.astral.sh/uv/concepts/resolution/#dependency-cooldowns
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          This pyproject.toml configures uv but does not set a dependency cooldown. Newly published packages can be
+          malicious or unstable. Add `exclude-newer = "7 days"` under `[tool.uv]` to wait 7 days before resolving newly
+          published package versions. Added in: 0.9.17 Reference:
+          https://docs.astral.sh/uv/concepts/resolution/#dependency-cooldowns
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://docs.astral.sh/uv/concepts/resolution/#dependency-cooldowns
+    tags:
+      - uv
+      - python
+  - id: laravel-blade-form-missing-csrf
+    name: laravel-blade-form-missing-csrf
+    description: >-
+      Detected a form executing a state-changing HTTP method `$METHOD` to route definition `$...ROUTE` without a Laravel
+      CSRF decorator or explicit CSRF token implementation. If this form modifies sensitive state this will open your
+      application to Cross-Site Request Forgery (CSRF) attacks.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          action="$...ROUTE"
+        message: >-
+          Detected a form executing a state-changing HTTP method `$METHOD` to route definition `$...ROUTE` without a
+          Laravel CSRF decorator or explicit CSRF token implementation. If this form modifies sensitive state this will
+          open your application to Cross-Site Request Forgery (CSRF) attacks.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://laravel.com/docs/9.x/csrf
+    tags:
+      - php
+      - laravel
+      - blade
+  - id: template-blocktranslate-no-escape
+    name: template-blocktranslate-no-escape
+    description: >-
+      Translated strings will not be escaped when rendered in a template. This leads to a vulnerability where
+      translators could include malicious script tags in their translations. Consider using `force_escape` to explicitly
+      escape a translated text.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Translated strings will not be escaped when rendered in a template. This leads to a vulnerability where
+          translators could include malicious script tags in their translations. Consider using `force_escape` to
+          explicitly escape a translated text.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://edx.readthedocs.io/projects/edx-developer-guide/en/latest/preventing_xss/preventing_xss_in_django_templates.html#html-escaping-translations-in-django-templates
+      - https://docs.djangoproject.com/en/3.1/topics/i18n/translation/#internationalization-in-template-code
+    tags:
+      - django
+  - id: template-translate-as-no-escape
+    name: template-translate-as-no-escape
+    description: >-
+      Translated strings will not be escaped when rendered in a template. This leads to a vulnerability where
+      translators could include malicious script tags in their translations. Consider using `force_escape` to explicitly
+      escape a translated text.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Translated strings will not be escaped when rendered in a template. This leads to a vulnerability where
+          translators could include malicious script tags in their translations. Consider using `force_escape` to
+          explicitly escape a translated text.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://edx.readthedocs.io/projects/edx-developer-guide/en/latest/preventing_xss/preventing_xss_in_django_templates.html#html-escaping-translations-in-django-templates
+      - https://docs.djangoproject.com/en/3.1/topics/i18n/translation/#internationalization-in-template-code
+    tags:
+      - django
+  - id: django-no-csrf-token
+    name: django-no-csrf-token
+    description: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <form...>...</form>
+        message: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.
+    cwe:
+      - CWE-352
+    owasp: []
+    references:
+      - https://docs.djangoproject.com/en/4.2/howto/csrf/
+    tags:
+      - django
+  - id: template-unquoted-attribute-var
+    name: template-unquoted-attribute-var
+    description: >-
+      Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom
+      JavaScript handlers. To fix this, add quotes around the template expression, like this: "{{ $...VAR }}".
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: '={{$...VAR}}'
+        message: >-
+          Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom
+          JavaScript handlers. To fix this, add quotes around the template expression, like this: "{{ $...VAR }}".
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://flask.palletsprojects.com/en/1.1.x/security/#cross-site-scripting-xss
+    tags:
+      - flask
+  - id: alias-for-html-safe
+    name: alias-for-html-safe
+    description: >-
+      The syntax `<%== ... %>` is an alias for `html_safe`. This means the content inside these tags will be rendered as
+      raw HTML. This may expose your application to cross-site scripting. If you need raw HTML, prefer using the more
+      explicit `html_safe` and be sure to correctly sanitize variables using a library such as DOMPurify.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <%== ... %>
+        message: >-
+          The syntax `<%== ... %>` is an alias for `html_safe`. This means the content inside these tags will be
+          rendered as raw HTML. This may expose your application to cross-site scripting. If you need raw HTML, prefer
+          using the more explicit `html_safe` and be sure to correctly sanitize variables using a library such as
+          DOMPurify.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://medium.com/sumone-technical-blog/a-pretty-way-to-unescape-html-in-a-ruby-on-rails-application-efc22b850027
+      - https://stackoverflow.com/questions/4251284/raw-vs-html-safe-vs-h-to-unescape-html#:~:text===
+    tags:
+      - rails
+  - id: avoid-content-tag
+    name: avoid-content-tag
+    description: >-
+      'content_tag' exhibits unintuitive escaping behavior and may accidentally expose your application to cross-site
+      scripting. If using Rails 2, only attribute values are escaped. If using Rails 3, content and attribute values are
+      escaped. Tag and attribute names are never escaped. Because of this, it is recommended to use 'html_safe' if you
+      must render raw HTML data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: content_tag
+        message: >-
+          'content_tag' exhibits unintuitive escaping behavior and may accidentally expose your application to
+          cross-site scripting. If using Rails 2, only attribute values are escaped. If using Rails 3, content and
+          attribute values are escaped. Tag and attribute names are never escaped. Because of this, it is recommended to
+          use 'html_safe' if you must render raw HTML data.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://brakemanscanner.org/docs/warning_types/content_tag/
+    tags:
+      - rails
+  - id: avoid-html-safe
+    name: avoid-html-safe
+    description: >-
+      'html_safe' renders raw HTML. This means that normal HTML escaping is bypassed. If user data can be controlled
+      here, this exposes your application to cross-site scripting (XSS). If you need to do this, be sure to correctly
+      sanitize the data using a library such as DOMPurify.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: $SOMETHING.html_safe
+        message: >-
+          'html_safe' renders raw HTML. This means that normal HTML escaping is bypassed. If user data can be controlled
+          here, this exposes your application to cross-site scripting (XSS). If you need to do this, be sure to
+          correctly sanitize the data using a library such as DOMPurify.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://stackoverflow.com/questions/4251284/raw-vs-html-safe-vs-h-to-unescape-html#:~:text===
+      - >-
+        https://medium.com/sumone-technical-blog/a-pretty-way-to-unescape-html-in-a-ruby-on-rails-application-efc22b850027
+    tags:
+      - rails
+  - id: avoid-raw
+    name: avoid-raw
+    description: >-
+      'raw' renders raw HTML, as the name implies. This means that normal HTML escaping is bypassed. If user data can be
+      controlled here, this exposes your application to cross-site scripting (XSS). If you need to do this, be sure to
+      correctly sanitize the data using a library such as DOMPurify.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: raw
+        message: >-
+          'raw' renders raw HTML, as the name implies. This means that normal HTML escaping is bypassed. If user data
+          can be controlled here, this exposes your application to cross-site scripting (XSS). If you need to do this,
+          be sure to correctly sanitize the data using a library such as DOMPurify.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://stackoverflow.com/questions/4251284/raw-vs-html-safe-vs-h-to-unescape-html#:~:text===
+      - >-
+        https://medium.com/sumone-technical-blog/a-pretty-way-to-unescape-html-in-a-ruby-on-rails-application-efc22b850027
+    tags:
+      - rails
+  - id: dangerous-link-to
+    name: dangerous-link-to
+    description: >-
+      Detected a template variable used in 'link_to'. This will generate dynamic data in the 'href' attribute. This
+      allows a malicious actor to input the 'javascript:' URI and is subject to cross- site scripting (XSS) attacks. If
+      using a relative URL, start with a literal forward slash and concatenate the URL, like this: 'link_to "Here",
+      "/"+@link'. You may also consider setting the Content Security Policy (CSP) header.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: link_to ... @$VAR
+        message: >-
+          Detected a template variable used in 'link_to'. This will generate dynamic data in the 'href' attribute. This
+          allows a malicious actor to input the 'javascript:' URI and is subject to cross- site scripting (XSS) attacks.
+          If using a relative URL, start with a literal forward slash and concatenate the URL, like this: 'link_to
+          "Here", "/"+@link'. You may also consider setting the Content Security Policy (CSP) header.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Ruby_on_Rails_Cheat_Sheet.html#cross-site-scripting-xss
+      - https://brakemanscanner.org/docs/warning_types/link_to_href/
+    tags:
+      - rails
+  - id: unquoted-attribute
+    name: unquoted-attribute
+    description: >-
+      Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom
+      JavaScript handlers. To fix this, add quotes around the template expression, like this: "<%= expr %>".
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <%= ... %>
+        message: >-
+          Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom
+          JavaScript handlers. To fix this, add quotes around the template expression, like this: "<%= expr %>".
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://brakemanpro.com/2017/09/08/cross-site-scripting-in-rails#unquoted-attributes
+      - https://flask.palletsprojects.com/en/1.1.x/security/#cross-site-scripting-xss
+    tags:
+      - rails
+  - id: check-dynamic-render-local-file-include
+    name: check-dynamic-render-local-file-include
+    description: >-
+      Found request parameters in a call to `render` in a dynamic context. This can allow end users to request arbitrary
+      local files which may result in leaking sensitive information persisted on disk.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          params[...]
+        message: >-
+          Found request parameters in a call to `render` in a dynamic context. This can allow end users to request
+          arbitrary local files which may result in leaking sensitive information persisted on disk.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion
+      - >-
+        https://github.com/presidentbeef/brakeman/blob/f74cb53ead47f0af821d98b5b41e16d63100c240/test/apps/rails2/app/views/home/test_render.html.erb
+    tags:
+      - ruby
+      - rails
+  - id: check-reverse-tabnabbing
+    name: check-reverse-tabnabbing
+    description: >-
+      Setting an anchor target of `_blank` without the `noopener` or `noreferrer` attribute allows reverse tabnabbing on
+      Internet Explorer, Opera, and Android Webview.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: |
+          _blank
+        message: >-
+          Setting an anchor target of `_blank` without the `noopener` or `noreferrer` attribute allows reverse
+          tabnabbing on Internet Explorer, Opera, and Android Webview.
+    cwe:
+      - CWE-1022
+    owasp: []
+    references:
+      - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#browser_compatibility
+      - https://github.com/presidentbeef/brakeman/blob/3f5d5d5/test/apps/rails5/app/views/users/show.html.erb
+    tags:
+      - ruby
+      - rails
+  - id: scalac-debug
+    name: scalac-debug
+    description: >-
+      Scala applications built with `debug` set to true in production may leak debug information to attackers. Debug
+      mode also affects performance and reliability. Remove it from configuration.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Scala applications built with `debug` set to true in production may leak debug information to attackers. Debug
+          mode also affects performance and reliability. Remove it from configuration.
+    cwe:
+      - CWE-489
+    owasp:
+      - A05:2021
+    references:
+      - https://docs.scala-lang.org/overviews/compiler-options/index.html
+    tags:
+      - scala
+      - sbt
+  - id: conf-csrf-headers-bypass
+    name: conf-csrf-headers-bypass
+    description: >-
+      Possibly bypassable CSRF configuration found. CSRF is an attack that forces an end user to execute unwanted
+      actions on a web application in which they’re currently authenticated. Make sure that Content-Type black list is
+      configured and CORS filter is turned on.
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Possibly bypassable CSRF configuration found. CSRF is an attack that forces an end user to execute unwanted
+          actions on a web application in which they’re currently authenticated. Make sure that Content-Type black list
+          is configured and CORS filter is turned on.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.playframework.com/documentation/2.8.x/Migration25#CSRF-changes
+      - https://owasp.org/www-community/attacks/csrf
+    tags:
+      - scala
+      - play
+  - id: conf-insecure-cookie-settings
+    name: conf-insecure-cookie-settings
+    description: >-
+      Session cookie `Secure` flag is explicitly disabled. The `secure` flag for cookies prevents the client from
+      transmitting the cookie over insecure channels such as HTTP. Set the `Secure` flag by setting `secure` to `true`
+      in configuration file.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: secure = false
+        message: >-
+          Session cookie `Secure` flag is explicitly disabled. The `secure` flag for cookies prevents the client from
+          transmitting the cookie over insecure channels such as HTTP. Set the `Secure` flag by setting `secure` to
+          `true` in configuration file.
+    cwe:
+      - CWE-614
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#security
+      - https://www.playframework.com/documentation/2.8.x/SettingsSession#Session-Configuration
+    tags:
+      - play
+      - scala
+  - id: twirl-html-var
+    name: twirl-html-var
+    description: >-
+      Raw html content controlled by a variable detected. You may be accidentally bypassing secure methods of rendering
+      HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which could let
+      attackers steal sensitive user data. Try to avoid using `Html()` or consider properly sanitizing input data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - regex: .*
+        message: >-
+          Raw html content controlled by a variable detected. You may be accidentally bypassing secure methods of
+          rendering HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which
+          could let attackers steal sensitive user data. Try to avoid using `Html()` or consider properly sanitizing
+          input data.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.playframework.com/documentation/2.8.x/ScalaTemplates#Escaping
+    tags:
+      - scala
+      - play
+      - twirl
+  - id: unchecked-subprocess-call-1
+    name: unchecked-subprocess-call-1
+    description: No description provided
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: ''
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call
+    name: unchecked-subprocess-call
+    description: No description provided
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: ''
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call-2
+    name: unchecked-subprocess-call-2
+    description: No description provided
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: ''
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call-3
+    name: unchecked-subprocess-call-3
+    description: No description provided
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: ''
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: subprocess-run
+    name: subprocess-run
+    description: bad stuff
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: bad stuff
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: subprocess-run-2
+    name: subprocess-run-2
+    description: bad stuff
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: bad stuff
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: other-rule
+    name: other-rule
+    description: No description provided
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <div>hello</div>
+        message: ''
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: other-rule-2
+    name: other-rule-2
+    description: No description provided
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - generic
+    patterns:
+      - pattern: <div>hello</div>
+        message: ''
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: bad-1
+    name: bad-1
+    description: |
+      a
+      b
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: ...
+        message: |
+          a
+          b
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: bad-2
+    name: bad-2
+    description: |-
+      a
+      b
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: ...
+        message: |-
+          a
+          b
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: good-1
+    name: good-1
+    description: a b
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: ...
+        message: a b
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call1
+    name: unchecked-subprocess-call1
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call2
+    name: unchecked-subprocess-call2
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: subprocess.call3(...)
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call3
+    name: unchecked-subprocess-call3
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - regex: .*
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call4
+    name: unchecked-subprocess-call4
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: subprocess.call3(...)
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call5
+    name: unchecked-subprocess-call5
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: subprocess.call1(...)
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call6
+    name: unchecked-subprocess-call6
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: subprocess.call1(...)
+        message: test
+      - pattern: subprocess.call2(...)
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call7
+    name: unchecked-subprocess-call7
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: subprocess.call1(...)
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: unchecked-subprocess-call8
+    name: unchecked-subprocess-call8
+    description: test
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - '*'
+    patterns:
+      - pattern: subprocess.call1(...)
+        message: test
+      - pattern: subprocess.call2(...)
+        message: test
+    cwe: []
+    owasp: []
+    references: []
+    tags: []

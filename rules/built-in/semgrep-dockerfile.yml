@@ -1,0 +1,874 @@
+rules:
+  - id: dockerfile-pip-extra-index-url
+    name: dockerfile-pip-extra-index-url
+    description: >-
+      When `--extra-index-url` is used in a `pip install` command, this is usually meant to  install a package from a
+      package index other than the public one.  However, if a package is added with the same name to the public PyPi
+      repository, and if the version number is high enough, this package will be installed when building this docker
+      image. This package may be a malicious dependency. Such an attack is called a dependency confusion attack. If
+      using a private package index, prefer to use `--index-url` if possible. 
+    category: file-ops
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN ... $PIP install ... --extra-index-url ...
+        message: >-
+          When `--extra-index-url` is used in a `pip install` command, this is usually meant to  install a package from
+          a package index other than the public one.  However, if a package is added with the same name to the public
+          PyPi repository, and if the version number is high enough, this package will be installed when building this
+          docker image. This package may be a malicious dependency. Such an attack is called a dependency confusion
+          attack. If using a private package index, prefer to use `--index-url` if possible. 
+    cwe:
+      - CWE-427
+    owasp: []
+    references:
+      - https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-extra-index-url
+      - https://github.com/semgrep/semgrep-rules/issues/3032
+    tags:
+      - docker
+  - id: dockerfile-source-not-pinned
+    name: dockerfile-source-not-pinned
+    description: >-
+      To ensure reproducible builds, pin Dockerfile `FROM` commands to a specific hash. You can find the hash by running
+      `docker pull $IMAGE` and then  specify it with `$IMAGE:$VERSION@sha256:<hash goes here>`
+    category: injection
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: >-
+          To ensure reproducible builds, pin Dockerfile `FROM` commands to a specific hash. You can find the hash by
+          running `docker pull $IMAGE` and then  specify it with `$IMAGE:$VERSION@sha256:<hash goes here>`
+    cwe: []
+    owasp: []
+    references:
+      - https://stackoverflow.com/a/33511811/4965
+    tags:
+      - docker
+  - id: avoid-apk-upgrade
+    name: avoid-apk-upgrade
+    description: >-
+      Packages in base images should be up-to-date, removing the need for 'apk upgrade'. If packages are out-of-date,
+      consider contacting the base image maintainer.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN ... apk upgrade ...
+        message: >-
+          Packages in base images should be up-to-date, removing the need for 'apk upgrade'. If packages are
+          out-of-date, consider contacting the base image maintainer.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3017
+    tags:
+      - dockerfile
+  - id: avoid-apt-get-upgrade
+    name: avoid-apt-get-upgrade
+    description: >-
+      Packages in base containers should be up-to-date, removing the need to upgrade or dist-upgrade. If a package is
+      out of date, contact the maintainers.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN ... apt-get upgrade ...
+        message: >-
+          Packages in base containers should be up-to-date, removing the need to upgrade or dist-upgrade. If a package
+          is out of date, contact the maintainers.
+      - pattern: RUN ... apt-get dist-upgrade ...
+        message: >-
+          Packages in base containers should be up-to-date, removing the need to upgrade or dist-upgrade. If a package
+          is out of date, contact the maintainers.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3005
+    tags:
+      - dockerfile
+  - id: avoid-dnf-update
+    name: avoid-dnf-update
+    description: >-
+      Packages in base images should be up-to-date, removing the need for 'dnf update'. If packages are out-of-date,
+      consider contacting the base image maintainer.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: dnf update
+        message: >-
+          Packages in base images should be up-to-date, removing the need for 'dnf update'. If packages are out-of-date,
+          consider contacting the base image maintainer.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3039
+    tags:
+      - dockerfile
+  - id: avoid-latest-version
+    name: avoid-latest-version
+    description: >-
+      Images should be tagged with an explicit version to produce deterministic container images. The 'latest' tag may
+      change the base container without warning.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: FROM $FROM:latest
+        message: >-
+          Images should be tagged with an explicit version to produce deterministic container images. The 'latest' tag
+          may change the base container without warning.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3007
+    tags:
+      - dockerfile
+  - id: avoid-platform-with-from
+    name: avoid-platform-with-from
+    description: >-
+      Using '--platform' with FROM restricts the image to build on a single platform. Further, this must be the same as
+      the build platform. If you intended to specify the target platform, use the utility 'docker buildx --platform='
+      instead.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: FROM --platform=$PLATFORM $IMAGE
+        message: >-
+          Using '--platform' with FROM restricts the image to build on a single platform. Further, this must be the same
+          as the build platform. If you intended to specify the target platform, use the utility 'docker buildx
+          --platform=' instead.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3029
+      - https://docs.docker.com/buildx/working-with-buildx/
+    tags:
+      - dockerfile
+  - id: avoid-yum-update
+    name: avoid-yum-update
+    description: >-
+      Packages in base images should be up-to-date, removing the need for 'yum update'. If packages are out-of-date,
+      consider contacting the base image maintainer.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: yum update
+        message: >-
+          Packages in base images should be up-to-date, removing the need for 'yum update'. If packages are out-of-date,
+          consider contacting the base image maintainer.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3031
+    tags:
+      - dockerfile
+  - id: avoid-zypper-update
+    name: avoid-zypper-update
+    description: >-
+      Packages in base images should be up-to-date, removing the need for 'zypper update'. If packages are out-of-date,
+      consider contacting the base image maintainer.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: zypper update ...
+        message: >-
+          Packages in base images should be up-to-date, removing the need for 'zypper update'. If packages are
+          out-of-date, consider contacting the base image maintainer.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3035
+    tags:
+      - dockerfile
+  - id: maintainer-is-deprecated
+    name: maintainer-is-deprecated
+    description: MAINTAINER has been deprecated.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: MAINTAINER $NAME
+        message: MAINTAINER has been deprecated.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL4000
+    tags:
+      - dockerfile
+  - id: missing-apk-no-cache
+    name: missing-apk-no-cache
+    description: >-
+      This apk command is missing '--no-cache'. This forces apk to use a package index instead of a local package cache,
+      removing the need for '--update' and the deletion of '/var/cache/apk/*'. Add '--no-cache' to your apk command.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN apk $COMMAND ...
+        message: >-
+          This apk command is missing '--no-cache'. This forces apk to use a package index instead of a local package
+          cache, removing the need for '--update' and the deletion of '/var/cache/apk/*'. Add '--no-cache' to your apk
+          command.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3019
+    tags:
+      - dockerfile
+  - id: missing-dnf-assume-yes-switch
+    name: missing-dnf-assume-yes-switch
+    description: >-
+      This 'dnf install' is missing the '-y' switch. This might stall builds because it requires human intervention. Add
+      the '-y' switch.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN ... dnf install ...
+        message: >-
+          This 'dnf install' is missing the '-y' switch. This might stall builds because it requires human intervention.
+          Add the '-y' switch.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3038
+    tags:
+      - dockerfile
+  - id: missing-dnf-clean-all
+    name: missing-dnf-clean-all
+    description: >-
+      This dnf command does not end with '&& dnf clean all'. Running 'dnf clean all' will remove cached data and reduce
+      package size. (This must be performed in the same RUN step.)
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN ... dnf ...
+        message: >-
+          This dnf command does not end with '&& dnf clean all'. Running 'dnf clean all' will remove cached data and
+          reduce package size. (This must be performed in the same RUN step.)
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3038
+    tags:
+      - dockerfile
+  - id: missing-image-version
+    name: missing-image-version
+    description: >-
+      Detected docker image with no explicit version attached. Images should be tagged with an explicit version to
+      produce deterministic container images -- attach a version when using  `FROM <image>`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: >-
+          Detected docker image with no explicit version attached. Images should be tagged with an explicit version to
+          produce deterministic container images -- attach a version when using  `FROM <image>`.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3006
+    tags:
+      - dockerfile
+  - id: missing-no-install-recommends
+    name: missing-no-install-recommends
+    description: >-
+      This 'apt-get install' is missing '--no-install-recommends'. This prevents unnecessary packages from being
+      installed, thereby reducing image size. Add '--no-install-recommends'.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN apt-get install ...
+        message: >-
+          This 'apt-get install' is missing '--no-install-recommends'. This prevents unnecessary packages from being
+          installed, thereby reducing image size. Add '--no-install-recommends'.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3015
+    tags:
+      - dockerfile
+  - id: missing-pip-no-cache-dir
+    name: missing-pip-no-cache-dir
+    description: >-
+      This '$PIP install' is missing '--no-cache-dir'. This flag prevents package archives from being kept around,
+      thereby reducing image size. Add '--no-cache-dir'.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: >-
+          This '$PIP install' is missing '--no-cache-dir'. This flag prevents package archives from being kept around,
+          thereby reducing image size. Add '--no-cache-dir'.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3042
+    tags:
+      - dockerfile
+  - id: missing-yum-assume-yes-switch
+    name: missing-yum-assume-yes-switch
+    description: >-
+      This 'yum install' is missing the '-y' switch. This might stall builds because it requires human intervention. Add
+      the '-y' switch.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN ... yum install ...
+        message: >-
+          This 'yum install' is missing the '-y' switch. This might stall builds because it requires human intervention.
+          Add the '-y' switch.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3030
+    tags:
+      - dockerfile
+  - id: missing-zypper-clean
+    name: missing-zypper-clean
+    description: >-
+      This zypper command does not end with '&& zypper clean'. Running 'zypper clean' will remove cached data and reduce
+      package size. (This must be performed in the same RUN step.)
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN ... zypper $COMMAND ...
+        message: >-
+          This zypper command does not end with '&& zypper clean'. Running 'zypper clean' will remove cached data and
+          reduce package size. (This must be performed in the same RUN step.)
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3036
+    tags:
+      - dockerfile
+  - id: nonsensical-command
+    name: nonsensical-command
+    description: Some commands such as `$CMD` do not make sense in a container. Do not use these.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN $CMD ...
+        message: Some commands such as `$CMD` do not make sense in a container. Do not use these.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3001
+    tags:
+      - dockerfile
+  - id: prefer-apt-get
+    name: prefer-apt-get
+    description: '''apt-get'' is preferred as an unattended tool for stability. ''apt'' is discouraged.'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN apt ...
+        message: '''apt-get'' is preferred as an unattended tool for stability. ''apt'' is discouraged.'
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3027
+    tags:
+      - dockerfile
+  - id: prefer-copy-over-add
+    name: prefer-copy-over-add
+    description: >-
+      The ADD command will accept and include files from a URL and automatically extract archives. This potentially
+      exposes the container to a man-in-the-middle attack or other attacks if a malicious actor can tamper with the
+      source archive. Since ADD can have this and other unexpected side effects, the use of the more explicit COPY
+      command is preferred.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          ADD $FROM $TO
+        message: >-
+          The ADD command will accept and include files from a URL and automatically extract archives. This potentially
+          exposes the container to a man-in-the-middle attack or other attacks if a malicious actor can tamper with the
+          source archive. Since ADD can have this and other unexpected side effects, the use of the more explicit COPY
+          command is preferred.
+    cwe: []
+    owasp: []
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
+    tags:
+      - dockerfile
+  - id: prefer-json-notation
+    name: prefer-json-notation
+    description: Prefer JSON notation when using CMD or ENTRYPOINT. This allows signals to be passed from the OS.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: Prefer JSON notation when using CMD or ENTRYPOINT. This allows signals to be passed from the OS.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3025
+      - https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#cmd
+    tags:
+      - dockerfile
+  - id: remove-package-cache
+    name: remove-package-cache
+    description: >-
+      The package cache was not deleted after running 'apt-get update', which increases the size of the image. Remove
+      the package cache by appending '&& apt-get clean' at the end of apt-get command chain.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN ... apt-get update ...
+        message: >-
+          The package cache was not deleted after running 'apt-get update', which increases the size of the image.
+          Remove the package cache by appending '&& apt-get clean' at the end of apt-get command chain.
+      - pattern: apt-get update
+        message: >-
+          The package cache was not deleted after running 'apt-get update', which increases the size of the image.
+          Remove the package cache by appending '&& apt-get clean' at the end of apt-get command chain.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3009
+    tags:
+      - dockerfile
+  - id: remove-package-lists
+    name: remove-package-lists
+    description: >-
+      The package lists were not deleted after running 'apt-get update', which increases the size of the image. Remove
+      the package lists by appending '&& rm -rf /var/lib/apt/lists/*' at the end of apt-get command chain.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: RUN apt-get update ...
+        message: >-
+          The package lists were not deleted after running 'apt-get update', which increases the size of the image.
+          Remove the package lists by appending '&& rm -rf /var/lib/apt/lists/*' at the end of apt-get command chain.
+      - pattern: apt-get update
+        message: >-
+          The package lists were not deleted after running 'apt-get update', which increases the size of the image.
+          Remove the package lists by appending '&& rm -rf /var/lib/apt/lists/*' at the end of apt-get command chain.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3009
+    tags:
+      - dockerfile
+  - id: set-pipefail
+    name: set-pipefail
+    description: >-
+      Only the exit code from the final command in this RUN instruction will be evaluated unless 'pipefail' is set. If
+      you want to fail the command at any stage in the pipe, set 'pipefail' by including 'SHELL ["/bin/bash", "-o",
+      "pipefail", "-c"] before the command. If you're using alpine and don't have bash installed, communicate this
+      explicitly with `SHELL ["/bin/ash"]`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: >-
+          Only the exit code from the final command in this RUN instruction will be evaluated unless 'pipefail' is set.
+          If you want to fail the command at any stage in the pipe, set 'pipefail' by including 'SHELL ["/bin/bash",
+          "-o", "pipefail", "-c"] before the command. If you're using alpine and don't have bash installed, communicate
+          this explicitly with `SHELL ["/bin/ash"]`.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL4006
+    tags:
+      - dockerfile
+  - id: use-either-wget-or-curl
+    name: use-either-wget-or-curl
+    description: '''wget'' and ''curl'' are similar tools. Choose one and do not install the other to decrease image size.'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN wget ...
+          ...
+          RUN curl ...
+        message: '''wget'' and ''curl'' are similar tools. Choose one and do not install the other to decrease image size.'
+      - pattern: |
+          RUN curl ...
+          ...
+          RUN wget ...
+        message: '''wget'' and ''curl'' are similar tools. Choose one and do not install the other to decrease image size.'
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL4001
+    tags:
+      - dockerfile
+  - id: use-shell-instruction
+    name: use-shell-instruction
+    description: Use the SHELL instruction to set the default shell instead of overwriting '/bin/sh'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN ln ... $SHELL /bin/sh
+        message: Use the SHELL instruction to set the default shell instead of overwriting '/bin/sh'.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL4005
+    tags:
+      - dockerfile
+  - id: use-workdir
+    name: use-workdir
+    description: >-
+      As recommended by Docker's documentation, it is best to use 'WORKDIR' instead of 'RUN cd ...' for improved clarity
+      and reliability. Also, 'RUN cd ...' may not work as expected in a container.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: >-
+          As recommended by Docker's documentation, it is best to use 'WORKDIR' instead of 'RUN cd ...' for improved
+          clarity and reliability. Also, 'RUN cd ...' may not work as expected in a container.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3003
+    tags:
+      - dockerfile
+  - id: invalid-port
+    name: invalid-port
+    description: Detected an invalid port number. Valid ports are 0 through 65535.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: Detected an invalid port number. Valid ports are 0 through 65535.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3011
+    tags:
+      - dockerfile
+  - id: missing-assume-yes-switch
+    name: missing-assume-yes-switch
+    description: >-
+      This 'apt-get install' is missing the '-y' switch. This might stall builds because it requires human intervention.
+      Add the '-y' switch.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN ... apt-get install ... $MULTIFLAG ... 
+        message: >-
+          This 'apt-get install' is missing the '-y' switch. This might stall builds because it requires human
+          intervention. Add the '-y' switch.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3014
+    tags:
+      - dockerfile
+  - id: multiple-entrypoint-instructions
+    name: multiple-entrypoint-instructions
+    description: Multiple ENTRYPOINT instructions were found. Only the last one will take effect.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          ENTRYPOINT ...
+          ...
+          $ENTRYPOINT_INSTR
+        message: Multiple ENTRYPOINT instructions were found. Only the last one will take effect.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL4004
+      - >-
+        https://kapeli.com/cheat_sheets/Dockerfile.docset/Contents/Resources/Documents/index#//dash_ref_Instructions/Entry/ENTRYPOINT/0
+    tags:
+      - dockerfile
+  - id: dockerfile-dockerd-socket-mount
+    name: dockerfile-dockerd-socket-mount
+    description: >-
+      The Dockerfile(image) mounts docker.sock to the container which may allow an attacker already inside of the
+      container to escape container and execute arbitrary commands on the host machine.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          The Dockerfile(image) mounts docker.sock to the container which may allow an attacker already inside of the
+          container to escape container and execute arbitrary commands on the host machine.
+    cwe:
+      - CWE-862
+      - CWE-269
+    owasp: []
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
+      - https://redfoxsec.com/blog/insecure-volume-mounts-in-docker/
+      - https://blog.quarkslab.com/why-is-exposing-the-docker-socket-a-really-bad-idea.html
+    tags:
+      - dockerfile
+  - id: last-user-is-root
+    name: last-user-is-root
+    description: >-
+      The last user in the container is 'root'. This is a security hazard because if an attacker gains control of the
+      container they will have root access. Switch back to another user after running commands as 'root'.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: USER root
+        message: >-
+          The last user in the container is 'root'. This is a security hazard because if an attacker gains control of
+          the container they will have root access. Switch back to another user after running commands as 'root'.
+    cwe:
+      - CWE-269
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3002
+    tags:
+      - dockerfile
+  - id: missing-user-entrypoint
+    name: missing-user-entrypoint
+    description: >-
+      By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker
+      can control a process running as root, they may have control over the container. Ensure that the last USER in a
+      Dockerfile is a USER other than 'root'.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          ENTRYPOINT $...VARS
+        message: >-
+          By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an
+          attacker can control a process running as root, they may have control over the container. Ensure that the last
+          USER in a Dockerfile is a USER other than 'root'.
+    cwe:
+      - CWE-269
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://owasp.org/Top10/A04_2021-Insecure_Design
+    tags:
+      - dockerfile
+  - id: missing-user
+    name: missing-user
+    description: >-
+      By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker
+      can control a process running as root, they may have control over the container. Ensure that the last USER in a
+      Dockerfile is a USER other than 'root'.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          CMD $...VARS
+        message: >-
+          By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an
+          attacker can control a process running as root, they may have control over the container. Ensure that the last
+          USER in a Dockerfile is a USER other than 'root'.
+    cwe:
+      - CWE-250
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://owasp.org/Top10/A04_2021-Insecure_Design
+    tags:
+      - dockerfile
+  - id: no-sudo-in-dockerfile
+    name: no-sudo-in-dockerfile
+    description: >-
+      Avoid using sudo in Dockerfiles. Running processes as a non-root user can help  reduce the potential impact of
+      configuration errors and security vulnerabilities.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN sudo ...
+        message: >-
+          Avoid using sudo in Dockerfiles. Running processes as a non-root user can help  reduce the potential impact of
+          configuration errors and security vulnerabilities.
+    cwe:
+      - CWE-250
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/250.html
+      - https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
+    tags:
+      - dockerfile
+  - id: secret-in-build-arg
+    name: secret-in-build-arg
+    description: >-
+      Docker build time arguments are not suited for secrets, because the argument values are saved with the image.
+      Running `docker image history` on the image will show information on how the image was built, including arguments.
+      If these contain plain text secrets, anyone with access to the docker image can access those secrets and exploit
+      them.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: >-
+          Docker build time arguments are not suited for secrets, because the argument values are saved with the image.
+          Running `docker image history` on the image will show information on how the image was built, including
+          arguments. If these contain plain text secrets, anyone with access to the docker image can access those
+          secrets and exploit them.
+    cwe:
+      - CWE-538
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/538.html
+      - https://docs.docker.com/engine/reference/builder/#arg
+    tags:
+      - dockerfile
+  - id: multiple-cmd-instructions
+    name: multiple-cmd-instructions
+    description: Multiple CMD instructions were found. Only the last one will take effect.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - regex: .*
+        message: Multiple CMD instructions were found. Only the last one will take effect.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL4003
+      - >-
+        https://kapeli.com/cheat_sheets/Dockerfile.docset/Contents/Resources/Documents/index#//dash_ref_Instructions/Entry/CMD/0
+    tags:
+      - dockerfile
+  - id: missing-zypper-no-confirm-switch
+    name: missing-zypper-no-confirm-switch
+    description: >-
+      This 'zypper install' is missing the '-y' switch. This might stall builds because it requires human intervention.
+      Add the '-y' switch.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - dockerfile
+    patterns:
+      - pattern: |
+          RUN ... zypper install ...
+        message: >-
+          This 'zypper install' is missing the '-y' switch. This might stall builds because it requires human
+          intervention. Add the '-y' switch.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/hadolint/hadolint/wiki/DL3034
+    tags:
+      - dockerfile

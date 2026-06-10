@@ -1,0 +1,94 @@
+rules:
+  - id: https-equiv
+    name: https-equiv
+    description: The correct attribute name for this meta tag is `http-equiv`, not `https-equiv`.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - html
+    patterns:
+      - pattern: <meta ... https-equiv=...>
+        message: The correct attribute name for this meta tag is `http-equiv`, not `https-equiv`.
+    cwe: []
+    owasp: []
+    references:
+      - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#http-equiv
+    tags:
+      - html
+  - id: eval-detected
+    name: eval-detected
+    description: >-
+      Detected the use of eval(...). This can introduce  a Cross-Site-Scripting (XSS) vulnerability if this  comes from
+      user-provided input. Follow OWASP best  practices to ensure you handle XSS within a JavaScript context correct,
+      and consider using safer APIs to evaluate  user-input such as JSON.parse(...). 
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - html
+    patterns:
+      - regex: .*
+        message: >-
+          Detected the use of eval(...). This can introduce  a Cross-Site-Scripting (XSS) vulnerability if this  comes
+          from user-provided input. Follow OWASP best  practices to ensure you handle XSS within a JavaScript context
+          correct, and consider using safer APIs to evaluate  user-input such as JSON.parse(...). 
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+    tags:
+      - browser
+  - id: insecure-document-method
+    name: insecure-document-method
+    description: >-
+      Detected the use of an inner/outerHTML assignment.  This can introduce a Cross-Site-Scripting (XSS) vulnerability
+      if this  comes from user-provided input. If you have to use a dangerous web API,  consider using a sanitization
+      library such as DOMPurify to sanitize  the HTML before it is assigned.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - html
+    patterns:
+      - regex: .*
+        message: >-
+          Detected the use of an inner/outerHTML assignment.  This can introduce a Cross-Site-Scripting (XSS)
+          vulnerability if this  comes from user-provided input. If you have to use a dangerous web API,  consider using
+          a sanitization library such as DOMPurify to sanitize  the HTML before it is assigned.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - browser
+  - id: plaintext-http-link
+    name: plaintext-http-link
+    description: This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - html
+    patterns:
+      - pattern: <a href="$URL">...</a>
+        message: This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/319.html
+    tags:
+      - html

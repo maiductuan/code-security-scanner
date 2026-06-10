@@ -1,0 +1,25 @@
+rules:
+  - id: javascript.express.security.audit.xss.direct-response-write
+    message: "User input directly written to response, potential XSS"
+    severity: ERROR
+    languages:
+      - javascript
+      - typescript
+    metadata:
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      owasp:
+        - "A03:2021 - Injection"
+      references:
+        - https://owasp.org/www-community/attacks/xss/
+    pattern: res.write(req.query.url)
+
+  - id: python.lang.security.audit.crypto.weak-hash-md5
+    message: "MD5 hashing detected. Use SHA-256 or stronger."
+    severity: WARNING
+    languages:
+      - python
+    metadata:
+      cwe: "CWE-328"
+      owasp: "A02:2021 - Cryptographic Failures"
+    pattern-regex: hashlib\.md5\(

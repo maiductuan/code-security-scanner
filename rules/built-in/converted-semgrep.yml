@@ -1,0 +1,37 @@
+rules:
+  - id: javascript.express.security.audit.xss.direct-response-write
+    name: direct-response-write
+    description: User input directly written to response, potential XSS
+    category: xss
+    severity: high
+    confidence: medium
+    languages:
+      - javascript
+      - typescript
+    patterns:
+      - pattern: res.write(req.query.url)
+        message: User input directly written to response, potential XSS
+    cwe:
+      - CWE-79
+    owasp:
+      - A03:2021
+    references:
+      - https://owasp.org/www-community/attacks/xss/
+    tags: []
+  - id: python.lang.security.audit.crypto.weak-hash-md5
+    name: weak-hash-md5
+    description: MD5 hashing detected. Use SHA-256 or stronger.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - python
+    patterns:
+      - regex: hashlib\.md5\(
+        message: MD5 hashing detected. Use SHA-256 or stronger.
+    cwe:
+      - CWE-328
+    owasp:
+      - A02:2021
+    references: []
+    tags: []

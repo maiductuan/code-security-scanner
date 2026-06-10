@@ -1,0 +1,200 @@
+rules:
+  - id: detect-apple-core-ml
+    name: detect-apple-core-ml
+    description: 'Possibly found usage of AI: Apple CoreML'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - swift
+    patterns:
+      - pattern: VNCoreMLModel(...)
+        message: 'Possibly found usage of AI: Apple CoreML'
+      - pattern: MLModelConfiguration(...)
+        message: 'Possibly found usage of AI: Apple CoreML'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: detect-gemini
+    name: detect-gemini
+    description: 'Possibly found usage of AI: Gemini'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - swift
+    patterns:
+      - pattern: import GoogleGenerativeAI
+        message: 'Possibly found usage of AI: Gemini'
+      - pattern: GenerativeModel(...)
+        message: 'Possibly found usage of AI: Gemini'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: insecure-random
+    name: insecure-random
+    description: >-
+      A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the source
+      of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use the
+      `SecCopyRandomBytes` API explicitly.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - swift
+    patterns:
+      - pattern: random()
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: Int.random(...)
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: Bool.random(...)
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: Float.random(...)
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: Double.random(...)
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: arc4random()
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: arc4random_buf(...)
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: arc4random_uniform(...)
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: SystemRandomNumberGenerator(...)
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+      - pattern: rand()
+        message: >-
+          A random number generator was detected which is **not** *guaranteed* to be Cryptographically secure. If the
+          source of entropy is used for security purposes (e.g. with other Cryptographic operations), make sure to use
+          the `SecCopyRandomBytes` API explicitly.
+    cwe:
+      - CWE-338
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://mobile-security.gitbook.io/masvs/security-requirements/0x08-v3-cryptography_verification_requirements
+      - https://developer.apple.com/documentation/security/1399291-secrandomcopybytes
+      - https://developer.apple.com/documentation/security/randomization_services?language=swift
+      - https://github.com/apple/swift-evolution/blob/main/proposals/0202-random-unification.md
+    tags:
+      - ios
+      - macos
+  - id: swift-user-defaults
+    name: swift-user-defaults
+    description: >-
+      Potentially sensitive data was observed to be stored in UserDefaults, which is not adequate protection of
+      sensitive information. For data of a sensitive nature, applications should leverage the Keychain.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - swift
+    patterns:
+      - regex: .*
+        message: >-
+          Potentially sensitive data was observed to be stored in UserDefaults, which is not adequate protection of
+          sensitive information. For data of a sensitive nature, applications should leverage the Keychain.
+    cwe:
+      - CWE-311
+    owasp:
+      - A03:2017
+      - A04:2021
+      - A06:2025
+    references:
+      - >-
+        https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/ValidatingInput.html
+      - https://mas.owasp.org/MASVS/controls/MASVS-STORAGE-1/
+    tags:
+      - ios
+      - macos
+  - id: swift-potential-sqlite-injection
+    name: swift-potential-sqlite-injection
+    description: >-
+      Potential Client-side SQL injection which has different impacts depending on the SQL use-case. The impact may
+      include the circumvention of local authentication mechanisms, obtaining of sensitive data from the app, or
+      manipulation of client-side behavior. It wasn't possible to make certain that the source is untrusted, but the
+      application should avoid concatenating dynamic data into SQL queries and should instead leverage parameterized
+      queries.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - swift
+    patterns:
+      - regex: .*
+        message: >-
+          Potential Client-side SQL injection which has different impacts depending on the SQL use-case. The impact may
+          include the circumvention of local authentication mechanisms, obtaining of sensitive data from the app, or
+          manipulation of client-side behavior. It wasn't possible to make certain that the source is untrusted, but the
+          application should avoid concatenating dynamic data into SQL queries and should instead leverage parameterized
+          queries.
+    cwe:
+      - CWE-89
+    owasp: []
+    references:
+      - >-
+        https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/ValidatingInput.html
+    tags:
+      - ios
+      - macos
+  - id: swift-webview-config-allows-js-open-windows
+    name: swift-webview-config-allows-js-open-windows
+    description: >-
+      Webviews were observed that explictly allow JavaScript in an WKWebview to open windows automatically. Consider
+      disabling this functionality if not required, following the principle of least privelege.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - swift
+    patterns:
+      - pattern: |
+          $P = WKPreferences()
+          ...
+        message: >-
+          Webviews were observed that explictly allow JavaScript in an WKWebview to open windows automatically. Consider
+          disabling this functionality if not required, following the principle of least privelege.
+    cwe:
+      - CWE-272
+    owasp: []
+    references:
+      - https://mas.owasp.org/MASVS/controls/MASVS-PLATFORM-2/
+      - https://developer.apple.com/documentation/webkit/wkpreferences/1536573-javascriptcanopenwindowsautomati
+    tags:
+      - ios
+      - macos

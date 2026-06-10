@@ -1,0 +1,146 @@
+rules:
+  - id: deprecated_bnot_operator
+    name: deprecated_bnot_operator
+    description: The bitwise operator (`^^^`) is already deprecated. Please use `Bitwise.bnot($VAL)` instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - elixir
+    patterns:
+      - pattern: ~~~$VAL
+        message: The bitwise operator (`^^^`) is already deprecated. Please use `Bitwise.bnot($VAL)` instead.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/elixir-lang/elixir/commit/f1b9d3e818e5bebd44540f87be85979f24b9abfc
+    tags:
+      - elixir
+  - id: deprecated_bxor_operator
+    name: deprecated_bxor_operator
+    description: The bitwise operator (`^^^`) is already deprecated. Please use `Bitwise.bxor($LEFT, $RIGHT)` instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - elixir
+    patterns:
+      - pattern: $LEFT ^^^ $RIGHT
+        message: The bitwise operator (`^^^`) is already deprecated. Please use `Bitwise.bxor($LEFT, $RIGHT)` instead.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/elixir-lang/elixir/commit/c9a171da5b25e0eb5d1da3b04c622f8b79a8aff4
+    tags:
+      - elixir
+  - id: deprecated_calendar_iso_day_of_week_3
+    name: deprecated_calendar_iso_day_of_week_3
+    description: '`Calendar.ISO.day_of_week/3` is already deprecated. Please use `Calendar.ISO.day_of_week/4` instead.'
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - elixir
+    patterns:
+      - pattern: $VAR = Calendar.ISO.day_of_week($YEAR, $MONTH, $DAY)
+        message: '`Calendar.ISO.day_of_week/3` is already deprecated. Please use `Calendar.ISO.day_of_week/4` instead.'
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/elixir-lang/elixir/releases/tag/v1.15.0
+    tags:
+      - elixir
+  - id: deprecated_use_bitwise
+    name: deprecated_use_bitwise
+    description: The syntax `use Bitwise` is already deprecated. Please use `import Bitwise` instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - elixir
+    patterns:
+      - pattern: use Bitwise
+        message: The syntax `use Bitwise` is already deprecated. Please use `import Bitwise` instead.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/elixir-lang/elixir/commit/f1b9d3e818e5bebd44540f87be85979f24b9abfc
+    tags:
+      - elixir
+  - id: enum_map_into
+    name: enum_map_into
+    description: Using `Enum.into/3` is more efficient than using `Enum.map/2 |> Enum.into/2`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - elixir
+    patterns:
+      - pattern: |
+          Enum.into(Enum.map($E, $FUN), $INTO)
+        message: Using `Enum.into/3` is more efficient than using `Enum.map/2 |> Enum.into/2`.
+      - pattern: |
+          Enum.map($E, $FUN)
+          |> Enum.into($INTO)
+        message: Using `Enum.into/3` is more efficient than using `Enum.map/2 |> Enum.into/2`.
+      - pattern: |
+          $E
+          |> Enum.map($FUN)
+          |> Enum.into($INTO)
+        message: Using `Enum.into/3` is more efficient than using `Enum.map/2 |> Enum.into/2`.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/rrrene/credo/blob/master/lib/credo/check/refactor/map_into.ex
+    tags:
+      - elixir
+  - id: enum_map_join
+    name: enum_map_join
+    description: Using `Enum.map_join/3` is more efficient than using `Enum.map/2 |> Enum.join/2`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - elixir
+    patterns:
+      - pattern: |
+          Enum.join(Enum.map($E, $FUN), $JOINER)
+        message: Using `Enum.map_join/3` is more efficient than using `Enum.map/2 |> Enum.join/2`.
+      - pattern: |
+          Enum.map($E, $FUN)
+          |> Enum.join($JOINER)
+        message: Using `Enum.map_join/3` is more efficient than using `Enum.map/2 |> Enum.join/2`.
+      - pattern: |
+          $E
+          |> Enum.map($FUN)
+          |> Enum.join($JOINER)
+        message: Using `Enum.map_join/3` is more efficient than using `Enum.map/2 |> Enum.join/2`.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/rrrene/credo/blob/master/lib/credo/check/refactor/map_join.ex
+    tags:
+      - elixir
+  - id: atom_exhaustion
+    name: atom_exhaustion
+    description: >-
+      Atom values are appended to a global table but never removed. If input is user-controlled, dynamic instantiations
+      such as `String.to_atom` or `List.to_atom` can lead to possible memory leaks. Instead, use
+      `String.to_existing_atom` or `List.to_existing_atom`.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - elixir
+    patterns:
+      - pattern: $MODULE.to_atom($STRING)
+        message: >-
+          Atom values are appended to a global table but never removed. If input is user-controlled, dynamic
+          instantiations such as `String.to_atom` or `List.to_atom` can lead to possible memory leaks. Instead, use
+          `String.to_existing_atom` or `List.to_existing_atom`.
+    cwe: []
+    owasp: []
+    references:
+      - https://erlef.github.io/security-wg/secure_coding_and_deployment_hardening/atom_exhaustion.html
+    tags:
+      - elixir

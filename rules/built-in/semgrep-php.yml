@@ -1,0 +1,1607 @@
+rules:
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode
+  - id: doctrine-dbal-dangerous-query
+    name: doctrine-dbal-dangerous-query
+    description: >-
+      Detected string concatenation with a non-literal variable in a Doctrine DBAL query method. This could lead to SQL
+      injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection, use
+      parameterized queries or prepared statements instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Detected string concatenation with a non-literal variable in a Doctrine DBAL query method. This could lead to
+          SQL injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL
+          injection, use parameterized queries or prepared statements instead.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/security.html
+      - https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+    tags:
+      - doctrine
+  - id: doctrine-orm-dangerous-query
+    name: doctrine-orm-dangerous-query
+    description: >-
+      `$QUERY` Detected string concatenation with a non-literal variable in a Doctrine QueryBuilder method. This could
+      lead to SQL injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL
+      injection, use parameterized queries or prepared statements instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          `$QUERY` Detected string concatenation with a non-literal variable in a Doctrine QueryBuilder method. This
+          could lead to SQL injection if the variable is user-controlled and not properly sanitized. In order to prevent
+          SQL injection, use parameterized queries or prepared statements instead.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/query-builder.html#security-safely-preventing-sql-injection
+      - https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+    tags:
+      - doctrine
+  - id: empty-with-boolean-expression
+    name: empty-with-boolean-expression
+    description: Calling `empty` on a boolean expression may be an indication that a parenthesis is misplaced.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          empty($A && $B)
+        message: Calling `empty` on a boolean expression may be an indication that a parenthesis is misplaced.
+      - pattern: |
+          empty($A || $B)
+        message: Calling `empty` on a boolean expression may be an indication that a parenthesis is misplaced.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - php
+  - id: assert-use
+    name: assert-use
+    description: Calling assert with user input is equivalent to eval'ing.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: Calling assert with user input is equivalent to eval'ing.
+    cwe:
+      - CWE-95
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/function.assert
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/AssertsSniff.php
+    tags:
+      - php
+  - id: assert-use-audit
+    name: assert-use-audit
+    description: Calling assert with user input is equivalent to eval'ing.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: assert($ASSERT, ...);
+        message: Calling assert with user input is equivalent to eval'ing.
+    cwe:
+      - CWE-95
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/function.assert
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/AssertsSniff.php
+    tags:
+      - php
+  - id: openssl-decrypt-validate
+    name: openssl-decrypt-validate
+    description: >-
+      The function `openssl_decrypt` returns either a string of the decrypted data on success or `false` on failure. If
+      the failure case is not handled, this could lead to undefined behavior in your application. Please handle the case
+      where `openssl_decrypt` returns `false`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: openssl_decrypt(...);
+        message: >-
+          The function `openssl_decrypt` returns either a string of the decrypted data on success or `false` on failure.
+          If the failure case is not handled, this could lead to undefined behavior in your application. Please handle
+          the case where `openssl_decrypt` returns `false`.
+    cwe:
+      - CWE-252
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://www.php.net/manual/en/function.openssl-decrypt.php
+    tags:
+      - php
+      - openssl
+  - id: sha224-hash
+    name: sha224-hash
+    description: >-
+      This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+      updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: hash('sha224', ...);
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: hash('sha512/224', ...);
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: hash('sha3-224', ...);
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: hash_hmac('sha224', ...);
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: hash_hmac('sha512/224', ...);
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: hash_hmac('sha3-224', ...);
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar3.ipd.pdf
+      - >-
+        https://www.cyber.gov.au/resources-business-and-government/essential-cyber-security/ism/cyber-security-guidelines/guidelines-cryptography
+    tags:
+      - php
+  - id: backticks-use
+    name: backticks-use
+    description: Backticks use may lead to command injection vulnerabilities.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: '`...`;'
+        message: Backticks use may lead to command injection vulnerabilities.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/language.operators.execution.php
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/BackticksSniff.php
+    tags:
+      - php
+  - id: base-convert-loses-precision
+    name: base-convert-loses-precision
+    description: >-
+      The function base_convert uses 64-bit numbers internally, and does not correctly convert large numbers. It is not
+      suitable for random tokens such as those used for session tokens or CSRF tokens.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          The function base_convert uses 64-bit numbers internally, and does not correctly convert large numbers. It is
+          not suitable for random tokens such as those used for session tokens or CSRF tokens.
+    cwe:
+      - CWE-190
+    owasp: []
+    references:
+      - https://www.php.net/base_convert
+      - https://www.sjoerdlangkemper.nl/2017/03/15/dont-use-base-convert-on-random-tokens/
+    tags:
+      - php
+  - id: curl-ssl-verifypeer-off
+    name: curl-ssl-verifypeer-off
+    description: SSL verification is disabled but should not be (currently CURLOPT_SSL_VERIFYPEER= $IS_VERIFIED)
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: SSL verification is disabled but should not be (currently CURLOPT_SSL_VERIFYPEER= $IS_VERIFIED)
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://www.saotn.org/dont-turn-off-curlopt_ssl_verifypeer-fix-php-configuration/
+    tags:
+      - php
+  - id: extract-user-data
+    name: extract-user-data
+    description: >-
+      Do not call 'extract()' on user-controllable data. If you must, then you must also provide the EXTR_SKIP flag to
+      prevent overwriting existing variables.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Do not call 'extract()' on user-controllable data. If you must, then you must also provide the EXTR_SKIP flag
+          to prevent overwriting existing variables.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://www.php.net/manual/en/function.extract.php#refsect1-function.extract-notes
+    tags:
+      - php
+  - id: eval-use
+    name: eval-use
+    description: Evaluating non-constant commands. This can lead to command injection.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: eval(...);
+        message: Evaluating non-constant commands. This can lead to command injection.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/function.eval
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/NoEvalsSniff.php
+    tags:
+      - php
+  - id: exec-use
+    name: exec-use
+    description: Executing non-constant commands. This can lead to command injection.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: $FUNC(...);
+        message: Executing non-constant commands. This can lead to command injection.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/SystemExecFunctionsSniff.php
+    tags:
+      - php
+  - id: file-inclusion
+    name: file-inclusion
+    description: >-
+      Detected non-constant file inclusion. This can lead to local file inclusion (LFI) or remote file inclusion (RFI)
+      if user input reaches this statement. LFI and RFI could lead to sensitive files being obtained by attackers.
+      Instead, explicitly specify what to include. If that is not a viable solution, validate user input thoroughly.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Detected non-constant file inclusion. This can lead to local file inclusion (LFI) or remote file inclusion
+          (RFI) if user input reaches this statement. LFI and RFI could lead to sensitive files being obtained by
+          attackers. Instead, explicitly specify what to include. If that is not a viable solution, validate user input
+          thoroughly.
+    cwe:
+      - CWE-98
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/function.include.php
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/EasyRFISniff.php
+      - https://en.wikipedia.org/wiki/File_inclusion_vulnerability#Types_of_Inclusion
+    tags:
+      - php
+  - id: ftp-use
+    name: ftp-use
+    description: FTP allows for unencrypted file transfers. Consider using an encrypted alternative.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: $FUNC(...);
+        message: FTP allows for unencrypted file transfers. Consider using an encrypted alternative.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://www.php.net/manual/en/intro.ftp.php
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/FringeFunctionsSniff.php
+    tags:
+      - php
+  - id: echoed-request
+    name: echoed-request
+    description: >-
+      `Echo`ing user input risks cross-site scripting vulnerability. You should use `htmlentities()` when showing data
+      to users.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          `Echo`ing user input risks cross-site scripting vulnerability. You should use `htmlentities()` when showing
+          data to users.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/function.htmlentities.php
+      - https://www.php.net/manual/en/reserved.variables.request.php
+      - https://www.php.net/manual/en/reserved.variables.post.php
+      - https://www.php.net/manual/en/reserved.variables.get.php
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+    tags:
+      - php
+  - id: printed-request
+    name: printed-request
+    description: >-
+      `Printing user input risks cross-site scripting vulnerability. You should use `htmlentities()` when showing data
+      to users.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          `Printing user input risks cross-site scripting vulnerability. You should use `htmlentities()` when showing
+          data to users.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/function.htmlentities.php
+      - https://www.php.net/manual/en/reserved.variables.request.php
+      - https://www.php.net/manual/en/reserved.variables.post.php
+      - https://www.php.net/manual/en/reserved.variables.get.php
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+    tags:
+      - php
+  - id: tainted-callable
+    name: tainted-callable
+    description: Callable based on user input risks remote code execution.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: Callable based on user input risks remote code execution.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/language.types.callable.php
+    tags:
+      - php
+  - id: tainted-exec
+    name: tainted-exec
+    description: User input is passed to a function that executes a shell command. This can lead to remote code execution.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: User input is passed to a function that executes a shell command. This can lead to remote code execution.
+    cwe:
+      - CWE-78
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - php
+  - id: tainted-filename
+    name: tainted-filename
+    description: File name based on user input risks server-side request forgery.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: File name based on user input risks server-side request forgery.
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29
+    tags:
+      - php
+  - id: tainted-object-instantiation
+    name: tainted-object-instantiation
+    description: >-
+      <- A new object is created where the class name is based on user input. This could lead to remote code execution,
+      as it allows to instantiate any class in the application.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          <- A new object is created where the class name is based on user input. This could lead to remote code
+          execution, as it allows to instantiate any class in the application.
+    cwe:
+      - CWE-470
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - php
+  - id: tainted-session
+    name: tainted-session
+    description: >-
+      Session key based on user input risks session poisoning. The user can determine the key used for the session, and
+      thus write any session variable. Session variables are typically trusted to be set only by the application, and
+      manipulating the session can result in access control issues.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Session key based on user input risks session poisoning. The user can determine the key used for the session,
+          and thus write any session variable. Session variables are typically trusted to be set only by the
+          application, and manipulating the session can result in access control issues.
+    cwe:
+      - CWE-284
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://en.wikipedia.org/wiki/Session_poisoning
+    tags:
+      - php
+  - id: tainted-sql-string
+    name: tainted-sql-string
+    description: >-
+      User data flows into this manually-constructed SQL string. User data can be safely inserted into SQL strings using
+      prepared statements or an object-relational mapper (ORM). Manually-constructed SQL strings is a possible indicator
+      of SQL injection, which could let an attacker steal or manipulate data from the database. Instead, use prepared
+      statements (`$mysqli->prepare("INSERT INTO test(id, label) VALUES (?, ?)");`) or a safe library.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          User data flows into this manually-constructed SQL string. User data can be safely inserted into SQL strings
+          using prepared statements or an object-relational mapper (ORM). Manually-constructed SQL strings is a possible
+          indicator of SQL injection, which could let an attacker steal or manipulate data from the database. Instead,
+          use prepared statements (`$mysqli->prepare("INSERT INTO test(id, label) VALUES (?, ?)");`) or a safe library.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/www-community/attacks/SQL_Injection
+    tags:
+      - php
+  - id: tainted-url-host
+    name: tainted-url-host
+    description: >-
+      User data flows into the host portion of this manually-constructed URL. This could allow an attacker to send data
+      to their own server, potentially exposing sensitive data such as cookies or authorization information sent with
+      this request. They could also probe internal servers or other resources that the server running this code can
+      access. (This is called server-side request forgery, or SSRF.) Do not allow arbitrary hosts. Instead, create an
+      allowlist for approved hosts, or hardcode the correct host.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          User data flows into the host portion of this manually-constructed URL. This could allow an attacker to send
+          data to their own server, potentially exposing sensitive data such as cookies or authorization information
+          sent with this request. They could also probe internal servers or other resources that the server running this
+          code can access. (This is called server-side request forgery, or SSRF.) Do not allow arbitrary hosts. Instead,
+          create an allowlist for approved hosts, or hardcode the correct host.
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+      - A01:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+    tags:
+      - php
+  - id: ldap-bind-without-password
+    name: ldap-bind-without-password
+    description: >-
+      Detected anonymous LDAP bind. This permits anonymous users to execute LDAP statements. Consider enforcing
+      authentication for LDAP.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Detected anonymous LDAP bind. This permits anonymous users to execute LDAP statements. Consider enforcing
+          authentication for LDAP.
+    cwe:
+      - CWE-287
+    owasp:
+      - A02:2017
+      - A07:2021
+      - A07:2025
+    references:
+      - https://www.php.net/manual/en/function.ldap-bind.php
+    tags:
+      - php
+  - id: mb-ereg-replace-eval
+    name: mb-ereg-replace-eval
+    description: >-
+      Calling mb_ereg_replace with user input in the options can lead to arbitrary code execution. The eval modifier
+      (`e`) evaluates the replacement argument as code.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: mb_ereg_replace($PATTERN, $REPL, $STR, $OPTIONS);
+        message: >-
+          Calling mb_ereg_replace with user input in the options can lead to arbitrary code execution. The eval modifier
+          (`e`) evaluates the replacement argument as code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.php.net/manual/en/function.mb-ereg-replace.php
+      - https://www.php.net/manual/en/function.mb-regex-set-options.php
+    tags:
+      - php
+  - id: mcrypt-use
+    name: mcrypt-use
+    description: Mcrypt functionality has been deprecated and/or removed in recent PHP versions. Consider using Sodium or OpenSSL.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: $FUNC(...);
+        message: >-
+          Mcrypt functionality has been deprecated and/or removed in recent PHP versions. Consider using Sodium or
+          OpenSSL.
+    cwe:
+      - CWE-676
+    owasp: []
+    references:
+      - https://www.php.net/manual/en/intro.mcrypt.php
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/CryptoFunctionsSniff.php
+    tags:
+      - php
+  - id: md5-loose-equality
+    name: md5-loose-equality
+    description: Make sure comparisons involving md5 values are strict (use `===` not `==`) to avoid type juggling issues
+    category: crypto
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: Make sure comparisons involving md5 values are strict (use `===` not `==`) to avoid type juggling issues
+    cwe:
+      - CWE-697
+    owasp: []
+    references:
+      - https://www.php.net/manual/en/types.comparisons.php
+      - https://web.archive.org/web/20210430183236/https://www.whitehatsec.com/blog/magic-hashes/
+    tags:
+      - php
+  - id: md5-used-as-password
+    name: md5-used-as-password
+    description: >-
+      It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+      cracked by an attacker in a short amount of time. Use a suitable password hashing function such as bcrypt. You can
+      use `password_hash($PASSWORD, PASSWORD_BCRYPT, $OPTIONS);`.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+          cracked by an attacker in a short amount of time. Use a suitable password hashing function such as bcrypt. You
+          can use `password_hash($PASSWORD, PASSWORD_BCRYPT, $OPTIONS);`.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://tools.ietf.org/html/rfc6151
+      - https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision
+      - https://security.stackexchange.com/questions/211/how-to-securely-hash-passwords
+      - https://github.com/returntocorp/semgrep-rules/issues/1609
+      - https://www.php.net/password_hash
+    tags:
+      - md5
+  - id: openssl-cbc-static-iv
+    name: openssl-cbc-static-iv
+    description: Static IV used with AES in CBC mode. Static IVs enable chosen-plaintext attacks against encrypted data.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: Static IV used with AES in CBC mode. Static IVs enable chosen-plaintext attacks against encrypted data.
+    cwe:
+      - CWE-329
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://csrc.nist.gov/publications/detail/sp/800-38a/final
+    tags:
+      - php
+      - openssl
+  - id: php-permissive-cors
+    name: php-permissive-cors
+    description: Access-Control-Allow-Origin response header is set to "*". This will disable CORS Same Origin Policy restrictions.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: header($VALUE,...)
+        message: >-
+          Access-Control-Allow-Origin response header is set to "*". This will disable CORS Same Origin Policy
+          restrictions.
+    cwe:
+      - CWE-346
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://developer.mozilla.org/ru/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+    tags:
+      - php
+  - id: php-ssrf
+    name: php-ssrf
+    description: >-
+      The web server receives a URL or similar request from an upstream component and retrieves the contents of this
+      URL, but it does not sufficiently ensure that the request is being sent to the expected destination. Dangerous
+      function $FUNCS with payload $DATA
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          The web server receives a URL or similar request from an upstream component and retrieves the contents of this
+          URL, but it does not sufficiently ensure that the request is being sent to the expected destination. Dangerous
+          function $FUNCS with payload $DATA
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+      - A01:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+    tags:
+      - php
+  - id: phpinfo-use
+    name: phpinfo-use
+    description: The 'phpinfo' function may reveal sensitive information about your environment.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: phpinfo(...);
+        message: The 'phpinfo' function may reveal sensitive information about your environment.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.php.net/manual/en/function.phpinfo
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/PhpinfosSniff.php
+    tags:
+      - php
+  - id: redirect-to-request-uri
+    name: redirect-to-request-uri
+    description: >-
+      Redirecting to the current request URL may redirect to another domain, if the current path starts with two
+      slashes.  E.g. in https://www.example.com//attacker.com, the value of REQUEST_URI is //attacker.com, and
+      redirecting to it will redirect to that domain.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Redirecting to the current request URL may redirect to another domain, if the current path starts with two
+          slashes.  E.g. in https://www.example.com//attacker.com, the value of REQUEST_URI is //attacker.com, and
+          redirecting to it will redirect to that domain.
+    cwe:
+      - CWE-601
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.php.net/manual/en/reserved.variables.server.php
+      - https://owasp.org/www-project-top-ten/2017/A5_2017-Broken_Access_Control.html
+    tags:
+      - php
+  - id: unlink-use
+    name: unlink-use
+    description: >-
+      Using user input when deleting files with `unlink()` is potentially dangerous. A malicious actor could use this to
+      modify or access files they have no right to.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: unlink(...)
+        message: >-
+          Using user input when deleting files with `unlink()` is potentially dangerous. A malicious actor could use
+          this to modify or access files they have no right to.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.php.net/manual/en/function.unlink
+      - https://owasp.org/www-project-top-ten/2017/A5_2017-Broken_Access_Control.html
+    tags:
+      - php
+  - id: unserialize-use
+    name: unserialize-use
+    description: >-
+      Calling `unserialize()` with user input in the pattern can lead to arbitrary code execution. Consider using JSON
+      or structured data approaches (e.g. Google Protocol Buffers).
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: unserialize(...)
+        message: >-
+          Calling `unserialize()` with user input in the pattern can lead to arbitrary code execution. Consider using
+          JSON or structured data approaches (e.g. Google Protocol Buffers).
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://www.php.net/manual/en/function.unserialize.php
+      - https://owasp.org/www-project-top-ten/2017/A8_2017-Insecure_Deserialization.html
+    tags:
+      - php
+  - id: weak-crypto
+    name: weak-crypto
+    description: Detected usage of weak crypto function. Consider using stronger alternatives.
+    category: crypto
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: Detected usage of weak crypto function. Consider using stronger alternatives.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://www.php.net/manual/en/book.sodium.php
+      - >-
+        https://github.com/FloeDesignTechnologies/phpcs-security-audit/blob/master/Security/Sniffs/BadFunctions/CryptoFunctionsSniff.php
+    tags:
+      - php
+  - id: laravel-active-debug-code
+    name: laravel-active-debug-code
+    description: >-
+      Found an instance setting the APP_DEBUG environment variable to true. In your production environment, this should
+      always be false. Otherwise, you risk exposing sensitive configuration values to potential attackers. Instead, set
+      this to false.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Found an instance setting the APP_DEBUG environment variable to true. In your production environment, this
+          should always be false. Otherwise, you risk exposing sensitive configuration values to potential attackers.
+          Instead, set this to false.
+    cwe:
+      - CWE-489
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+      - https://laravel.com/docs/9.x/configuration
+    tags:
+      - php
+      - laravel
+  - id: laravel-api-route-sql-injection
+    name: laravel-api-route-sql-injection
+    description: >-
+      HTTP method [$METHOD] to Laravel route $ROUTE_NAME is vulnerable to SQL injection via string concatenation or
+      unsafe interpolation.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          HTTP method [$METHOD] to Laravel route $ROUTE_NAME is vulnerable to SQL injection via string concatenation or
+          unsafe interpolation.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+    tags:
+      - php
+      - laravel
+  - id: laravel-cookie-http-only
+    name: laravel-cookie-http-only
+    description: >-
+      Found a configuration file where the HttpOnly attribute is not set to true. Setting `http_only` to true makes sure
+      that your cookies are inaccessible from Javascript, which mitigates XSS attacks. Instead, set the 'http_only' like
+      so: `http_only` => true 
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          'cookie'
+        message: >-
+          Found a configuration file where the HttpOnly attribute is not set to true. Setting `http_only` to true makes
+          sure that your cookies are inaccessible from Javascript, which mitigates XSS attacks. Instead, set the
+          'http_only' like so: `http_only` => true 
+    cwe:
+      - CWE-1004
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+    tags:
+      - php
+      - laravel
+  - id: laravel-cookie-long-timeout
+    name: laravel-cookie-long-timeout
+    description: Found a configuration file where the lifetime attribute is over 30 minutes.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          'lifetime'
+        message: Found a configuration file where the lifetime attribute is over 30 minutes.
+    cwe:
+      - CWE-1004
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+    tags:
+      - php
+      - laravel
+  - id: laravel-cookie-null-domain
+    name: laravel-cookie-null-domain
+    description: >-
+      Found a configuration file where the domain attribute is not set to null. It is recommended (unless you are using
+      sub-domain route registrations) to set this attribute to null so that only the same origin can set the cookie,
+      thus protecting your cookies. 
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          'cookie'
+        message: >-
+          Found a configuration file where the domain attribute is not set to null. It is recommended (unless you are
+          using sub-domain route registrations) to set this attribute to null so that only the same origin can set the
+          cookie, thus protecting your cookies. 
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+    tags:
+      - php
+      - laravel
+  - id: laravel-cookie-same-site
+    name: laravel-cookie-same-site
+    description: >-
+      Found a configuration file where the same_site attribute is not set to 'lax' or 'strict'. Setting 'same_site' to
+      'lax' or 'strict' restricts cookies to a first-party or same-site context, which will protect your cookies and
+      prevent CSRF.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          'cookie'
+        message: >-
+          Found a configuration file where the same_site attribute is not set to 'lax' or 'strict'. Setting 'same_site'
+          to 'lax' or 'strict' restricts cookies to a first-party or same-site context, which will protect your cookies
+          and prevent CSRF.
+    cwe:
+      - CWE-1275
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+    tags:
+      - php
+      - laravel
+  - id: laravel-cookie-secure-set
+    name: laravel-cookie-secure-set
+    description: >-
+      Found a configuration file where the secure attribute is not set to 'true'. Setting 'secure' to 'true' prevents
+      the client from transmitting the cookie over unencrypted channels and therefore prevents cookies from being stolen
+      through man in the middle attacks. 
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          'cookie'
+        message: >-
+          Found a configuration file where the secure attribute is not set to 'true'. Setting 'secure' to 'true'
+          prevents the client from transmitting the cookie over unencrypted channels and therefore prevents cookies from
+          being stolen through man in the middle attacks. 
+    cwe:
+      - CWE-614
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+    tags:
+      - php
+      - laravel
+  - id: laravel-dangerous-model-construction
+    name: laravel-dangerous-model-construction
+    description: >-
+      Setting `$guarded` to an empty array allows mass assignment to every property in a Laravel model. This explicitly
+      overrides Eloquent's safe-by-default mass assignment protections.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          $guarded = [];
+        message: >-
+          Setting `$guarded` to an empty array allows mass assignment to every property in a Laravel model. This
+          explicitly overrides Eloquent's safe-by-default mass assignment protections.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://laravel.com/docs/9.x/eloquent#allowing-mass-assignment
+      - https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Laravel_Cheat_Sheet.md
+    tags:
+      - php
+      - laravel
+      - eloquent
+  - id: laravel-sql-injection
+    name: laravel-sql-injection
+    description: >-
+      Detected a SQL query based on user input. This could lead to SQL injection, which could potentially result in
+      sensitive data being exfiltrated by attackers. Instead, use parameterized queries and prepared statements.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a SQL query based on user input. This could lead to SQL injection, which could potentially result in
+          sensitive data being exfiltrated by attackers. Instead, use parameterized queries and prepared statements.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://laravel.com/docs/8.x/queries
+    tags:
+      - laravel
+  - id: laravel-unsafe-validator
+    name: laravel-unsafe-validator
+    description: Found a request argument passed to an `ignore()` definition in a Rule constraint. This can lead to SQL injection.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Found a request argument passed to an `ignore()` definition in a Rule constraint. This can lead to SQL
+          injection.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://laravel.com/docs/9.x/validation#rule-unique
+    tags:
+      - php
+      - laravel
+  - id: symfony-csrf-protection-disabled
+    name: symfony-csrf-protection-disabled
+    description: >-
+      CSRF protection is disabled for this configuration. This is a security risk. Make sure that it is safe or consider
+      setting `csrf_protection` property to `true`.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          CSRF protection is disabled for this configuration. This is a security risk. Make sure that it is safe or
+          consider setting `csrf_protection` property to `true`.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://symfony.com/doc/current/security/csrf.html
+    tags:
+      - symfony
+  - id: symfony-non-literal-redirect
+    name: symfony-non-literal-redirect
+    description: >-
+      The `redirect()` method does not check its destination in any way. If you redirect to a URL provided by end-users,
+      your application may be open to the unvalidated redirects security vulnerability. Consider using literal values or
+      an allowlist to validate URLs.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: $this->redirect(...)
+        message: >-
+          The `redirect()` method does not check its destination in any way. If you redirect to a URL provided by
+          end-users, your application may be open to the unvalidated redirects security vulnerability. Consider using
+          literal values or an allowlist to validate URLs.
+    cwe:
+      - CWE-601
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://symfony.com/doc/current/controller.html#redirecting
+      - https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
+    tags:
+      - symfony
+  - id: symfony-permissive-cors
+    name: symfony-permissive-cors
+    description: Access-Control-Allow-Origin response header is set to "*". This will disable CORS Same Origin Policy restrictions.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Access-Control-Allow-Origin response header is set to "*". This will disable CORS Same Origin Policy
+          restrictions.
+    cwe:
+      - CWE-346
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://developer.mozilla.org/ru/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+    tags:
+      - symfony
+  - id: wp-ajax-no-auth-and-auth-hooks-audit
+    name: wp-ajax-no-auth-and-auth-hooks-audit
+    description: >-
+      These hooks allow the developer to handle the custom AJAX endpoints."wp_ajax_$action" hook get fires for any
+      authenticated user and "wp_ajax_nopriv_$action" hook get fires for non-authenticated users.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: add_action($HOOK,...)
+        message: >-
+          These hooks allow the developer to handle the custom AJAX endpoints."wp_ajax_$action" hook get fires for any
+          authenticated user and "wp_ajax_nopriv_$action" hook get fires for non-authenticated users.
+    cwe:
+      - CWE-285
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#authorisation
+      - https://developer.wordpress.org/reference/hooks/wp_ajax_action/
+    tags:
+      - Wordpress Plugins
+  - id: wp-authorisation-checks-audit
+    name: wp-authorisation-checks-audit
+    description: These are some of the patterns used for authorisation. Look properly if the authorisation is proper or not.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: $FUNCTION(...)
+        message: These are some of the patterns used for authorisation. Look properly if the authorisation is proper or not.
+    cwe:
+      - CWE-285
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#authorisation
+    tags:
+      - Wordpress Plugins
+  - id: wp-code-execution-audit
+    name: wp-code-execution-audit
+    description: >-
+      These functions can lead to code injection if the data inside them is user-controlled. Don't use the input
+      directly or validate the data properly before passing it to these functions.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          These functions can lead to code injection if the data inside them is user-controlled. Don't use the input
+          directly or validate the data properly before passing it to these functions.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#php-code-execution
+    tags:
+      - Wordpress Plugins
+  - id: wp-command-execution-audit
+    name: wp-command-execution-audit
+    description: >-
+      These functions can lead to command execution if the data inside them is user-controlled. Don't use the input
+      directly or validate the data properly before passing it to these functions.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          These functions can lead to command execution if the data inside them is user-controlled. Don't use the input
+          directly or validate the data properly before passing it to these functions.
+    cwe:
+      - CWE-78
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#command-execution
+    tags:
+      - Wordpress Plugins
+  - id: wp-csrf-audit
+    name: wp-csrf-audit
+    description: >-
+      Passing false or 0 as the third argument to this function will not cause the script to die, making the check
+      useless.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: check_ajax_referer(...,...,false)
+        message: >-
+          Passing false or 0 as the third argument to this function will not cause the script to die, making the check
+          useless.
+    cwe:
+      - CWE-352
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - >-
+        https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#cross-site-request-forgery-csrf
+      - https://developer.wordpress.org/reference/functions/check_ajax_referer/
+    tags:
+      - Wordpress Plugins
+  - id: wp-file-download-audit
+    name: wp-file-download-audit
+    description: >-
+      These functions can be used to read to content of the files if the data inside is user-controlled. Don't use the
+      input directly or validate the data properly before passing it to these functions.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          These functions can be used to read to content of the files if the data inside is user-controlled. Don't use
+          the input directly or validate the data properly before passing it to these functions.
+    cwe:
+      - CWE-73
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#file-download
+    tags:
+      - Wordpress Plugins
+  - id: wp-file-inclusion-audit
+    name: wp-file-inclusion-audit
+    description: >-
+      These functions can lead to Local File Inclusion (LFI) or Remote File Inclusion (RFI) if the data inside is
+      user-controlled. Validate the data properly before passing it to these functions.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          These functions can lead to Local File Inclusion (LFI) or Remote File Inclusion (RFI) if the data inside is
+          user-controlled. Validate the data properly before passing it to these functions.
+    cwe:
+      - CWE-22
+      - CWE-73
+      - CWE-98
+    owasp:
+      - A01:2021
+      - A08:2021
+      - A01:2025
+      - A08:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#file-inclusion
+    tags:
+      - Wordpress Plugins
+  - id: wp-file-manipulation-audit
+    name: wp-file-manipulation-audit
+    description: >-
+      These functions can be used to delete the files if the data inside the functions are user controlled. Use these
+      functions carefully.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          These functions can be used to delete the files if the data inside the functions are user controlled. Use
+          these functions carefully.
+    cwe:
+      - CWE-22
+      - CWE-73
+      - CWE-98
+    owasp:
+      - A01:2021
+      - A08:2021
+      - A01:2025
+      - A08:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#file-manipulation
+    tags:
+      - Wordpress Plugins
+  - id: wp-open-redirect-audit
+    name: wp-open-redirect-audit
+    description: >-
+      This function can be used to redirect to user supplied URLs. If user input is not sanitised or validated, this
+      could lead to Open Redirect vulnerabilities. Use "wp_safe_redirect()" to prevent this kind of attack.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - pattern: wp_redirect(...)
+        message: >-
+          This function can be used to redirect to user supplied URLs. If user input is not sanitised or validated, this
+          could lead to Open Redirect vulnerabilities. Use "wp_safe_redirect()" to prevent this kind of attack.
+    cwe:
+      - CWE-601
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#open-redirect
+      - https://developer.wordpress.org/reference/functions/wp_safe_redirect/
+    tags:
+      - Wordpress Plugins
+  - id: wp-php-object-injection-audit
+    name: wp-php-object-injection-audit
+    description: >-
+      If the data used inside the patterns are directly used without proper sanitization, then this could lead to PHP
+      Object Injection. Do not use these function with user-supplied input, use JSON functions instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          If the data used inside the patterns are directly used without proper sanitization, then this could lead to
+          PHP Object Injection. Do not use these function with user-supplied input, use JSON functions instead.
+    cwe:
+      - CWE-502
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#php-object-injection
+      - https://owasp.org/www-community/vulnerabilities/PHP_Object_Injection
+    tags:
+      - Wordpress Plugins
+  - id: wp-sql-injection-audit
+    name: wp-sql-injection-audit
+    description: >-
+      Detected unsafe API methods. This could lead to SQL Injection if the used variable in the functions are user
+      controlled and not properly escaped or sanitized. In order to prevent SQL Injection, use safe api methods like
+      "$wpdb->prepare" properly or escape/sanitize the data properly.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          Detected unsafe API methods. This could lead to SQL Injection if the used variable in the functions are user
+          controlled and not properly escaped or sanitized. In order to prevent SQL Injection, use safe api methods like
+          "$wpdb->prepare" properly or escape/sanitize the data properly.
+    cwe:
+      - CWE-89
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/wpscanteam/wpscan/wiki/WordPress-Plugin-Security-Testing-Cheat-Sheet#sql-injection
+      - https://owasp.org/www-community/attacks/SQL_Injection
+    tags:
+      - Wordpress Plugins
+  - id: wp-ssrf-audit
+    name: wp-ssrf-audit
+    description: Detected usage of vulnerable functions with user input, which could lead to SSRF vulnerabilities.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: Detected usage of vulnerable functions with user input, which could lead to SSRF vulnerabilities.
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+    references:
+      - https://developer.wordpress.org/reference/functions/wp_safe_remote_get/
+      - https://developer.wordpress.org/reference/functions/wp_remote_get/
+      - https://patchstack.com/articles/exploring-the-unpatched-wordpress-ssrf/
+    tags:
+      - Wordpress Plugins

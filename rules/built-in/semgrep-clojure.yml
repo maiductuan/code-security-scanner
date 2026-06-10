@@ -1,0 +1,166 @@
+rules:
+  - id: command-injection-shell-call
+    name: command-injection-shell-call
+    description: >-
+      A call to clojure.java.shell has been found, this could lead to an RCE if the inputs are user-controllable. Please
+      ensure their origin is validated and sanitized.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - clojure
+    patterns:
+      - regex: .*
+        message: >-
+          A call to clojure.java.shell has been found, this could lead to an RCE if the inputs are user-controllable.
+          Please ensure their origin is validated and sanitized.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://clojuredocs.org/clojure.java.shell/sh
+    tags:
+      - clojure
+  - id: documentbuilderfactory-xxe
+    name: documentbuilderfactory-xxe
+    description: >-
+      DOCTYPE declarations are enabled for javax.xml.parsers.SAXParserFactory. Without prohibiting external entity
+      declarations, this is vulnerable to XML external entity attacks. Disable this by setting the feature
+      "http://apache.org/xml/features/disallow-doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only
+      prohibit external entities declarations. This can be done by setting the features
+      "http://xml.org/sax/features/external-general-entities" and
+      "http://xml.org/sax/features/external-parameter-entities" to false.
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - clojure
+    patterns:
+      - regex: .*
+        message: >-
+          DOCTYPE declarations are enabled for javax.xml.parsers.SAXParserFactory. Without prohibiting external entity
+          declarations, this is vulnerable to XML external entity attacks. Disable this by setting the feature
+          "http://apache.org/xml/features/disallow-doctype-decl" to true. Alternatively, allow DOCTYPE declarations and
+          only prohibit external entities declarations. This can be done by setting the features
+          "http://xml.org/sax/features/external-general-entities" and
+          "http://xml.org/sax/features/external-parameter-entities" to false.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://xerces.apache.org/xerces2-j/features.html
+    tags:
+      - clojure
+      - xml
+  - id: use-of-md5
+    name: use-of-md5
+    description: >-
+      MD5 hash algorithm detected. This is not collision resistant and leads to easily-cracked password hashes. Replace
+      with current recommended hashing algorithms.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - clojure
+    patterns:
+      - pattern: (MessageDigest/getInstance "MD5")
+        message: >-
+          MD5 hash algorithm detected. This is not collision resistant and leads to easily-cracked password hashes.
+          Replace with current recommended hashing algorithms.
+      - pattern: (MessageDigest/getInstance MessageDigestAlgorithms/MD5)
+        message: >-
+          MD5 hash algorithm detected. This is not collision resistant and leads to easily-cracked password hashes.
+          Replace with current recommended hashing algorithms.
+      - pattern: (MessageDigest/getInstance org.apache.commons.codec.digest.MessageDigestAlgorithms/MD5)
+        message: >-
+          MD5 hash algorithm detected. This is not collision resistant and leads to easily-cracked password hashes.
+          Replace with current recommended hashing algorithms.
+      - pattern: (java.security.MessageDigest/getInstance "MD5")
+        message: >-
+          MD5 hash algorithm detected. This is not collision resistant and leads to easily-cracked password hashes.
+          Replace with current recommended hashing algorithms.
+      - pattern: (java.security.MessageDigest/getInstance MessageDigestAlgorithms/MD5)
+        message: >-
+          MD5 hash algorithm detected. This is not collision resistant and leads to easily-cracked password hashes.
+          Replace with current recommended hashing algorithms.
+      - pattern: (java.security.MessageDigest/getInstance org.apache.commons.codec.digest.MessageDigestAlgorithms/MD5)
+        message: >-
+          MD5 hash algorithm detected. This is not collision resistant and leads to easily-cracked password hashes.
+          Replace with current recommended hashing algorithms.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html
+      - https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+    tags:
+      - clojure
+  - id: use-of-sha1
+    name: use-of-sha1
+    description: >-
+      Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not
+      suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or SHA256 or SHA512 for other hash
+      function applications.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - clojure
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore
+          not suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or SHA256 or SHA512 for
+          other hash function applications.
+    cwe:
+      - CWE-327
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html
+      - https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+    tags:
+      - clojure
+  - id: read-string-unsafe
+    name: read-string-unsafe
+    description: >-
+      The default core Clojure read-string method is dangerous and can lead to deserialization vulnerabilities. Use the
+      edn/read-string instead.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - clojure
+    patterns:
+      - pattern: |
+          (read-string $X)
+        message: >-
+          The default core Clojure read-string method is dangerous and can lead to deserialization vulnerabilities. Use
+          the edn/read-string instead.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - http://www.learningclojure.com/2013/02/clojures-reader-is-unsafe.html#post-body-2898830171141471587
+      - https://ericnormand.me/article/clojure-web-security
+      - >-
+        https://github.com/jafingerhut/jafingerhut.github.com/blob/master/clojure- low/using-edn-safely.md#vulnerabilities-in-clojurecores-read-and-read-string
+    tags:
+      - clojure

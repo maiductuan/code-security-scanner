@@ -1,0 +1,71 @@
+version: "1.0"
+scanners:
+  security:
+    enabled: true
+    severity:
+      - critical
+      - high
+      - medium
+      - low
+  quality:
+    enabled: true
+    thresholds:
+      maxComplexity: 15
+      maxCognitiveComplexity: 20
+      maxFileLength: 500
+      maxFunctionLength: 50
+      maxNestingDepth: 4
+      minCommentRatio: 0.1
+  cve:
+    enabled: true
+    sources:
+      - osv
+    failOnSeverity: critical
+rules:
+  include:
+    - "*"
+  exclude: []
+  custom: []
+languages:
+  - auto
+paths:
+  include:
+    - "**/*"
+  exclude:
+    - "node_modules/"
+    - "vendor/"
+    - "dist/"
+    - "build/"
+    - ".git/"
+    - "**/node_modules/**"
+    - "**/vendor/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/.git/**"
+    - "**/*.min.js"
+    - "**/*.min.css"
+    - "**/*.map"
+    - "**/*.lock"
+    - "**/package-lock.json"
+    - "__pycache__/"
+    - ".venv/"
+    - "venv/"
+    - "target/"
+    - "bin/"
+    - "obj/"
+output:
+  format: console
+  verbose: false
+  colors: true
+ai:
+  enabled: false
+  provider: openai
+  maxFindings: 20
+  temperature: 0.1
+context:
+  projectType: auto
+  frameworks: []
+  sensitivePatterns: []
+parallel: 4
+incremental: false
+deep: false

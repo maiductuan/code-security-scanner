@@ -1,0 +1,117 @@
+rules:
+  # ── Quality: Complexity ──
+  - id: quality/high-complexity
+    name: High Cyclomatic Complexity
+    description: Function has high cyclomatic complexity making it hard to understand and test
+    category: complexity
+    severity: medium
+    confidence: high
+    languages: ["*"]
+    patterns: []
+    tags: [maintainability]
+
+  - id: quality/deep-nesting
+    name: Deep Nesting
+    description: Code has deeply nested blocks making it hard to read
+    category: complexity
+    severity: medium
+    confidence: high
+    languages: ["*"]
+    patterns: []
+    tags: [maintainability]
+
+  - id: quality/long-function
+    name: Long Function
+    description: Function is too long - consider breaking it into smaller functions
+    category: complexity
+    severity: low
+    confidence: high
+    languages: ["*"]
+    patterns: []
+    tags: [maintainability]
+
+  # ── Quality: Code Smells ──
+  - id: quality/long-file
+    name: Long File
+    description: File exceeds the maximum recommended line count
+    category: code-smells
+    severity: low
+    confidence: high
+    languages: ["*"]
+    patterns: []
+    tags: [maintainability]
+
+  - id: quality/magic-number
+    name: Magic Number
+    description: Use named constants instead of magic numbers for better readability
+    category: code-smells
+    severity: low
+    confidence: medium
+    languages: ["*"]
+    patterns:
+      - regex: "(?:if|while|for|return|===?|!==?|[<>]=?)\\s*\\b(?:[2-9]\\d{2,}|[1-9]\\d{3,})\\b"
+        message: Magic number - use a named constant
+    tags: [maintainability]
+
+  - id: quality/todo-comment
+    name: TODO/FIXME Comment
+    description: Unresolved TODO or FIXME comment found
+    category: code-smells
+    severity: low
+    confidence: high
+    languages: ["*"]
+    patterns:
+      - regex: "(?://|#|/\\*)\\s*(?:TODO|FIXME|HACK|XXX|BUG)\\b"
+        message: Unresolved TODO/FIXME comment
+    tags: [maintainability]
+
+  - id: quality/empty-catch
+    name: Empty Catch Block
+    description: Empty catch block silently swallows errors
+    category: code-smells
+    severity: medium
+    confidence: high
+    cwe: [CWE-390]
+    languages: [javascript, typescript, java, csharp, php]
+    patterns:
+      - regex: "catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
+        message: Empty catch block - at minimum log the error
+    fix:
+      description: Add error handling or at minimum log the error
+    tags: [error-handling]
+
+  - id: quality/console-log
+    name: Console Log Statement
+    description: Console log/print statements should be removed from production code
+    category: code-smells
+    severity: low
+    confidence: medium
+    languages: [javascript, typescript]
+    patterns:
+      - regex: "console\\.(?:log|debug|warn|info|trace)\\s*\\("
+        message: console.log() left in code
+    fix:
+      description: Use a proper logging library or remove debug statements
+    tags: [debug]
+
+  # ── Quality: Duplication ──
+  - id: quality/code-duplication
+    name: Code Duplication
+    description: Duplicated code block detected - consider extracting to a shared function
+    category: duplication
+    severity: medium
+    confidence: medium
+    languages: ["*"]
+    patterns: []
+    tags: [maintainability, dry]
+
+  # ── Quality: Metrics ──
+  - id: quality/low-comment-ratio
+    name: Low Comment Ratio
+    description: File has very few comments relative to code
+    category: metrics
+    severity: low
+    confidence: low
+    languages: ["*"]
+    patterns: []
+    tags: [documentation]

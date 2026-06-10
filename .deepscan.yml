@@ -1,0 +1,45 @@
+# DeepScan Configuration
+# https://github.com/deepscan/deepscan-cli
+
+version: "1.0"
+
+scanners:
+  security:
+    enabled: true
+    severity:
+      - critical
+      - high
+      - medium
+      - low
+  quality:
+    enabled: true
+    thresholds:
+      maxComplexity: 15
+      maxFileLength: 500
+      maxFunctionLength: 50
+      maxNestingDepth: 4
+  cve:
+    enabled: true
+    sources:
+      - osv
+
+rules:
+  include:
+    - "*"
+  exclude: []
+  custom: []
+
+paths:
+  include:
+    - "**/*"
+  exclude:
+    - "node_modules/"
+    - "dist/"
+    - "build/"
+    - ".git/"
+
+output:
+  format: console
+
+ai:
+  enabled: false

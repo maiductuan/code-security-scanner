@@ -1,0 +1,336 @@
+rules:
+  - id: global-access-modifiers
+    name: global-access-modifiers
+    description: >-
+      Global classes, methods, and variables should be avoided (especially in managed packages) as they can never be
+      deleted or changed in signature. Always check twice if something needs to be global.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: global [A-Za-z0-9_]{3,}
+        message: >-
+          Global classes, methods, and variables should be avoided (especially in managed packages) as they can never be
+          deleted or changed in signature. Always check twice if something needs to be global.
+    cwe:
+      - CWE-284
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/284.html
+    tags:
+      - salesforce
+  - id: absolute-urls
+    name: absolute-urls
+    description: >-
+      Using absolute URLs to Salesforce Pages is bug prone. Different sandboxes and production environments will have
+      different instance names (like "na10", "na15" etc.). Code using absolute URLs will only work when it runs in the
+      corresponding salesforce instances. It will break as soon as it is deployed in another one. Thus only relative
+      URLs, i.e. without the domain and subdomain names, should be used when pointing to a salesforce page.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: (http|https)://.*(salesforce|force|visualforce)\.com\.*
+        message: >-
+          Using absolute URLs to Salesforce Pages is bug prone. Different sandboxes and production environments will
+          have different instance names (like "na10", "na15" etc.). Code using absolute URLs will only work when it runs
+          in the corresponding salesforce instances. It will break as soon as it is deployed in another one. Thus only
+          relative URLs, i.e. without the domain and subdomain names, should be used when pointing to a salesforce page.
+    cwe: []
+    owasp: []
+    references:
+      - ''
+    tags:
+      - salesforce
+  - id: apex-csrf-constructor
+    name: apex-csrf-constructor
+    description: >-
+      Having DML operations in Apex class constructor or initializers can have unexpected side effects: By just
+      accessing a page, the DML statements would be executed and the database would be modified. Just querying the
+      database is permitted.
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: .*
+        message: >-
+          Having DML operations in Apex class constructor or initializers can have unexpected side effects: By just
+          accessing a page, the DML statements would be executed and the database would be modified. Just querying the
+          database is permitted.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/352.html
+    tags:
+      - salesforce
+  - id: dml-native-statements
+    name: dml-native-statements
+    description: >-
+      Native Salesforce DML operations execute in system context, ignoring the current user's permissions, field-level
+      security, organization-wide defaults, position in the role hierarchy, and sharing rules. Be mindful when using
+      native Salesforce DML operations.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: .*
+        message: >-
+          Native Salesforce DML operations execute in system context, ignoring the current user's permissions,
+          field-level security, organization-wide defaults, position in the role hierarchy, and sharing rules. Be
+          mindful when using native Salesforce DML operations.
+    cwe:
+      - CWE-863
+    owasp:
+      - A01:2021
+      - A04:2021
+      - A01:2025
+      - A06:2025
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_dml_section.htm
+      - https://cwe.mitre.org/data/definitions/863.html
+      - https://owasp.org/Top10/A04_2021-Insecure_Design/
+    tags:
+      - salesforce
+  - id: bad-crypto
+    name: bad-crypto
+    description: >-
+      The rule makes sure you are using randomly generated IVs and keys for Crypto calls. Hard-coding these values
+      greatly compromises the security of encrypted data.
+    category: crypto
+    severity: high
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - pattern: Blob $IV = Blob.valueOf('$STRING');...Crypto.encrypt($ONE, $TWO, $IV, $FOUR);
+        message: >-
+          The rule makes sure you are using randomly generated IVs and keys for Crypto calls. Hard-coding these values
+          greatly compromises the security of encrypted data.
+      - pattern: Blob $IV = Blob.valueOf('$STRING');...Crypto.decrypt($ONE, $TWO, $IV, $FOUR);
+        message: >-
+          The rule makes sure you are using randomly generated IVs and keys for Crypto calls. Hard-coding these values
+          greatly compromises the security of encrypted data.
+      - pattern: Blob $KEY = Blob.valueOf('$STRING');...Crypto.encrypt($ONE, $KEY, $THREE, $FOUR);
+        message: >-
+          The rule makes sure you are using randomly generated IVs and keys for Crypto calls. Hard-coding these values
+          greatly compromises the security of encrypted data.
+      - pattern: Blob $KEY = Blob.valueOf('$STRING');...Crypto.decrypt($ONE, $KEY, $THREE, $FOUR);
+        message: >-
+          The rule makes sure you are using randomly generated IVs and keys for Crypto calls. Hard-coding these values
+          greatly compromises the security of encrypted data.
+    cwe:
+      - CWE-321
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/321.html
+    tags:
+      - salesforce
+  - id: insecure-http-request
+    name: insecure-http-request
+    description: >-
+      The software transmits sensitive or security-critical data in cleartext in a communication channel that can be
+      sniffed by unauthorized actors.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: http[:][/][/]
+        message: >-
+          The software transmits sensitive or security-critical data in cleartext in a communication channel that can be
+          sniffed by unauthorized actors.
+    cwe:
+      - CWE-319
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/319.html
+    tags:
+      - salesforce
+  - id: named-credentials-constant-match
+    name: named-credentials-constant-match
+    description: >-
+      Named Credentials (and callout endpoints) should be used instead of hard-coding credentials. 1. Hard-coded
+      credentials are hard to maintain when mixed in with application code. 2. It is particularly hard to update
+      hard-coded credentials when they are used amongst different classes. 3. Granting a developer access to the
+      codebase means granting knowledge of credentials, and thus keeping a two-level access is not possible. 4. Using
+      different credentials for different environments is troublesome and error-prone.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: .*
+        message: >-
+          Named Credentials (and callout endpoints) should be used instead of hard-coding credentials. 1. Hard-coded
+          credentials are hard to maintain when mixed in with application code. 2. It is particularly hard to update
+          hard-coded credentials when they are used amongst different classes. 3. Granting a developer access to the
+          codebase means granting knowledge of credentials, and thus keeping a two-level access is not possible. 4.
+          Using different credentials for different environments is troublesome and error-prone.
+    cwe:
+      - CWE-540
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/540.html
+    tags:
+      - salesforce
+  - id: named-credentials-string-match
+    name: named-credentials-string-match
+    description: >-
+      Named Credentials (and callout endpoints) should be used instead of hard-coding credentials. 1. Hard-coded
+      credentials are hard to maintain when mixed in with application code. 2. It is particularly hard to update
+      hard-coded credentials when they are used amongst different classes. 3. Granting a developer access to the
+      codebase means granting knowledge of credentials, and thus keeping a two-level access is not possible. 4. Using
+      different credentials for different environments is troublesome and error-prone.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - pattern: $REQUEST.setHeader('Authorization', $AUTHSTRING);
+        message: >-
+          Named Credentials (and callout endpoints) should be used instead of hard-coding credentials. 1. Hard-coded
+          credentials are hard to maintain when mixed in with application code. 2. It is particularly hard to update
+          hard-coded credentials when they are used amongst different classes. 3. Granting a developer access to the
+          codebase means granting knowledge of credentials, and thus keeping a two-level access is not possible. 4.
+          Using different credentials for different environments is troublesome and error-prone.
+    cwe:
+      - CWE-540
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/540.html
+    tags:
+      - salesforce
+  - id: soql-injection-unescaped-url-param
+    name: soql-injection-unescaped-url-param
+    description: >-
+      If a dynamic query must be used,leverage nFORCE Query Builder. In other programming languages, the related flaw is
+      known as SQL injection. Apex doesn't use SQL, but uses its own database query language, SOQL. SOQL is much simpler
+      and more limited in functionality than SQL. The risks are much lower for SOQL injection than for SQL injection,
+      but the attacks are nearly identical to traditional SQL injection. SQL/SOQL injection takes user-supplied input
+      and uses those values in a dynamic SOQL query. If the input isn't validated, it can include SOQL commands that
+      effectively modify the SOQL statement and trick the application into performing unintended commands.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: .*
+        message: >-
+          If a dynamic query must be used,leverage nFORCE Query Builder. In other programming languages, the related
+          flaw is known as SQL injection. Apex doesn't use SQL, but uses its own database query language, SOQL. SOQL is
+          much simpler and more limited in functionality than SQL. The risks are much lower for SOQL injection than for
+          SQL injection, but the attacks are nearly identical to traditional SQL injection. SQL/SOQL injection takes
+          user-supplied input and uses those values in a dynamic SOQL query. If the input isn't validated, it can
+          include SOQL commands that effectively modify the SOQL statement and trick the application into performing
+          unintended commands.
+    cwe:
+      - CWE-943
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/943.html
+    tags:
+      - salesforce
+  - id: soql-injection-unescaped-param
+    name: soql-injection-unescaped-param
+    description: >-
+      If a dynamic query must be used,leverage nFORCE Query Builder. In other programming languages, the related flaw is
+      known as SQL injection. Apex doesn't use SQL, but uses its own database query language, SOQL. SOQL is much simpler
+      and more limited in functionality than SQL. The risks are much lower for SOQL injection than for SQL injection,
+      but the attacks are nearly identical to traditional SQL injection. SQL/SOQL injection takes user-supplied input
+      and uses those values in a dynamic SOQL query. If the input isn't validated, it can include SOQL commands that
+      effectively modify the SOQL statement and trick the application into performing unintended commands.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: .*
+        message: >-
+          If a dynamic query must be used,leverage nFORCE Query Builder. In other programming languages, the related
+          flaw is known as SQL injection. Apex doesn't use SQL, but uses its own database query language, SOQL. SOQL is
+          much simpler and more limited in functionality than SQL. The risks are much lower for SOQL injection than for
+          SQL injection, but the attacks are nearly identical to traditional SQL injection. SQL/SOQL injection takes
+          user-supplied input and uses those values in a dynamic SOQL query. If the input isn't validated, it can
+          include SOQL commands that effectively modify the SOQL statement and trick the application into performing
+          unintended commands.
+    cwe:
+      - CWE-943
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/943.html
+    tags:
+      - salesforce
+  - id: specify-sharing-level
+    name: specify-sharing-level
+    description: >-
+      Every Apex class should have an explicit sharing mode declared. Use the `with sharing` or `without sharing`
+      keywords on a class to specify whether sharing rules must be enforced. Use the `inherited sharing` keyword on an
+      Apex class to run the class in the sharing mode of the class that called it.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - regex: (private|public|global).*\s(class)\s.*[{]
+        message: >-
+          Every Apex class should have an explicit sharing mode declared. Use the `with sharing` or `without sharing`
+          keywords on a class to specify whether sharing rules must be enforced. Use the `inherited sharing` keyword on
+          an Apex class to run the class in the sharing mode of the class that called it.
+    cwe:
+      - CWE-284
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_keywords_sharing.htm
+      - https://cwe.mitre.org/data/definitions/284.html
+      - https://owasp.org/Top10/A04_2021-Insecure_Design/
+    tags:
+      - salesforce
+  - id: system-debug
+    name: system-debug
+    description: >-
+      In addition to debug statements potentially logging data excessively, debug statements also contribute to longer
+      transactions and consume Apex CPU time even when debug logs are not being captured.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - apex
+    patterns:
+      - pattern: System.debug(...)
+        message: >-
+          In addition to debug statements potentially logging data excessively, debug statements also contribute to
+          longer transactions and consume Apex CPU time even when debug logs are not being captured.
+    cwe:
+      - CWE-489
+      - CWE-779
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/489.html
+      - https://cwe.mitre.org/data/definitions/779.html
+    tags:
+      - vuln

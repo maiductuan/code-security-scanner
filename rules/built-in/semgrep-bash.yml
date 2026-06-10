@@ -1,0 +1,362 @@
+rules:
+  - id: hooks-no-input-validation-bash
+    name: hooks-no-input-validation-bash
+    description: >-
+      Piping untrusted input directly to eval, bash, or sh is dangerous in Claude Code and Cursor hooks. Validate and
+      sanitize input before executing it.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - pattern: eval $...ARGS
+        message: >-
+          Piping untrusted input directly to eval, bash, or sh is dangerous in Claude Code and Cursor hooks. Validate
+          and sanitize input before executing it.
+      - pattern: echo $...ARGS | bash
+        message: >-
+          Piping untrusted input directly to eval, bash, or sh is dangerous in Claude Code and Cursor hooks. Validate
+          and sanitize input before executing it.
+      - pattern: echo $...ARGS | sh
+        message: >-
+          Piping untrusted input directly to eval, bash, or sh is dangerous in Claude Code and Cursor hooks. Validate
+          and sanitize input before executing it.
+    cwe:
+      - CWE-1287
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-path-traversal-bash
+    name: hooks-path-traversal-bash
+    description: >-
+      Hook input flows into a file path without validation. Claude Code and Cursor hooks receive JSON input that may
+      contain user-controlled paths. An attacker could craft input with path traversal sequences (e.g.,
+      '../../etc/passwd') to read, modify, or delete arbitrary files. Use realpath or readlink -f to resolve and
+      validate paths before file operations.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - regex: .*
+        message: >-
+          Hook input flows into a file path without validation. Claude Code and Cursor hooks receive JSON input that may
+          contain user-controlled paths. An attacker could craft input with path traversal sequences (e.g.,
+          '../../etc/passwd') to read, modify, or delete arbitrary files. Use realpath or readlink -f to resolve and
+          validate paths before file operations.
+    cwe:
+      - CWE-22
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-relative-script-path-bash
+    name: hooks-relative-script-path-bash
+    description: >-
+      Relative path used for script invocation in hook. Use absolute paths or environment variables like
+      $CLAUDE_PROJECT_DIR, $CURSOR_PROJECT_DIR, or $HOME to ensure the correct script is executed regardless of working
+      directory.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - regex: (source|bash|sh|\.)\s+\./\S+
+        message: >-
+          Relative path used for script invocation in hook. Use absolute paths or environment variables like
+          $CLAUDE_PROJECT_DIR, $CURSOR_PROJECT_DIR, or $HOME to ensure the correct script is executed regardless of
+          working directory.
+    cwe:
+      - CWE-426
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-unquoted-variable-bash-taint
+    name: hooks-unquoted-variable-bash-taint
+    description: >-
+      Untrusted input from stdin (e.g., via `cat | jq`) flows into a dangerous command execution sink such as `eval`,
+      `bash -c`, or `sh -c`. In Claude Code and Cursor hooks, stdin contains JSON that may include user-controlled data.
+      Passing this data unquoted or unsanitized to command execution functions enables OS command injection. Use safe
+      alternatives like arrays or direct command invocation instead of eval, and always quote variable expansions.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - regex: .*
+        message: >-
+          Untrusted input from stdin (e.g., via `cat | jq`) flows into a dangerous command execution sink such as
+          `eval`, `bash -c`, or `sh -c`. In Claude Code and Cursor hooks, stdin contains JSON that may include
+          user-controlled data. Passing this data unquoted or unsanitized to command execution functions enables OS
+          command injection. Use safe alternatives like arrays or direct command invocation instead of eval, and always
+          quote variable expansions.
+    cwe:
+      - CWE-78
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: hooks-unquoted-variable-bash-eval
+    name: hooks-unquoted-variable-bash-eval
+    description: >-
+      Use of `eval` in a Claude Code or Cursor hook script is dangerous. The `eval` command re-parses its arguments,
+      which can lead to command injection if any variable contains special characters or attacker-controlled data. Avoid
+      `eval` entirely; use arrays, direct command invocation, or other safe alternatives.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - pattern: eval $...ARGS
+        message: >-
+          Use of `eval` in a Claude Code or Cursor hook script is dangerous. The `eval` command re-parses its arguments,
+          which can lead to command injection if any variable contains special characters or attacker-controlled data.
+          Avoid `eval` entirely; use arrays, direct command invocation, or other safe alternatives.
+    cwe:
+      - CWE-78
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/claude-code/hooks
+      - https://cursor.com/docs/agent/hooks
+    tags:
+      - claude-code
+      - cursor
+  - id: curl-eval
+    name: curl-eval
+    description: >-
+      Data is being eval'd from a `curl` command. An attacker with control of the server in the `curl` command could
+      inject malicious code into the `eval`, resulting in a system comrpomise. Avoid eval'ing untrusted data if you can.
+      If you must do this, consider checking the SHA sum of the content returned by the server to verify its integrity.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - regex: .*
+        message: >-
+          Data is being eval'd from a `curl` command. An attacker with control of the server in the `curl` command could
+          inject malicious code into the `eval`, resulting in a system comrpomise. Avoid eval'ing untrusted data if you
+          can. If you must do this, consider checking the SHA sum of the content returned by the server to verify its
+          integrity.
+    cwe:
+      - CWE-95
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - bash
+      - curl
+  - id: curl-pipe-bash
+    name: curl-pipe-bash
+    description: >-
+      Data is being piped into `bash` from a `curl` command. An attacker with control of the server in the `curl`
+      command could inject malicious code into the pipe, resulting in a system compromise. Avoid piping untrusted data
+      into `bash` or any other shell if you can. If you must do this, consider checking the SHA sum of the content
+      returned by the server to verify its integrity.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - regex: .*
+        message: >-
+          Data is being piped into `bash` from a `curl` command. An attacker with control of the server in the `curl`
+          command could inject malicious code into the pipe, resulting in a system compromise. Avoid piping untrusted
+          data into `bash` or any other shell if you can. If you must do this, consider checking the SHA sum of the
+          content returned by the server to verify its integrity.
+    cwe:
+      - CWE-95
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - bash
+      - curl
+  - id: iteration-over-ls-output
+    name: iteration-over-ls-output
+    description: Iterating over ls output is fragile. Use globs, e.g. 'dir/*' instead of '$(ls dir)'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - pattern: |
+          for $VAR in $LIST; do
+            ...
+          done
+        message: Iterating over ls output is fragile. Use globs, e.g. 'dir/*' instead of '$(ls dir)'.
+      - pattern: |
+          $(ls ...)
+        message: Iterating over ls output is fragile. Use globs, e.g. 'dir/*' instead of '$(ls dir)'.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/koalaman/shellcheck/wiki/SC2045
+    tags:
+      - bash
+  - id: useless-cat
+    name: useless-cat
+    description: Useless call to 'cat' in a pipeline. Use '<' and '>' for any command to read from a file or write to a file.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - pattern: |
+          cat | ...
+        message: Useless call to 'cat' in a pipeline. Use '<' and '>' for any command to read from a file or write to a file.
+      - pattern: |
+          ... | cat
+        message: Useless call to 'cat' in a pipeline. Use '<' and '>' for any command to read from a file or write to a file.
+      - pattern: |
+          ... | cat | ...
+        message: Useless call to 'cat' in a pipeline. Use '<' and '>' for any command to read from a file or write to a file.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/koalaman/shellcheck/wiki/SC2002
+    tags:
+      - bash
+  - id: unquoted-variable-expansion-in-command
+    name: unquoted-variable-expansion-in-command
+    description: >-
+      Variable expansions must be double-quoted so as to prevent being split into multiple pieces according to
+      whitespace or whichever separator is specified by the IFS variable. If you really wish to split the variable's
+      contents, you may use a variable that starts with an underscore e.g. $_X instead of $X, and semgrep will ignore
+      it. If what you need is an array, consider using a proper bash array.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - regex: .*
+        message: >-
+          Variable expansions must be double-quoted so as to prevent being split into multiple pieces according to
+          whitespace or whichever separator is specified by the IFS variable. If you really wish to split the variable's
+          contents, you may use a variable that starts with an underscore e.g. $_X instead of $X, and semgrep will
+          ignore it. If what you need is an array, consider using a proper bash array.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - bash
+  - id: unquoted-command-substitution-in-command
+    name: unquoted-command-substitution-in-command
+    description: >-
+      The result of command substitution $(...) or `...`, if unquoted, is split on whitespace or other separators
+      specified by the IFS variable. You should surround it with double quotes to avoid splitting the result.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - regex: |
+          .*(\$\([^\(]|`).+([^\)]\)|`).*
+        message: >-
+          The result of command substitution $(...) or `...`, if unquoted, is split on whitespace or other separators
+          specified by the IFS variable. You should surround it with double quotes to avoid splitting the result.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - bash
+  - id: ifs-tampering
+    name: ifs-tampering
+    description: >-
+      The special variable IFS affects how splitting takes place when expanding unquoted variables. Don't set it
+      globally. Prefer a dedicated utility such as 'cut' or 'awk' if you need to split input data. If you must use
+      'read', set IFS locally using e.g. 'IFS="," read -a my_array'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+    patterns:
+      - pattern: IFS=...
+        message: >-
+          The special variable IFS affects how splitting takes place when expanding unquoted variables. Don't set it
+          globally. Prefer a dedicated utility such as 'cut' or 'awk' if you need to split input data. If you must use
+          'read', set IFS locally using e.g. 'IFS="," read -a my_array'.
+    cwe:
+      - CWE-20
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - bash
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode

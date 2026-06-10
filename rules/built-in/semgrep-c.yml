@@ -1,0 +1,429 @@
+rules:
+  - id: c-string-equality
+    name: c-string-equality
+    description: Using == on char* performs pointer comparison, use strcmp instead
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: (char *$X) == (char *$Y)
+        message: Using == on char* performs pointer comparison, use strcmp instead
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - c
+  - id: double_goto
+    name: double_goto
+    description: The second goto statement will always be executed.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: |
+          if ($COND)
+            goto $FAIL;
+            goto $FAIL;
+        message: The second goto statement will always be executed.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - c
+  - id: incorrect-use-ato-fn
+    name: incorrect-use-ato-fn
+    description: >-
+      Avoid the 'ato*()' family of functions. Their use can lead to undefined behavior, integer overflows, and lack of
+      appropriate error handling. Instead prefer the 'strtol*()' family of functions.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: atoi(...)
+        message: >-
+          Avoid the 'ato*()' family of functions. Their use can lead to undefined behavior, integer overflows, and lack
+          of appropriate error handling. Instead prefer the 'strtol*()' family of functions.
+      - pattern: atol(...)
+        message: >-
+          Avoid the 'ato*()' family of functions. Their use can lead to undefined behavior, integer overflows, and lack
+          of appropriate error handling. Instead prefer the 'strtol*()' family of functions.
+      - pattern: atoll(...)
+        message: >-
+          Avoid the 'ato*()' family of functions. Their use can lead to undefined behavior, integer overflows, and lack
+          of appropriate error handling. Instead prefer the 'strtol*()' family of functions.
+    cwe: []
+    owasp: []
+    references:
+      - https://stackoverflow.com/q/38393162
+      - https://stackoverflow.com/q/14176123
+    tags:
+      - c
+  - id: incorrect-use-sscanf-fn
+    name: incorrect-use-sscanf-fn
+    description: >-
+      Avoid 'sscanf()' for number conversions. Its use can lead to undefined behavior, slow processing, and integer
+      overflows. Instead prefer the 'strto*()' family of functions.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: sscanf($STR, $FMT, $PTR);
+        message: >-
+          Avoid 'sscanf()' for number conversions. Its use can lead to undefined behavior, slow processing, and integer
+          overflows. Instead prefer the 'strto*()' family of functions.
+    cwe: []
+    owasp: []
+    references:
+      - https://stackoverflow.com/q/22865622
+      - https://stackoverflow.com/q/7021725
+      - https://www.mattkeeter.com/blog/2021-03-01-happen/
+    tags:
+      - c
+  - id: double-free
+    name: double-free
+    description: Variable '$VAR' was freed twice. This can lead to undefined behavior.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - regex: .*
+        message: Variable '$VAR' was freed twice. This can lead to undefined behavior.
+    cwe:
+      - CWE-415
+    owasp:
+      - A03:2021
+      - A01:2017
+      - A05:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/415.html
+      - https://owasp.org/www-community/vulnerabilities/Doubly_freeing_memory
+    tags:
+      - c
+  - id: function-use-after-free
+    name: function-use-after-free
+    description: Variable '$VAR' was passed to a function after being freed. This can lead to undefined behavior.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - regex: .*
+        message: Variable '$VAR' was passed to a function after being freed. This can lead to undefined behavior.
+    cwe:
+      - CWE-416
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/416.html
+      - https://ctf-wiki.github.io/ctf-wiki/pwn/linux/glibc-heap/use_after_free/
+    tags:
+      - c
+  - id: info-leak-on-non-formated-string
+    name: info-leak-on-non-formated-string
+    description: Use %s, %d, %c... to format your variables, otherwise this could leak information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: printf(argv[$NUM]);
+        message: Use %s, %d, %c... to format your variables, otherwise this could leak information.
+    cwe:
+      - CWE-532
+    owasp:
+      - A09:2021
+      - A09:2025
+    references:
+      - http://nebelwelt.net/files/13PPREW.pdf
+    tags:
+      - c
+  - id: insecure-use-gets-fn
+    name: insecure-use-gets-fn
+    description: >-
+      Avoid 'gets()'. This function does not consider buffer boundaries and can lead to buffer overflows. Use 'fgets()'
+      or 'gets_s()' instead.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: gets(...)
+        message: >-
+          Avoid 'gets()'. This function does not consider buffer boundaries and can lead to buffer overflows. Use
+          'fgets()' or 'gets_s()' instead.
+    cwe:
+      - CWE-676
+    owasp: []
+    references:
+      - https://us-cert.cisa.gov/bsi/articles/knowledge/coding-practices/fgets-and-gets_s
+    tags:
+      - c
+  - id: insecure-use-memset
+    name: insecure-use-memset
+    description: >-
+      When handling sensitive information in a buffer, it's important to ensure  that the data is securely erased before
+      the buffer is deleted or reused.  While `memset()` is commonly used for this purpose, it can leave sensitive 
+      information behind due to compiler optimizations or other factors.  To avoid this potential vulnerability, it's
+      recommended to use the  `memset_s()` function instead. `memset_s()` is a standardized function  that securely
+      overwrites the memory with a specified value, making it more  difficult for an attacker to recover any sensitive
+      data that was stored in  the buffer. By using `memset_s()` instead of `memset()`, you can help to  ensure that
+      your application is more secure and less vulnerable to exploits  that rely on residual data in memory.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: memset($...VARS)
+        message: >-
+          When handling sensitive information in a buffer, it's important to ensure  that the data is securely erased
+          before the buffer is deleted or reused.  While `memset()` is commonly used for this purpose, it can leave
+          sensitive  information behind due to compiler optimizations or other factors.  To avoid this potential
+          vulnerability, it's recommended to use the  `memset_s()` function instead. `memset_s()` is a standardized
+          function  that securely overwrites the memory with a specified value, making it more  difficult for an
+          attacker to recover any sensitive data that was stored in  the buffer. By using `memset_s()` instead of
+          `memset()`, you can help to  ensure that your application is more secure and less vulnerable to exploits  that
+          rely on residual data in memory.
+    cwe:
+      - CWE-14
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/14.html
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures/
+    tags:
+      - c
+  - id: insecure-use-printf-fn
+    name: insecure-use-printf-fn
+    description: >-
+      Avoid using user-controlled format strings passed into 'sprintf', 'printf' and 'vsprintf'. These functions put you
+      at risk of buffer overflow vulnerabilities through the use of format string exploits. Instead, use 'snprintf' and
+      'vsnprintf'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - regex: .*
+        message: >-
+          Avoid using user-controlled format strings passed into 'sprintf', 'printf' and 'vsprintf'. These functions put
+          you at risk of buffer overflow vulnerabilities through the use of format string exploits. Instead, use
+          'snprintf' and 'vsnprintf'.
+    cwe:
+      - CWE-134
+    owasp: []
+    references:
+      - https://doc.castsoftware.com/display/SBX/Never+use+sprintf%28%29+or+vsprintf%28%29+functions
+      - https://www.cvedetails.com/cwe-details/134/Uncontrolled-Format-String.html
+    tags:
+      - c
+  - id: insecure-use-scanf-fn
+    name: insecure-use-scanf-fn
+    description: >-
+      Avoid using 'scanf()'. This function, when used improperly, does not consider buffer boundaries and can lead to
+      buffer overflows. Use 'fgets()' instead for reading input.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: scanf(...)
+        message: >-
+          Avoid using 'scanf()'. This function, when used improperly, does not consider buffer boundaries and can lead
+          to buffer overflows. Use 'fgets()' instead for reading input.
+    cwe:
+      - CWE-676
+    owasp: []
+    references:
+      - http://sekrit.de/webdocs/c/beginners-guide-away-from-scanf.html
+    tags:
+      - c
+  - id: insecure-use-strcat-fn
+    name: insecure-use-strcat-fn
+    description: >-
+      Finding triggers whenever there is a strcat or strncat used. This is an issue because strcat or strncat can lead
+      to buffer overflow vulns. Fix this by using strcat_s instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: strcat(...)
+        message: >-
+          Finding triggers whenever there is a strcat or strncat used. This is an issue because strcat or strncat can
+          lead to buffer overflow vulns. Fix this by using strcat_s instead.
+      - pattern: strncat(...)
+        message: >-
+          Finding triggers whenever there is a strcat or strncat used. This is an issue because strcat or strncat can
+          lead to buffer overflow vulns. Fix this by using strcat_s instead.
+    cwe:
+      - CWE-676
+    owasp: []
+    references:
+      - https://nvd.nist.gov/vuln/detail/CVE-2019-12553
+      - https://techblog.mediaservice.net/2020/04/cve-2020-2851-stack-based-buffer-overflow-in-cde-libdtsvc/
+    tags:
+      - c
+  - id: insecure-use-string-copy-fn
+    name: insecure-use-string-copy-fn
+    description: >-
+      Finding triggers whenever there is a strcpy or strncpy used. This is an issue because strcpy does not affirm the
+      size of the destination array and strncpy will not automatically NULL-terminate strings. This can lead to buffer
+      overflows, which can cause program crashes and potentially let an attacker inject code in the program. Fix this by
+      using strcpy_s instead (although note that strcpy_s is an optional part of the C11 standard, and so may not be
+      available).
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: strcpy(...)
+        message: >-
+          Finding triggers whenever there is a strcpy or strncpy used. This is an issue because strcpy does not affirm
+          the size of the destination array and strncpy will not automatically NULL-terminate strings. This can lead to
+          buffer overflows, which can cause program crashes and potentially let an attacker inject code in the program.
+          Fix this by using strcpy_s instead (although note that strcpy_s is an optional part of the C11 standard, and
+          so may not be available).
+      - pattern: strncpy(...)
+        message: >-
+          Finding triggers whenever there is a strcpy or strncpy used. This is an issue because strcpy does not affirm
+          the size of the destination array and strncpy will not automatically NULL-terminate strings. This can lead to
+          buffer overflows, which can cause program crashes and potentially let an attacker inject code in the program.
+          Fix this by using strcpy_s instead (although note that strcpy_s is an optional part of the C11 standard, and
+          so may not be available).
+    cwe:
+      - CWE-676
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/676
+      - https://nvd.nist.gov/vuln/detail/CVE-2019-11365
+    tags:
+      - c
+  - id: insecure-use-strtok-fn
+    name: insecure-use-strtok-fn
+    description: >-
+      Avoid using 'strtok()'. This function directly modifies the first argument buffer, permanently erasing the
+      delimiter character. Use 'strtok_r()' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - pattern: strtok(...)
+        message: >-
+          Avoid using 'strtok()'. This function directly modifies the first argument buffer, permanently erasing the
+          delimiter character. Use 'strtok_r()' instead.
+    cwe:
+      - CWE-676
+    owasp: []
+    references:
+      - >-
+        https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
+      - https://man7.org/linux/man-pages/man3/strtok.3.html#BUGS
+      - https://stackoverflow.com/a/40335556
+    tags:
+      - c
+  - id: random-fd-exhaustion
+    name: random-fd-exhaustion
+    description: >-
+      Call to 'read()' without error checking is susceptible to file descriptor exhaustion. Consider using the
+      'getrandom()' function.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - regex: .*
+        message: >-
+          Call to 'read()' without error checking is susceptible to file descriptor exhaustion. Consider using the
+          'getrandom()' function.
+    cwe:
+      - CWE-774
+    owasp: []
+    references:
+      - https://lwn.net/Articles/606141/
+    tags:
+      - c
+  - id: use-after-free
+    name: use-after-free
+    description: Variable '$VAR' was used after being freed. This can lead to undefined behavior.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - c
+    patterns:
+      - regex: .*
+        message: Variable '$VAR' was used after being freed. This can lead to undefined behavior.
+    cwe:
+      - CWE-416
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/416.html
+      - https://ctf-wiki.github.io/ctf-wiki/pwn/linux/glibc-heap/use_after_free/
+    tags:
+      - c
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode

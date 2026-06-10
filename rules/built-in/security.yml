@@ -1,0 +1,379 @@
+rules:
+  # ── Security: Injection ──
+  - id: security/sql-injection
+    name: SQL Injection
+    description: Detects potential SQL injection vulnerabilities where user input may be directly concatenated into SQL queries
+    category: injection
+    subcategory: sql
+    severity: critical
+    confidence: high
+    cwe: [CWE-89]
+    owasp: ["A03:2021"]
+    languages: [javascript, typescript, python, java, php, ruby, go, csharp]
+    patterns:
+      - regex: "(?:query|execute|exec)\\s*\\(\\s*[`\"']\\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER).*\\$\\{"
+        message: SQL query with template literal interpolation
+      - regex: "(?:query|execute|exec)\\s*\\(\\s*[\"']\\s*(?:SELECT|INSERT|UPDATE|DELETE).*[\"']\\s*\\+"
+        message: SQL query with string concatenation
+      - regex: "f[\"']\\s*(?:SELECT|INSERT|UPDATE|DELETE).*\\{"
+        message: SQL query with f-string interpolation (Python)
+      - regex: "\\.raw\\s*\\(\\s*[`\"'\\$]"
+        message: Raw SQL query usage
+      - regex: "(?:DB\\s*::\\s*(?:select|statement|insert|update|delete|raw)|whereRaw|havingRaw|orderByRaw)\\s*\\(\\s*[\"'](?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|UNION)\\b[^\"']*[\"']\\s*\\.\\s*\\$\\w+"
+        message: Laravel raw SQL query built with string concatenation
+    fix:
+      description: Use parameterized queries or prepared statements instead of string concatenation
+      replacement: Use db.query("SELECT * FROM users WHERE id = ?", [userId])
+    tags: [owasp-top-10, injection, a03]
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection/
+      - https://cwe.mitre.org/data/definitions/89.html
+
+  - id: security/command-injection
+    name: Command Injection
+    description: Detects potential OS command injection where user input flows into command execution functions
+    category: injection
+    subcategory: command
+    severity: critical
+    confidence: high
+    cwe: [CWE-78]
+    owasp: ["A03:2021"]
+    languages: [javascript, typescript, python, java, php, ruby, go, c, cpp]
+    patterns:
+      - regex: "(?:exec|execSync|spawn|spawnSync)\\s*\\(\\s*(?:[`\"'].*\\$\\{|[\"'].*\\+)"
+        message: Command execution with interpolated/concatenated input
+      - regex: "child_process.*(?:exec|spawn)\\s*\\("
+        message: child_process usage detected - verify input sanitization
+      - regex: "os\\.system\\s*\\(\\s*(?:f[\"']|[\"'].*%|.*\\+)"
+        message: os.system() with dynamic input (Python)
+      - regex: "subprocess\\.(?:call|run|Popen)\\s*\\(\\s*(?:f[\"']|.*\\+|.*%)"
+        message: subprocess with dynamic input (Python)
+      - regex: "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\("
+        message: Runtime.exec() usage (Java)
+      - regex: "system\\s*\\(\\s*(?:\\$|.*\\+|.*\\.)"
+        message: system() call with dynamic input
+    fix:
+      description: Use parameterized APIs (e.g., execFile with array args) or whitelist-validate input
+    tags: [owasp-top-10, injection, a03]
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection/
+      - https://cwe.mitre.org/data/definitions/78.html
+
+  - id: security/code-injection
+    name: Code Injection (eval)
+    description: Detects usage of eval() and similar dynamic code execution functions
+    category: injection
+    subcategory: code
+    severity: critical
+    confidence: high
+    cwe: [CWE-94, CWE-95]
+    owasp: ["A03:2021"]
+    languages: [javascript, typescript, python, php, ruby]
+    patterns:
+      - regex: "\\beval\\s*\\("
+        message: eval() usage detected
+      - regex: "new\\s+Function\\s*\\("
+        message: new Function() is equivalent to eval()
+      - regex: "setTimeout\\s*\\(\\s*[\"']"
+        message: setTimeout with string argument acts like eval()
+      - regex: "setInterval\\s*\\(\\s*[\"']"
+        message: setInterval with string argument acts like eval()
+      - regex: "\\bexec\\s*\\(\\s*compile\\s*\\("
+        message: exec(compile()) in Python
+    fix:
+      description: Avoid eval() and dynamic code execution. Use JSON.parse() for data, or safe alternatives.
+    tags: [owasp-top-10, injection]
+    references:
+      - https://cwe.mitre.org/data/definitions/94.html
+
+  # ── Security: XSS ──
+  - id: security/xss-innerhtml
+    name: XSS via innerHTML
+    description: Detects assignment to innerHTML which can lead to Cross-Site Scripting
+    category: xss
+    severity: high
+    confidence: medium
+    cwe: [CWE-79]
+    owasp: ["A03:2021"]
+    languages: [javascript, typescript]
+    patterns:
+      - regex: "\\.innerHTML\\s*="
+        message: innerHTML assignment can lead to XSS
+      - regex: "\\.outerHTML\\s*="
+        message: outerHTML assignment can lead to XSS
+      - regex: "document\\.write\\s*\\("
+        message: document.write() can lead to XSS
+      - regex: "document\\.writeln\\s*\\("
+        message: document.writeln() can lead to XSS
+      - regex: dangerouslySetInnerHTML
+        message: React dangerouslySetInnerHTML usage
+      - regex: "\\$\\(.*\\)\\.html\\s*\\("
+        message: jQuery .html() can lead to XSS
+    fix:
+      description: Use textContent instead of innerHTML, or sanitize with DOMPurify
+    tags: [owasp-top-10, xss]
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection/
+      - https://cwe.mitre.org/data/definitions/79.html
+
+  - id: security/xss-response
+    name: Reflected XSS in HTTP Responses
+    description: Detects dynamic HTML generation in HTTP responses which can lead to reflected XSS
+    category: xss
+    severity: high
+    confidence: medium
+    cwe: [CWE-79]
+    owasp: ["A03:2021"]
+    languages: [javascript, typescript, python, php]
+    patterns:
+      - regex: "res\\.(?:send|write|end)\\s*\\(\\s*`[^`]*<[a-zA-Z]+[^>]*>[^`]*\\$\\{"
+        message: Dynamic HTML template literal sent directly in HTTP response
+      - regex: "res\\.(?:send|write|end)\\s*\\(\\s*(?:[\"'][^\"']*<[a-zA-Z]+[^>]*>[^\"']*[\"']\\s*\\+|[^)]+\\s*\\+\\s*[\"'][^\"']*<[a-zA-Z]+[^>]*>)"
+        message: HTML string concatenation sent directly in HTTP response
+      - regex: "return\\s+['\"][^'\"]*<[a-zA-Z]+[^>]*>[^'\"]*['\"]\\s*%\\s*\\w+"
+        message: Python string formatting used to return HTML response
+      - regex: "return\\s+f['\"][^'\"]*<[a-zA-Z]+[^>]*>[^'\"]*\\{"
+        message: Python f-string used to return HTML response
+      - regex: "mark_safe\\s*\\(\\s*(?!(?:['\"`][^'\"`]*['\"`])\\s*\\))\\S"
+        message: Django mark_safe called with dynamic content or variable
+    fix:
+      description: Always escape HTML inputs, use template autoescaping, or sanitize with a library like DOMPurify/bleach.
+    tags: [owasp-top-10, xss]
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+
+  # ── Security: Secrets ──
+  - id: security/hardcoded-secret
+    name: Hardcoded Secret
+    description: Detects hardcoded passwords, API keys, and tokens in source code
+    category: secrets
+    severity: critical
+    confidence: high
+    cwe: [CWE-798]
+    owasp: ["A07:2021"]
+    languages: ["*"]
+    patterns:
+      - regex: "(?:password|passwd|pwd|secret|api_key|apikey|api_secret|access_key|access_token|auth_token|private_key)\\s*[:=]\\s*[\"'][^\"']{8,}[\"']"
+        message: Hardcoded secret value detected
+      - regex: "AKIA[0-9A-Z]{16}"
+        message: AWS Access Key ID detected
+      - regex: "ghp_[a-zA-Z0-9]{36}"
+        message: GitHub Personal Access Token detected
+      - regex: "gho_[a-zA-Z0-9]{36}"
+        message: GitHub OAuth Token detected
+      - regex: "xox[bpras]-[a-zA-Z0-9-]+"
+        message: Slack Token detected
+      - regex: "sk-[a-zA-Z0-9]{20,}"
+        message: OpenAI/Stripe Secret Key detected
+      - regex: "sk_live_[a-zA-Z0-9]{24,}"
+        message: Stripe Live Secret Key detected
+      - regex: "sq0csp-[a-zA-Z0-9\\-_]{43}"
+        message: Square Access Token detected
+      - regex: "SG\\.[a-zA-Z0-9\\-_]{22}\\.[a-zA-Z0-9\\-_]{43}"
+        message: SendGrid API Key detected
+      - regex: "ya29\\.[a-zA-Z0-9_-]+"
+        message: Google OAuth Access Token detected
+      - regex: "-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
+        message: Private key detected in source code
+      - regex: "(?:mongodb|postgres|mysql|redis)://[^\\s\"']+:[^\\s\"']+@"
+        message: Database connection string with credentials
+    fix:
+      description: Use environment variables or a secrets manager. Never commit secrets to source control.
+    tags: [owasp-top-10, secrets, a07]
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+
+  # ── Security: Auth ──
+  - id: security/weak-auth
+    name: Weak Authentication Pattern
+    description: Detects weak authentication patterns that could lead to security vulnerabilities
+    category: auth
+    severity: high
+    confidence: medium
+    cwe: [CWE-287]
+    owasp: ["A07:2021"]
+    languages: [javascript, typescript, python, java, php]
+    patterns:
+      - regex: "jwt\\.sign\\s*\\([^)]*[\"']secret[\"']"
+        message: JWT signed with weak/default secret
+      - regex: "algorithm\\s*[:=]\\s*[\"'](?:none|HS256)[\"']"
+        message: JWT using weak algorithm (none or HS256)
+      - regex: "session\\.cookie\\.secure\\s*[:=]\\s*false"
+        message: Session cookie not using secure flag
+      - regex: "httpOnly\\s*[:=]\\s*false"
+        message: Cookie httpOnly flag disabled
+      - regex: "verify\\s*[:=]\\s*false"
+        message: SSL/TLS verification disabled
+      - regex: "password\\s*===?\\s*[\"']"
+        message: Direct password comparison (use bcrypt/argon2)
+    fix:
+      description: Use strong secrets, secure cookie flags, and proper password hashing (bcrypt/argon2)
+    tags: [auth, a07]
+    references:
+      - https://cwe.mitre.org/data/definitions/287.html
+
+  # ── Security: Crypto ──
+  - id: security/weak-crypto
+    name: Weak Cryptography
+    description: Detects usage of weak or deprecated cryptographic algorithms
+    category: crypto
+    severity: high
+    confidence: high
+    cwe: [CWE-327, CWE-328]
+    owasp: ["A02:2021"]
+    languages: ["*"]
+    patterns:
+      - regex: "(?:createHash|MessageDigest\\.getInstance|hashlib\\.)\\s*\\(?\\s*[\"'](?:md5|md4|sha1|sha-1)[\"']"
+        message: Weak hash algorithm (MD5/SHA1) - use SHA-256 or stronger
+      - regex: "(?:createCipher|Cipher\\.getInstance)\\s*\\(?\\s*[\"'](?:des|rc4|rc2|blowfish)[\"']"
+        message: Weak encryption algorithm - use AES-256-GCM
+      - regex: "Math\\.random\\s*\\("
+        message: Math.random() is not cryptographically secure - use crypto.getRandomValues()
+      - regex: "random\\.random\\s*\\("
+        message: random.random() is not cryptographically secure (Python) - use secrets module
+      - regex: "(?:createCipher(?:iv)?|new.*Cipher)\\s*\\([^)]*[\"'][^\"']{1,32}[\"']"
+        message: Possible hardcoded encryption key
+    fix:
+      description: Use SHA-256+ for hashing, AES-256-GCM for encryption, and crypto.getRandomValues/secrets for randomness
+    tags: [crypto, a02]
+    references:
+      - https://cwe.mitre.org/data/definitions/327.html
+
+  # ── Security: File Operations ──
+  - id: security/path-traversal
+    name: Path Traversal
+    description: Detects potential path traversal vulnerabilities in file operations
+    category: file-ops
+    severity: high
+    confidence: medium
+    cwe: [CWE-22]
+    owasp: ["A01:2021"]
+    languages: ["*"]
+    patterns:
+      - regex: "(?:readFile|writeFile|createReadStream|createWriteStream|open)\\s*\\(\\s*(?:req\\.|request\\.|params\\.|query\\.)"
+        message: File operation with user-controlled path
+      - regex: "\\.\\.[\\\\/]"
+        message: Path traversal sequence detected
+      - regex: "path\\.join\\s*\\([^)]*(?:req\\.|request\\.|params\\.|query\\.)"
+        message: path.join with user input
+      - regex: "(?:ioutil\\.|os\\.)(?:ReadFile|Open|OpenFile|Create|Remove)\\s*\\(\\s*[^'\"`)]*\\b(?:req|request|params|query|body|args|input|user|filename|file|path|uri|url)\\b"
+        message: File read/open with dynamic path (Go/Generic)
+      - regex: "(?:filepath\\.|path\\.|os\\.path\\.)Join\\s*\\(\\s*[^,]+,\\s*\\b(?:req|request|params|query|body|args|input|user|filename|file|path|uri|url)\\b"
+        message: Path construction with user input/variables
+    fix:
+      description: Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.
+    tags: [file-ops, a01]
+    references:
+      - https://cwe.mitre.org/data/definitions/22.html
+
+  # ── Security: XXE ──
+  - id: security/xxe
+    name: XML External Entity (XXE)
+    description: Detects unsafe XML parsers where external entity resolution is not disabled
+    category: api-security
+    subcategory: xxe
+    severity: critical
+    confidence: medium
+    cwe: [CWE-611]
+    owasp: ["A05:2021"]
+    languages: [java, javascript, typescript, python]
+    patterns:
+      - regex: "DocumentBuilderFactory\\s*\\.\\s*(?:newInstance|newDefaultInstance)"
+        message: Java DocumentBuilderFactory instantiated
+      - regex: "XMLInputFactory\\s*\\.\\s*(?:newInstance|newFactory)"
+        message: Java XMLInputFactory instantiated
+      - regex: "libxmljs\\s*\\.\\s*parseXml\\s*\\(\\s*[^,)]+\\s*,\\s*\\{\\s*noent\\s*:\\s*true"
+        message: "libxmljs parseXml with noent: true enables XXE"
+    fix:
+      description: Disable DTDs and external entities in your XML parser configuration.
+    tags: [xxe, xml, api-security]
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+
+  # ── Security: SSRF ──
+  - id: security/ssrf
+    name: Server-Side Request Forgery (SSRF)
+    description: Detects HTTP requests made with user-controlled URLs
+    category: api-security
+    subcategory: ssrf
+    severity: critical
+    confidence: high
+    cwe: [CWE-918]
+    owasp: ["A10:2021"]
+    languages: [javascript, typescript, python, java]
+    patterns:
+      - regex: "axios\\s*\\.\\s*(?:get|post|request)\\s*\\(\\s*(?:req|request|params|query|body|args|input|user|url)"
+        message: Axios request with user input
+      - regex: "fetch\\s*\\(\\s*(?:req|request|params|query|body|args|input|user|url)"
+        message: Fetch request with user input
+      - regex: "requests\\s*\\.\\s*(?:get|post|request)\\s*\\(\\s*(?:req|request|params|user_input|url)"
+        message: Python requests call with user input
+    fix:
+      description: Validate user input before sending HTTP requests. Restrict to a whitelist of allowed domains.
+    tags: [ssrf, api-security]
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+
+  # ── Security: CORS Misconfiguration ──
+  - id: security/cors-wildcard
+    name: Unsafe CORS Wildcard
+    description: Detects CORS configurations that permit wildcard (*) origins
+    category: api-security
+    subcategory: cors
+    severity: high
+    confidence: high
+    cwe: [CWE-942]
+    owasp: ["A02:2021"]
+    languages: [javascript, typescript]
+    patterns:
+      - regex: "Access-Control-Allow-Origin[\"']\\s*[\\s,:=]\\s*[\"']\\*[\"']"
+        message: CORS header set to wildcard (*)
+      - regex: "origin\\s*:\\s*[\"']\\*[\"']"
+        message: Express CORS middleware wildcard origin
+    fix:
+      description: Specify trusted domains instead of a wildcard (*), especially if cookies or credentials are sent.
+    tags: [cors, api-security]
+    references:
+      - https://owasp.org/www-community/attacks/CORS_Origin_Reflection
+
+  # ── Security: CSRF Disabled ──
+  - id: security/csrf-disabled
+    name: CSRF Protection Disabled
+    description: Detects configurations where CSRF protection has been explicitly disabled
+    category: api-security
+    subcategory: csrf
+    severity: high
+    confidence: high
+    cwe: [CWE-352]
+    owasp: ["A01:2021"]
+    languages: [java, kotlin]
+    patterns:
+      - regex: "csrf\\s*\\(\\s*\\)\\s*\\.\\s*disable\\s*\\(\\s*\\)"
+        message: CSRF protection disabled in Spring Security
+    fix:
+      description: Do not disable CSRF unless using token-based authentication (like JWT) that is not stored in cookies.
+    tags: [csrf, api-security]
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+
+  # ── Security: Missing Rate Limiting ──
+  - id: security/missing-rate-limit
+    name: Missing Rate Limiting
+    description: Detects sensitive authentication endpoints defined without rate limiting middleware
+    category: api-security
+    subcategory: rate-limiting
+    severity: medium
+    confidence: high
+    cwe: [CWE-770]
+    owasp: ["A04:2021-API"]
+    languages: [javascript, typescript]
+    patterns:
+      - regex: "app\\.(?:post|get)\\s*\\(\\s*[\"']\\/api\/auth\/login[\"']\\s*,\\s*(?!(?:[a-zA-Z0-9_]+Limit|limiter)\\b)"
+        message: Login route missing rate limit
+      - regex: "app\\.(?:post|get)\\s*\\(\\s*[\"']\\/api\/auth\/register[\"']\\s*,\\s*(?!(?:[a-zA-Z0-9_]+Limit|limiter)\\b)"
+        message: Registration route missing rate limit
+    fix:
+      description: Add a rate limiter middleware (e.g., express-rate-limit) to prevent brute-force attacks.
+    tags: [rate-limiting, api-security]
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html

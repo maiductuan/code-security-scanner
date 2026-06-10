@@ -1,0 +1,2785 @@
+rules:
+  - id: dockerfile-dockerd-socket-mount
+    name: dockerfile-dockerd-socket-mount
+    description: >-
+      The Dockerfile(image) mounts docker.sock to the container which may allow an attacker already inside of the
+      container to escape container and execute arbitrary commands on the host machine.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - dockerfile
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          The Dockerfile(image) mounts docker.sock to the container which may allow an attacker already inside of the
+          container to escape container and execute arbitrary commands on the host machine.
+    cwe:
+      - CWE-862
+      - CWE-269
+    owasp: []
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
+      - https://redfoxsec.com/blog/insecure-volume-mounts-in-docker/
+      - https://blog.quarkslab.com/why-is-exposing-the-docker-socket-a-really-bad-idea.html
+    tags:
+      - dockerfile
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode
+  - id: spring-actuator-fully-enabled-yaml
+    name: spring-actuator-fully-enabled-yaml
+    description: >-
+      Spring Boot Actuator is fully enabled. This exposes sensitive endpoints such as /actuator/env, /actuator/logfile,
+      /actuator/heapdump and others. Unless you have Spring Security enabled or another means to protect these
+      endpoints, this functionality is available without authentication, causing a severe security risk.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          include: "*"
+        message: >-
+          Spring Boot Actuator is fully enabled. This exposes sensitive endpoints such as /actuator/env,
+          /actuator/logfile, /actuator/heapdump and others. Unless you have Spring Security enabled or another means to
+          protect these endpoints, this functionality is available without authentication, causing a severe security
+          risk.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-endpoints-exposing-endpoints
+      - https://medium.com/walmartglobaltech/perils-of-spring-boot-actuators-misconfiguration-185c43a0f785
+      - https://blog.maass.xyz/spring-actuator-security-part-1-stealing-secrets-using-spring-actuators
+    tags:
+      - spring
+  - id: spring-actuator-dangerous-endpoints-enabled-yaml
+    name: spring-actuator-dangerous-endpoints-enabled-yaml
+    description: >-
+      Spring Boot Actuator "$ACTUATOR" is enabled. Depending on the actuator, this can pose a significant security risk.
+      Please double-check if the actuator is needed and properly secured.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          include: [..., $ACTUATOR, ...]
+        message: >-
+          Spring Boot Actuator "$ACTUATOR" is enabled. Depending on the actuator, this can pose a significant security
+          risk. Please double-check if the actuator is needed and properly secured.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-endpoints-exposing-endpoints
+      - https://medium.com/walmartglobaltech/perils-of-spring-boot-actuators-misconfiguration-185c43a0f785
+      - https://blog.maass.xyz/spring-actuator-security-part-1-stealing-secrets-using-spring-actuators
+    tags:
+      - spring
+  - id: dependabot-missing-cooldown
+    name: dependabot-missing-cooldown
+    description: >-
+      This Dependabot configuration does not set a cooldown period. Newly published packages can be malicious or
+      unstable. Add a `cooldown` block with `default-days: 7` to each `package-ecosystem` entry under `updates` to wait
+      7 days before proposing updates to newly published package versions. Reference:
+      https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This Dependabot configuration does not set a cooldown period. Newly published packages can be malicious or
+          unstable. Add a `cooldown` block with `default-days: 7` to each `package-ecosystem` entry under `updates` to
+          wait 7 days before proposing updates to newly published package versions. Reference:
+          https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - >-
+        https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown
+    tags:
+      - dependabot
+  - id: pnpm-block-exotic-sub-dependencies
+    name: pnpm-block-exotic-sub-dependencies
+    description: >-
+      Missing or incorrect blockExoticSubdeps. Set `blockExoticSubdeps: true` to transitive dependencies from being
+      installed from untrusted sources. Added in: v10.26.0 Reference: https://pnpm.io/settings#blockexoticsubdeps
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Missing or incorrect blockExoticSubdeps. Set `blockExoticSubdeps: true` to transitive dependencies from being
+          installed from untrusted sources. Added in: v10.26.0 Reference: https://pnpm.io/settings#blockexoticsubdeps
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://pnpm.io/settings#blockexoticsubdeps
+    tags:
+      - pnpm
+  - id: pnpm-minimum-release-age
+    name: pnpm-minimum-release-age
+    description: >-
+      This pnpm workspace configuration does not set a minimum release age. Newly published packages can be malicious or
+      unstable. Add `minimumReleaseAge: 10080` (minutes) to wait at least seven days before installing newly published
+      package versions. Added in: v10.16.0 Reference: https://pnpm.io/settings#minimumreleaseage
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This pnpm workspace configuration does not set a minimum release age. Newly published packages can be
+          malicious or unstable. Add `minimumReleaseAge: 10080` (minutes) to wait at least seven days before installing
+          newly published package versions. Added in: v10.16.0 Reference: https://pnpm.io/settings#minimumreleaseage
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://pnpm.io/settings#minimumreleaseage
+    tags:
+      - pnpm
+  - id: pnpm-trust-policy
+    name: pnpm-trust-policy
+    description: >-
+      Missing or incorrect trustPolicy. Set `trustPolicy: no-downgrade` to prevent malicious package updates from
+      downgrading security settings. Added in: v10.21.0 Reference: https://pnpm.io/settings#trustpolicy
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Missing or incorrect trustPolicy. Set `trustPolicy: no-downgrade` to prevent malicious package updates from
+          downgrading security settings. Added in: v10.21.0 Reference: https://pnpm.io/settings#trustpolicy
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://pnpm.io/settings#minimumreleaseage
+    tags:
+      - pnpm
+  - id: yarn-missing-minimal-age-gate
+    name: yarn-missing-minimal-age-gate
+    description: >-
+      This .yarnrc.yml does not set a minimal age gate or sets it too low. Newly published packages can be malicious or
+      unstable. Add `npmMinimalAgeGate: "7d"` to wait 7 days before resolving newly published package versions. Added
+      in: 4.10 Reference: https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This .yarnrc.yml does not set a minimal age gate or sets it too low. Newly published packages can be malicious
+          or unstable. Add `npmMinimalAgeGate: "7d"` to wait 7 days before resolving newly published package versions.
+          Added in: 4.10 Reference: https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate
+    tags:
+      - yarn
+      - javascript
+  - id: check-rails-secret-yaml
+    name: check-rails-secret-yaml
+    description: >-
+      $VALUE Found a string literal assignment to a production Rails session secret in `secrets.yaml`. Do not commit
+      secret values to source control! Any user in possession of this value may falsify arbitrary session data in your
+      application. Read this value from an environment variable, KMS, or file on disk outside of source control.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          secret_key_base: $VALUE
+        message: >-
+          $VALUE Found a string literal assignment to a production Rails session secret in `secrets.yaml`. Do not commit
+          secret values to source control! Any user in possession of this value may falsify arbitrary session data in
+          your application. Read this value from an environment variable, KMS, or file on disk outside of source
+          control.
+    cwe:
+      - CWE-540
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/presidentbeef/brakeman/blob/main/test/apps/rails4/config/secrets.yml
+    tags:
+      - ruby
+      - rails
+  - id: event-binding-payload-with-hyphen
+    name: event-binding-payload-with-hyphen
+    description: >-
+      The parameter `$VALUE` to this WorkflowEventBinding includes hyphens, which will, very confusingly, throw an error
+      when Argo Workflows tries to invoke the workflow. Set the payload value to use underscores instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          The parameter `$VALUE` to this WorkflowEventBinding includes hyphens, which will, very confusingly, throw an
+          error when Argo Workflows tries to invoke the workflow. Set the payload value to use underscores instead.
+    cwe: []
+    owasp: []
+    references:
+      - https://argoproj.github.io/argo-workflows/variables/#expression
+    tags:
+      - argo
+      - argo-workflows
+  - id: argo-workflow-parameter-command-injection
+    name: argo-workflow-parameter-command-injection
+    description: >-
+      Using input or workflow parameters in here-scripts can lead to command injection or code injection. Convert the
+      parameters to env variables instead.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Using input or workflow parameters in here-scripts can lead to command injection or code injection. Convert
+          the parameters to env variables instead.
+    cwe:
+      - CWE-78
+      - CWE-94
+    owasp:
+      - A03:2021
+    references:
+      - https://github.com/argoproj/argo-workflows/issues/5061
+      - https://github.com/argoproj/argo-workflows/issues/5114#issue-808865370
+    tags:
+      - ci
+      - argo
+  - id: exposing-docker-socket-volume
+    name: exposing-docker-socket-volume
+    description: >-
+      Exposing host's Docker socket to containers via a volume. The owner of this socket is root. Giving someone access
+      to it is equivalent to giving unrestricted root access to your host. Remove 'docker.sock' from volumes to prevent
+      this.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Exposing host's Docker socket to containers via a volume. The owner of this socket is root. Giving someone
+          access to it is equivalent to giving unrestricted root access to your host. Remove 'docker.sock' from volumes
+          to prevent this.
+    cwe:
+      - CWE-250
+    owasp:
+      - A06:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers
+    tags:
+      - docker-compose
+  - id: no-new-privileges
+    name: no-new-privileges
+    description: >-
+      Service '$SERVICE' allows for privilege escalation via setuid or setgid binaries. Add 'no-new-privileges:true' in
+      'security_opt' to prevent this.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          $SERVICE:
+            ...
+            image: ...
+        message: >-
+          Service '$SERVICE' allows for privilege escalation via setuid or setgid binaries. Add 'no-new-privileges:true'
+          in 'security_opt' to prevent this.
+    cwe:
+      - CWE-732
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/
+      - https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-4-add-no-new-privileges-flag
+    tags:
+      - docker-compose
+  - id: privileged-service
+    name: privileged-service
+    description: >-
+      Service '$SERVICE' is running in privileged mode. This grants the container the equivalent of root capabilities on
+      the host machine. This can lead to container escapes, privilege escalation, and other security concerns. Remove
+      the 'privileged' key to disable this capability.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Service '$SERVICE' is running in privileged mode. This grants the container the equivalent of root
+          capabilities on the host machine. This can lead to container escapes, privilege escalation, and other security
+          concerns. Remove the 'privileged' key to disable this capability.
+    cwe:
+      - CWE-250
+    owasp:
+      - A06:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://www.trendmicro.com/en_us/research/19/l/why-running-a-privileged-container-in-docker-is-a-bad-idea.html
+      - https://containerjournal.com/topics/container-security/why-running-a-privileged-container-is-not-a-good-idea/
+    tags:
+      - docker-compose
+  - id: seccomp-confinement-disabled
+    name: seccomp-confinement-disabled
+    description: >-
+      Service '$SERVICE' is explicitly disabling seccomp confinement. This runs the service in an unrestricted state.
+      Remove 'seccomp:unconfined' to prevent this.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          $SERVICE:
+            ...
+            image: ...
+            ...
+            security_opt:
+              - ...
+              - seccomp:unconfined
+        message: >-
+          Service '$SERVICE' is explicitly disabling seccomp confinement. This runs the service in an unrestricted
+          state. Remove 'seccomp:unconfined' to prevent this.
+    cwe:
+      - CWE-284
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://docs.docker.com/engine/security/seccomp/
+    tags:
+      - docker-compose
+  - id: selinux-separation-disabled
+    name: selinux-separation-disabled
+    description: >-
+      Service '$SERVICE' is explicitly disabling SELinux separation. This runs the service as an unconfined type. Remove
+      'label:disable' to prevent this.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          $SERVICE:
+            ...
+            image: ...
+            ...
+            security_opt:
+              - ...
+              - label:disable
+        message: >-
+          Service '$SERVICE' is explicitly disabling SELinux separation. This runs the service as an unconfined type.
+          Remove 'label:disable' to prevent this.
+    cwe:
+      - CWE-284
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.projectatomic.io/blog/2016/03/dwalsh_selinux_containers/
+      - https://docs.docker.com/engine/reference/run/#security-configuration
+    tags:
+      - docker-compose
+  - id: writable-filesystem-service
+    name: writable-filesystem-service
+    description: >-
+      Service '$SERVICE' is running with a writable root filesystem. This may allow malicious applications to download
+      and run additional payloads, or modify container files. If an application inside a container has to save something
+      temporarily consider using a tmpfs. Add 'read_only: true' to this service to prevent this.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          $SERVICE:
+            ...
+            image: ...
+            ...
+        message: >-
+          Service '$SERVICE' is running with a writable root filesystem. This may allow malicious applications to
+          download and run additional payloads, or modify container files. If an application inside a container has to
+          save something temporarily consider using a tmpfs. Add 'read_only: true' to this service to prevent this.
+    cwe:
+      - CWE-732
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - >-
+        https://docs.docker.com/compose/compose-file/compose-file-v3/#domainname-hostname-ipc-mac_address-privileged-read_only-shm_size-stdin_open-tty-user-working_dir
+      - https://blog.atomist.com/security-of-docker-kubernetes/
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-8-set-filesystem-and-volumes-to-read-only
+    tags:
+      - docker-compose
+  - id: allowed-unsecure-commands
+    name: allowed-unsecure-commands
+    description: >-
+      The environment variable `ACTIONS_ALLOW_UNSECURE_COMMANDS` grants this workflow permissions to use the `set-env`
+      and `add-path` commands. There is a vulnerability in these commands that could result in environment variables
+      being modified by an attacker. Depending on the use of the environment variable, this could enable an attacker to,
+      at worst, modify the system path to run a different command than intended, resulting in arbitrary code execution.
+      This could result in stolen code or secrets. Don't use `ACTIONS_ALLOW_UNSECURE_COMMANDS`. Instead, use Environment
+      Files. See https://github.com/actions/toolkit/blob/main/docs/commands.md#environment-files for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          The environment variable `ACTIONS_ALLOW_UNSECURE_COMMANDS` grants this workflow permissions to use the
+          `set-env` and `add-path` commands. There is a vulnerability in these commands that could result in environment
+          variables being modified by an attacker. Depending on the use of the environment variable, this could enable
+          an attacker to, at worst, modify the system path to run a different command than intended, resulting in
+          arbitrary code execution. This could result in stolen code or secrets. Don't use
+          `ACTIONS_ALLOW_UNSECURE_COMMANDS`. Instead, use Environment Files. See
+          https://github.com/actions/toolkit/blob/main/docs/commands.md#environment-files for more information.
+    cwe:
+      - CWE-749
+    owasp:
+      - A06:2017
+    references:
+      - https://github.blog/changelog/2020-10-01-github-actions-deprecating-set-env-and-add-path-commands/
+      - https://github.com/actions/toolkit/security/advisories/GHSA-mfwh-5m23-j46w
+      - https://github.com/actions/toolkit/blob/main/docs/commands.md#environment-files
+    tags:
+      - github-actions
+  - id: unsafe-add-mask-workflow-command
+    name: unsafe-add-mask-workflow-command
+    description: >-
+      GitHub Actions provides the **'add-mask'** workflow command to mask sensitive data in the workflow logs. If
+      **'add-mask'** is not used or if workflow commands have been stopped, sensitive data can leaked into the workflow
+      logs. An attacker could simply copy the workflow to another branch and add the following payload `echo
+      "::stop-commands::$stopMarker"` to stop workflow command processing ([described
+      here](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#stopping-and-starting-workflow-commands)),
+      which will cause the secret token to be exposed despite the **'add-mask'** usage. For more information, please
+      refer to the [GitHub
+      documentation](https://github.com/actions/toolkit/blob/main/docs/commands.md#register-a-secret).
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: '::add-mask::'
+        message: >-
+          GitHub Actions provides the **'add-mask'** workflow command to mask sensitive data in the workflow logs. If
+          **'add-mask'** is not used or if workflow commands have been stopped, sensitive data can leaked into the
+          workflow logs. An attacker could simply copy the workflow to another branch and add the following payload
+          `echo "::stop-commands::$stopMarker"` to stop workflow command processing ([described
+          here](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#stopping-and-starting-workflow-commands)),
+          which will cause the secret token to be exposed despite the **'add-mask'** usage. For more information, please
+          refer to the [GitHub
+          documentation](https://github.com/actions/toolkit/blob/main/docs/commands.md#register-a-secret).
+    cwe:
+      - CWE-200
+    owasp:
+      - A06:2017
+    references:
+      - https://github.blog/changelog/2020-10-01-github-actions-deprecating-set-env-and-add-path-commands/
+      - https://github.com/actions/runner/issues/159
+      - https://github.com/actions/runner/issues/475
+      - https://github.com/actions/runner/issues/807
+      - https://0xn3va.gitbook.io/cheat-sheets/ci-cd/github/actions#misuse-of-sensitive-data-in-workflows
+      - >-
+        https://github.com/github/docs/blob/main/content/actions/using-workflows/workflow-commands-for-github-actions.md#masking-a-value-in-a-log
+    tags:
+      - github-actions
+  - id: curl-eval
+    name: curl-eval
+    description: >-
+      Data is being eval'd from a `curl` command. An attacker with control of the server in the `curl` command could
+      inject malicious code into the `eval`, resulting in a system comrpomise. Avoid eval'ing untrusted data if you can.
+      If you must do this, consider checking the SHA sum of the content returned by the server to verify its integrity.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'run: $SHELL'
+        message: >-
+          Data is being eval'd from a `curl` command. An attacker with control of the server in the `curl` command could
+          inject malicious code into the `eval`, resulting in a system comrpomise. Avoid eval'ing untrusted data if you
+          can. If you must do this, consider checking the SHA sum of the content returned by the server to verify its
+          integrity.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#understanding-the-risk-of-script-injections
+    tags:
+      - github-actions
+      - bash
+      - curl
+  - id: detect-shai-hulud-backdoor
+    name: detect-shai-hulud-backdoor
+    description: The Shai-hulud backdoor creates a purposefully vulnerable github action with the name `discussion.yaml`.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'run: $SHELL'
+        message: The Shai-hulud backdoor creates a purposefully vulnerable github action with the name `discussion.yaml`.
+    cwe:
+      - CWE-509
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.aikido.dev/blog/shai-hulud-strikes-again-hitting-zapier-ensdomains
+    tags:
+      - github-actions
+  - id: gha-curl-pipe-shell
+    name: gha-curl-pipe-shell
+    description: >-
+      A `run:` step pipes the output of `curl` or `wget` directly into a shell interpreter. This is the "curl | bash"
+      install pattern — if the remote server is compromised or the URL is hijacked, an attacker can execute arbitrary
+      code in your CI runner. Consider downloading the file first, verifying its checksum or signature, and then
+      executing it.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'run: $SHELL'
+        message: >-
+          A `run:` step pipes the output of `curl` or `wget` directly into a shell interpreter. This is the "curl |
+          bash" install pattern — if the remote server is compromised or the URL is hijacked, an attacker can execute
+          arbitrary code in your CI runner. Consider downloading the file first, verifying its checksum or signature,
+          and then executing it.
+    cwe:
+      - CWE-78
+    owasp:
+      - A03:2021
+      - A03:2025
+    references:
+      - https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions
+      - https://www.idontplaydarts.com/2016/04/detecting-curl-pipe-bash-server-side/
+    tags:
+      - github-actions
+      - bash
+      - curl
+  - id: gha-workflow-env-secret
+    name: gha-workflow-env-secret
+    description: >-
+      A secret is exposed in the workflow-level `env:` block, making it available to every job and step in this workflow
+      — including any untrusted code run in pull-request workflows. Scope secrets as narrowly as possible: prefer
+      step-level `env:` so the secret is only available where it is actually needed.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: \$\{\{\s*secrets\.
+        message: >-
+          A secret is exposed in the workflow-level `env:` block, making it available to every job and step in this
+          workflow — including any untrusted code run in pull-request workflows. Scope secrets as narrowly as possible:
+          prefer step-level `env:` so the secret is only available where it is actually needed.
+    cwe:
+      - CWE-732
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-secrets
+      - >-
+        https://docs.github.com/en/actions/learn-github-actions/variables#defining-environment-variables-for-a-single-workflow
+    tags:
+      - github-actions
+  - id: github-actions-mutable-action-tag
+    name: github-actions-mutable-action-tag
+    description: >-
+      GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the
+      action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin
+      the reference to a full 40-character commit SHA instead, e.g. `uses:
+      actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          uses: "$ACTION"
+        message: >-
+          GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by
+          the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action
+          compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses:
+          actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.
+    cwe:
+      - CWE-1357
+      - CWE-353
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - >-
+        https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+    tags:
+      - github-actions
+  - id: github-script-injection
+    name: github-script-injection
+    description: >-
+      Using variable interpolation `${{...}}` with `github` context data in a `actions/github-script`'s `script:` step
+      could allow an attacker to inject their own code into the runner. This would allow them to steal secrets and code.
+      `github` context data can have arbitrary user input and should be treated as untrusted. Instead, use an
+      intermediate environment variable with `env:` to store the data and use the environment variable in the `run:`
+      script. Be sure to use double-quotes the environment variable, like this: "$ENVVAR".
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'script: $SHELL'
+        message: >-
+          Using variable interpolation `${{...}}` with `github` context data in a `actions/github-script`'s `script:`
+          step could allow an attacker to inject their own code into the runner. This would allow them to steal secrets
+          and code. `github` context data can have arbitrary user input and should be treated as untrusted. Instead, use
+          an intermediate environment variable with `env:` to store the data and use the environment variable in the
+          `run:` script. Be sure to use double-quotes the environment variable, like this: "$ENVVAR".
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#understanding-the-risk-of-script-injections
+      - https://securitylab.github.com/research/github-actions-untrusted-input/
+      - https://github.com/actions/github-script
+    tags:
+      - github-actions
+  - id: pull-request-target-code-checkout
+    name: pull-request-target-code-checkout
+    description: >-
+      This GitHub Actions workflow file uses `pull_request_target` and checks out code from the incoming pull request.
+      When using `pull_request_target`, the Action runs in the context of the target repository, which includes access
+      to all repository secrets. Normally, this is safe because the Action only runs code from the target repository,
+      not the incoming PR. However, by checking out the incoming PR code, you're now using the incoming code for the
+      rest of the action. You may be inadvertently executing arbitrary code from the incoming PR with access to
+      repository secrets, which would let an attacker steal repository secrets. This normally happens by running build
+      scripts (e.g., `npm build` and `make`) or dependency installation scripts (e.g., `python setup.py install`). Audit
+      your workflow file to make sure no code from the incoming PR is executed. Please see
+      https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for additional mitigations.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          ...
+          uses: "$ACTION"
+          with:
+            ...
+            ref: $EXPR
+        message: >-
+          This GitHub Actions workflow file uses `pull_request_target` and checks out code from the incoming pull
+          request. When using `pull_request_target`, the Action runs in the context of the target repository, which
+          includes access to all repository secrets. Normally, this is safe because the Action only runs code from the
+          target repository, not the incoming PR. However, by checking out the incoming PR code, you're now using the
+          incoming code for the rest of the action. You may be inadvertently executing arbitrary code from the incoming
+          PR with access to repository secrets, which would let an attacker steal repository secrets. This normally
+          happens by running build scripts (e.g., `npm build` and `make`) or dependency installation scripts (e.g.,
+          `python setup.py install`). Audit your workflow file to make sure no code from the incoming PR is executed.
+          Please see https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for additional
+          mitigations.
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+      - https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target
+      - >-
+        https://github.com/justinsteven/advisories/blob/master/2021_github_actions_checkspelling_token_leak_via_advice_symlink.md
+    tags:
+      - github-actions
+  - id: run-shell-injection
+    name: run-shell-injection
+    description: >-
+      Using variable interpolation `${{...}}` with `github` context data in a `run:` step could allow an attacker to
+      inject their own code into the runner. This would allow them to steal secrets and code. `github` context data can
+      have arbitrary user input and should be treated as untrusted. Instead, use an intermediate environment variable
+      with `env:` to store the data and use the environment variable in the `run:` script. Be sure to use double-quotes
+      the environment variable, like this: "$ENVVAR".
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'run: $SHELL'
+        message: >-
+          Using variable interpolation `${{...}}` with `github` context data in a `run:` step could allow an attacker to
+          inject their own code into the runner. This would allow them to steal secrets and code. `github` context data
+          can have arbitrary user input and should be treated as untrusted. Instead, use an intermediate environment
+          variable with `env:` to store the data and use the environment variable in the `run:` script. Be sure to use
+          double-quotes the environment variable, like this: "$ENVVAR".
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - >-
+        https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#understanding-the-risk-of-script-injections
+      - https://securitylab.github.com/research/github-actions-untrusted-input/
+    tags:
+      - github-actions
+  - id: secrets-inherit
+    name: secrets-inherit
+    description: >-
+      This workflow uses `secrets: inherit` to pass all of the calling workflow's secrets to a reusable workflow. This
+      violates the principle of least privilege because the called workflow receives access to every secret in the
+      repository, not just the ones it needs. If the called workflow is compromised or sourced from a third party, an
+      attacker gains access to all repository secrets. Instead, explicitly pass only the secrets that the called
+      workflow requires using the `secrets:` map, e.g. `secrets: { MY_SECRET: ${{ secrets.MY_SECRET }} }`.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'secrets: inherit'
+        message: >-
+          This workflow uses `secrets: inherit` to pass all of the calling workflow's secrets to a reusable workflow.
+          This violates the principle of least privilege because the called workflow receives access to every secret in
+          the repository, not just the ones it needs. If the called workflow is compromised or sourced from a third
+          party, an attacker gains access to all repository secrets. Instead, explicitly pass only the secrets that the
+          called workflow requires using the `secrets:` map, e.g. `secrets: { MY_SECRET: ${{ secrets.MY_SECRET }} }`.
+    cwe:
+      - CWE-250
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - >-
+        https://docs.github.com/en/actions/sharing-automations/reusing-workflows#passing-inputs-and-secrets-to-a-reusable-workflow
+      - >-
+        https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
+    tags:
+      - github-actions
+  - id: third-party-action-not-pinned-to-commit-sha
+    name: third-party-action-not-pinned-to-commit-sha
+    description: >-
+      An action sourced from a third-party repository on GitHub is not pinned to a full length commit SHA. Pinning an
+      action to a full length commit SHA is currently the only way to use an action as an immutable release. Pinning to
+      a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's repository, as they
+      would need to generate a SHA-1 collision for a valid Git object payload.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          uses: "$USES"
+        message: >-
+          An action sourced from a third-party repository on GitHub is not pinned to a full length commit SHA. Pinning
+          an action to a full length commit SHA is currently the only way to use an action as an immutable release.
+          Pinning to a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's
+          repository, as they would need to generate a SHA-1 collision for a valid Git object payload.
+    cwe:
+      - CWE-1357
+      - CWE-353
+    owasp:
+      - A06:2021
+    references:
+      - https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components
+      - >-
+        https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+    tags:
+      - github-actions
+  - id: workflow-run-target-code-checkout
+    name: workflow-run-target-code-checkout
+    description: >-
+      This GitHub Actions workflow file uses `workflow_run` and checks out code from the incoming pull request. When
+      using `workflow_run`, the Action runs in the context of the target repository, which includes access to all
+      repository secrets. Normally, this is safe because the Action only runs code from the target repository, not the
+      incoming PR. However, by checking out the incoming PR code, you're now using the incoming code for the rest of the
+      action. You may be inadvertently executing arbitrary code from the incoming PR with access to repository secrets,
+      which would let an attacker steal repository secrets. This normally happens by running build scripts (e.g., `npm
+      build` and `make`) or dependency installation scripts (e.g., `python setup.py install`). Audit your workflow file
+      to make sure no code from the incoming PR is executed. Please see
+      https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for additional mitigations.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          ...
+          uses: "$ACTION"
+          with:
+            ...
+            ref: $EXPR
+        message: >-
+          This GitHub Actions workflow file uses `workflow_run` and checks out code from the incoming pull request. When
+          using `workflow_run`, the Action runs in the context of the target repository, which includes access to all
+          repository secrets. Normally, this is safe because the Action only runs code from the target repository, not
+          the incoming PR. However, by checking out the incoming PR code, you're now using the incoming code for the
+          rest of the action. You may be inadvertently executing arbitrary code from the incoming PR with access to
+          repository secrets, which would let an attacker steal repository secrets. This normally happens by running
+          build scripts (e.g., `npm build` and `make`) or dependency installation scripts (e.g., `python setup.py
+          install`). Audit your workflow file to make sure no code from the incoming PR is executed. Please see
+          https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for additional mitigations.
+    cwe:
+      - CWE-913
+    owasp:
+      - A01:2017
+    references:
+      - https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+      - >-
+        https://github.com/justinsteven/advisories/blob/master/2021_github_actions_checkspelling_token_leak_via_advice_symlink.md
+      - https://www.legitsecurity.com/blog/github-privilege-escalation-vulnerability
+    tags:
+      - github-actions
+  - id: semgrep-github-action-push-without-branches
+    name: semgrep-github-action-push-without-branches
+    description: >-
+      The 'branches' field (in the push event configuration) contains no branches. This causes all branches to be
+      scanned and may result in unneccessary duplicate findings across the entire codebase.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          The 'branches' field (in the push event configuration) contains no branches. This causes all branches to be
+          scanned and may result in unneccessary duplicate findings across the entire codebase.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - github-action
+  - id: changes-with-when-never
+    name: changes-with-when-never
+    description: >-
+      This Gitlab CI YAML will never run on default branches due to a `changes` rule with `when:never`. To fix this,
+      make sure the triggering event is a push event. You can do this with `if: '$CI_PIPELINE_SOURCE == "push"'`. See
+      https://docs.gitlab.com/ee/ci/yaml/index.html#ruleschanges
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          - changes:
+            - ...
+            when: never
+        message: >-
+          This Gitlab CI YAML will never run on default branches due to a `changes` rule with `when:never`. To fix this,
+          make sure the triggering event is a push event. You can do this with `if: '$CI_PIPELINE_SOURCE == "push"'`.
+          See https://docs.gitlab.com/ee/ci/yaml/index.html#ruleschanges
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - gitlab
+      - gitlab-ci
+  - id: no-fractional-cpu-limits
+    name: no-fractional-cpu-limits
+    description: >-
+      When you set a fractional CPU limit on a container, the CPU cycles available will be throttled, even though most
+      nodes can handle processes alternating between using 100% of the CPU.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          cpu: $CPU_LIMIT
+        message: >-
+          When you set a fractional CPU limit on a container, the CPU cycles available will be throttled, even though
+          most nodes can handle processes alternating between using 100% of the CPU.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - kubernetes
+  - id: allow-privilege-escalation-no-securitycontext
+    name: allow-privilege-escalation-no-securitycontext
+    description: >-
+      In Kubernetes, each pod runs in its own isolated environment with its own set of security policies. However,
+      certain container images may contain `setuid` or `setgid` binaries that could allow an attacker to perform
+      privilege escalation and gain access to sensitive resources. To mitigate this risk, it's recommended to add a
+      `securityContext` to the container in the pod, with the parameter `allowPrivilegeEscalation` set to `false`. This
+      will prevent the container from running any privileged processes and limit the impact of any potential attacks. By
+      adding a `securityContext` to your Kubernetes pod, you can help to ensure that your containerized applications are
+      more secure and less vulnerable to privilege escalation attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          image: ...
+          ...
+        message: >-
+          In Kubernetes, each pod runs in its own isolated environment with its own set of security policies. However,
+          certain container images may contain `setuid` or `setgid` binaries that could allow an attacker to perform
+          privilege escalation and gain access to sensitive resources. To mitigate this risk, it's recommended to add a
+          `securityContext` to the container in the pod, with the parameter `allowPrivilegeEscalation` set to `false`.
+          This will prevent the container from running any privileged processes and limit the impact of any potential
+          attacks. By adding a `securityContext` to your Kubernetes pod, you can help to ensure that your containerized
+          applications are more secure and less vulnerable to privilege escalation attacks.
+    cwe:
+      - CWE-732
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#privilege-escalation
+      - https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      - https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-4-add-no-new-privileges-flag
+    tags:
+      - kubernetes
+  - id: allow-privilege-escalation-true
+    name: allow-privilege-escalation-true
+    description: >-
+      In Kubernetes, each pod runs in its own isolated environment with its own  set of security policies. However,
+      certain container images may contain  `setuid` or `setgid` binaries that could allow an attacker to perform 
+      privilege escalation and gain access to sensitive resources. To mitigate  this risk, it's recommended to add a
+      `securityContext` to the container in  the pod, with the parameter `allowPrivilegeEscalation` set to `false`. 
+      This will prevent the container from running any privileged processes and  limit the impact of any potential
+      attacks.  In the container `$CONTAINER` this parameter is set to `true` which makes this container much more
+      vulnerable to privelege escalation attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          allowPrivilegeEscalation: $TRUE
+        message: >-
+          In Kubernetes, each pod runs in its own isolated environment with its own  set of security policies. However,
+          certain container images may contain  `setuid` or `setgid` binaries that could allow an attacker to perform 
+          privilege escalation and gain access to sensitive resources. To mitigate  this risk, it's recommended to add a
+          `securityContext` to the container in  the pod, with the parameter `allowPrivilegeEscalation` set to `false`. 
+          This will prevent the container from running any privileged processes and  limit the impact of any potential
+          attacks.  In the container `$CONTAINER` this parameter is set to `true` which makes this container much more
+          vulnerable to privelege escalation attacks.
+    cwe:
+      - CWE-732
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#privilege-escalation
+      - https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      - https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-4-add-no-new-privileges-flag
+    tags:
+      - kubernetes
+  - id: allow-privilege-escalation
+    name: allow-privilege-escalation
+    description: >-
+      In Kubernetes, each pod runs in its own isolated environment with its own set of security policies. However,
+      certain container images may contain `setuid` or `setgid` binaries that could allow an attacker to perform
+      privilege escalation and gain access to sensitive resources. To mitigate this risk, it's recommended to add a
+      `securityContext` to the container in the pod, with the parameter `allowPrivilegeEscalation` set to `false`. This
+      will prevent the container from running any privileged processes and limit the impact of any potential attacks. By
+      adding the `allowPrivilegeEscalation` parameter to your the `securityContext`, you can help to ensure that your
+      containerized applications are more secure and less vulnerable to privilege escalation attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          image: ...
+          ...
+        message: >-
+          In Kubernetes, each pod runs in its own isolated environment with its own set of security policies. However,
+          certain container images may contain `setuid` or `setgid` binaries that could allow an attacker to perform
+          privilege escalation and gain access to sensitive resources. To mitigate this risk, it's recommended to add a
+          `securityContext` to the container in the pod, with the parameter `allowPrivilegeEscalation` set to `false`.
+          This will prevent the container from running any privileged processes and limit the impact of any potential
+          attacks. By adding the `allowPrivilegeEscalation` parameter to your the `securityContext`, you can help to
+          ensure that your containerized applications are more secure and less vulnerable to privilege escalation
+          attacks.
+    cwe:
+      - CWE-732
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#privilege-escalation
+      - https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      - https://www.kernel.org/doc/Documentation/prctl/no_new_privs.txt
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-4-add-no-new-privileges-flag
+    tags:
+      - kubernetes
+  - id: flask-debugging-enabled
+    name: flask-debugging-enabled
+    description: Do not set FLASK_ENV to "development" since that sets `debug=True` in Flask. Use "dev" or a similar term instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          {name: FLASK_ENV, value: "development"}
+        message: >-
+          Do not set FLASK_ENV to "development" since that sets `debug=True` in Flask. Use "dev" or a similar term
+          instead.
+    cwe:
+      - CWE-489
+    owasp:
+      - A06:2017
+    references:
+      - https://flask.palletsprojects.com/en/2.0.x/debugging/
+      - https://flask.palletsprojects.com/en/2.0.x/config/#ENV
+    tags:
+      - kubernetes
+      - flask
+  - id: exposing-docker-socket-hostpath
+    name: exposing-docker-socket-hostpath
+    description: >-
+      Exposing host's Docker socket to containers via a volume. The owner of this socket is root. Giving someone access
+      to it is equivalent to giving unrestricted root access to your host. Remove 'docker.sock' from hostpath to prevent
+      this.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          hostPath:
+            ...
+            path: /var/run/docker.sock
+        message: >-
+          Exposing host's Docker socket to containers via a volume. The owner of this socket is root. Giving someone
+          access to it is equivalent to giving unrestricted root access to your host. Remove 'docker.sock' from hostpath
+          to prevent this.
+    cwe:
+      - CWE-250
+    owasp: []
+    references:
+      - https://kubernetes.io/docs/concepts/storage/volumes/#hostpath
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#volumes-and-file-systems
+      - https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-1-do-not-expose-the-docker-daemon-socket-even-to-the-containers
+    tags:
+      - kubernetes
+  - id: hostipc-pod
+    name: hostipc-pod
+    description: >-
+      Pod is sharing the host IPC namespace. This allows container processes to communicate with processes on the host
+      which reduces isolation and bypasses container protection models. Remove the 'hostIPC' key to disable this
+      functionality.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          hostIPC: true
+        message: >-
+          Pod is sharing the host IPC namespace. This allows container processes to communicate with processes on the
+          host which reduces isolation and bypasses container protection models. Remove the 'hostIPC' key to disable
+          this functionality.
+    cwe:
+      - CWE-693
+    owasp: []
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces
+    tags:
+      - kubernetes
+  - id: hostnetwork-pod
+    name: hostnetwork-pod
+    description: >-
+      Pod may use the node network namespace. This gives the pod access to the loopback device, services listening on
+      localhost, and could be used to snoop on network activity of other pods on the same node. Remove the 'hostNetwork'
+      key to disable this functionality.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          hostNetwork: true
+        message: >-
+          Pod may use the node network namespace. This gives the pod access to the loopback device, services listening
+          on localhost, and could be used to snoop on network activity of other pods on the same node. Remove the
+          'hostNetwork' key to disable this functionality.
+    cwe:
+      - CWE-406
+    owasp: []
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces
+    tags:
+      - kubernetes
+  - id: hostpid-pod
+    name: hostpid-pod
+    description: >-
+      Pod is sharing the host process ID namespace. When paired with ptrace this can be used to escalate privileges
+      outside of the container. Remove the 'hostPID' key to disable this functionality.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          hostPID: true
+        message: >-
+          Pod is sharing the host process ID namespace. When paired with ptrace this can be used to escalate privileges
+          outside of the container. Remove the 'hostPID' key to disable this functionality.
+    cwe:
+      - CWE-269
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces
+    tags:
+      - kubernetes
+  - id: legacy-api-clusterrole-excessive-permissions
+    name: legacy-api-clusterrole-excessive-permissions
+    description: >-
+      Semgrep detected a Kubernetes core API ClusterRole with excessive permissions. Attaching excessive permissions to
+      a ClusterRole associated with the core namespace allows the V1 API to perform arbitrary actions on arbitrary
+      resources attached to the cluster. Prefer explicit allowlists of verbs/resources when configuring the core API
+      namespace. 
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          "*"
+        message: >-
+          Semgrep detected a Kubernetes core API ClusterRole with excessive permissions. Attaching excessive permissions
+          to a ClusterRole associated with the core namespace allows the V1 API to perform arbitrary actions on
+          arbitrary resources attached to the cluster. Prefer explicit allowlists of verbs/resources when configuring
+          the core API namespace. 
+    cwe:
+      - CWE-269
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole
+      - https://kubernetes.io/docs/concepts/security/rbac-good-practices/#general-good-practice
+      - https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#api-groups
+    tags:
+      - kubernetes
+  - id: privileged-container
+    name: privileged-container
+    description: >-
+      Container or pod is running in privileged mode. This grants the container the equivalent of root capabilities on
+      the host machine. This can lead to container escapes, privilege escalation, and other security concerns. Remove
+      the 'privileged' key to disable this capability.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Container or pod is running in privileged mode. This grants the container the equivalent of root capabilities
+          on the host machine. This can lead to container escapes, privilege escalation, and other security concerns.
+          Remove the 'privileged' key to disable this capability.
+    cwe:
+      - CWE-250
+    owasp: []
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#privileged
+      - https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
+    tags:
+      - kubernetes
+  - id: run-as-non-root-container-level-missing-security-context
+    name: run-as-non-root-container-level-missing-security-context
+    description: >-
+      When running containers in Kubernetes, it's important to ensure that they are properly secured to prevent
+      privilege escalation attacks. One potential vulnerability is when a container is allowed to run applications as
+      the root user, which could allow an attacker to gain access to sensitive resources. To mitigate this risk, it's
+      recommended to add a `securityContext` to the container, with the parameter `runAsNonRoot` set to `true`. This
+      will ensure that the container runs as a non-root user, limiting the damage that could be caused by any potential
+      attacks. By adding a `securityContext` to the container in your Kubernetes pod, you can help to ensure that your
+      containerized applications are more secure and less vulnerable to privilege escalation attacks.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          - name: $CONTAINER
+            $IMAGE: $IMAGEVAL
+            ...
+        message: >-
+          When running containers in Kubernetes, it's important to ensure that they are properly secured to prevent
+          privilege escalation attacks. One potential vulnerability is when a container is allowed to run applications
+          as the root user, which could allow an attacker to gain access to sensitive resources. To mitigate this risk,
+          it's recommended to add a `securityContext` to the container, with the parameter `runAsNonRoot` set to `true`.
+          This will ensure that the container runs as a non-root user, limiting the damage that could be caused by any
+          potential attacks. By adding a `securityContext` to the container in your Kubernetes pod, you can help to
+          ensure that your containerized applications are more secure and less vulnerable to privilege escalation
+          attacks.
+    cwe:
+      - CWE-250
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/blog/2016/08/security-best-practices-kubernetes-deployment/
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-2-set-a-user
+    tags:
+      - kubernetes
+  - id: run-as-non-root-container-level
+    name: run-as-non-root-container-level
+    description: >-
+      When running containers in Kubernetes, it's important to ensure that they are properly secured to prevent
+      privilege escalation attacks. One potential vulnerability is when a container is allowed to run applications as
+      the root user, which could allow an attacker to gain access to sensitive resources. To mitigate this risk, it's
+      recommended to add a `securityContext` to the container, with the parameter `runAsNonRoot` set to `true`. This
+      will ensure that the container runs as a non-root user, limiting the damage that could be caused by any potential
+      attacks. By adding a `securityContext` to the container in your Kubernetes pod, you can help to ensure that your
+      containerized applications are more secure and less vulnerable to privilege escalation attacks.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          - name: $CONTAINER
+            image: ...
+            ...
+            $SC:
+              ...
+        message: >-
+          When running containers in Kubernetes, it's important to ensure that they are properly secured to prevent
+          privilege escalation attacks. One potential vulnerability is when a container is allowed to run applications
+          as the root user, which could allow an attacker to gain access to sensitive resources. To mitigate this risk,
+          it's recommended to add a `securityContext` to the container, with the parameter `runAsNonRoot` set to `true`.
+          This will ensure that the container runs as a non-root user, limiting the damage that could be caused by any
+          potential attacks. By adding a `securityContext` to the container in your Kubernetes pod, you can help to
+          ensure that your containerized applications are more secure and less vulnerable to privilege escalation
+          attacks.
+    cwe:
+      - CWE-250
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/blog/2016/08/security-best-practices-kubernetes-deployment/
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-2-set-a-user
+    tags:
+      - kubernetes
+  - id: run-as-non-root-security-context-pod-level
+    name: run-as-non-root-security-context-pod-level
+    description: >-
+      When running containers in Kubernetes, it's important to ensure that they are properly secured to prevent
+      privilege escalation attacks. One potential vulnerability is when a container is allowed to run applications as
+      the root user, which could allow an attacker to gain access to sensitive resources. To mitigate this risk, it's
+      recommended to add a `securityContext` to the container, with the parameter `runAsNonRoot` set to `true`. This
+      will ensure that the container runs as a non-root user, limiting the damage that could be caused by any potential
+      attacks. By adding a `securityContext` to the container in your Kubernetes pod, you can help to ensure that your
+      containerized applications are more secure and less vulnerable to privilege escalation attacks.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          When running containers in Kubernetes, it's important to ensure that they are properly secured to prevent
+          privilege escalation attacks. One potential vulnerability is when a container is allowed to run applications
+          as the root user, which could allow an attacker to gain access to sensitive resources. To mitigate this risk,
+          it's recommended to add a `securityContext` to the container, with the parameter `runAsNonRoot` set to `true`.
+          This will ensure that the container runs as a non-root user, limiting the damage that could be caused by any
+          potential attacks. By adding a `securityContext` to the container in your Kubernetes pod, you can help to
+          ensure that your containerized applications are more secure and less vulnerable to privilege escalation
+          attacks.
+    cwe:
+      - CWE-250
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/blog/2016/08/security-best-practices-kubernetes-deployment/
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-2-set-a-user
+    tags:
+      - kubernetes
+  - id: run-as-non-root-unsafe-value
+    name: run-as-non-root-unsafe-value
+    description: >-
+      When running containers in Kubernetes, it's important to ensure that they  are properly secured to prevent
+      privilege escalation attacks.  One potential vulnerability is when a container is allowed to run  applications as
+      the root user, which could allow an attacker to gain  access to sensitive resources. To mitigate this risk, it's
+      recommended to  add a `securityContext` to the container, with the parameter `runAsNonRoot`  set to `true`. This
+      will ensure that the container runs as a non-root user,  limiting the damage that could be caused by any potential
+      attacks. By  adding a `securityContext` to the container in your Kubernetes pod, you can  help to ensure that your
+      containerized applications are more secure and  less vulnerable to privilege escalation attacks.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          When running containers in Kubernetes, it's important to ensure that they  are properly secured to prevent
+          privilege escalation attacks.  One potential vulnerability is when a container is allowed to run  applications
+          as the root user, which could allow an attacker to gain  access to sensitive resources. To mitigate this risk,
+          it's recommended to  add a `securityContext` to the container, with the parameter `runAsNonRoot`  set to
+          `true`. This will ensure that the container runs as a non-root user,  limiting the damage that could be caused
+          by any potential attacks. By  adding a `securityContext` to the container in your Kubernetes pod, you can 
+          help to ensure that your containerized applications are more secure and  less vulnerable to privilege
+          escalation attacks.
+    cwe:
+      - CWE-250
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/blog/2016/08/security-best-practices-kubernetes-deployment/
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-2-set-a-user
+    tags:
+      - kubernetes
+  - id: run-as-non-root
+    name: run-as-non-root
+    description: >-
+      When running containers in Kubernetes, it's important to ensure that they  are properly secured to prevent
+      privilege escalation attacks.  One potential vulnerability is when a container is allowed to run  applications as
+      the root user, which could allow an attacker to gain  access to sensitive resources. To mitigate this risk, it's
+      recommended to  add a `securityContext` to the container, with the parameter `runAsNonRoot`  set to `true`. This
+      will ensure that the container runs as a non-root user,  limiting the damage that could be caused by any potential
+      attacks. By  adding a `securityContext` to the container in your Kubernetes pod, you can  help to ensure that your
+      containerized applications are more secure and  less vulnerable to privilege escalation attacks.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          When running containers in Kubernetes, it's important to ensure that they  are properly secured to prevent
+          privilege escalation attacks.  One potential vulnerability is when a container is allowed to run  applications
+          as the root user, which could allow an attacker to gain  access to sensitive resources. To mitigate this risk,
+          it's recommended to  add a `securityContext` to the container, with the parameter `runAsNonRoot`  set to
+          `true`. This will ensure that the container runs as a non-root user,  limiting the damage that could be caused
+          by any potential attacks. By  adding a `securityContext` to the container in your Kubernetes pod, you can 
+          help to ensure that your containerized applications are more secure and  less vulnerable to privilege
+          escalation attacks.
+    cwe:
+      - CWE-250
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/blog/2016/08/security-best-practices-kubernetes-deployment/
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+      - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-2-set-a-user
+    tags:
+      - kubernetes
+  - id: secrets-in-config-file
+    name: secrets-in-config-file
+    description: >-
+      Secrets ($VALUE) should not be stored in infrastructure as code files. Use an alternative such as Bitnami Sealed
+      Secrets or KSOPS to encrypt Kubernetes Secrets. 
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          $KEY: $VALUE
+        message: >-
+          Secrets ($VALUE) should not be stored in infrastructure as code files. Use an alternative such as Bitnami
+          Sealed Secrets or KSOPS to encrypt Kubernetes Secrets. 
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://kubernetes.io/docs/concepts/configuration/secret/
+      - https://media.defense.gov/2021/Aug/03/2002820425/-1/-1/0/CTR_Kubernetes_Hardening_Guidance_1.1_20220315.PDF
+      - https://docs.gitlab.com/ee/user/clusters/agent/gitops/secrets_management.html
+      - https://www.cncf.io/blog/2021/04/22/revealing-the-secrets-of-kubernetes-secrets/
+      - https://github.com/bitnami-labs/sealed-secrets
+      - https://www.cncf.io/blog/2022/01/25/secrets-management-essential-when-using-kubernetes/
+      - https://blog.oddbit.com/post/2021-03-09-getting-started-with-ksops/
+    tags:
+      - kubernetes
+  - id: skip-tls-verify-cluster
+    name: skip-tls-verify-cluster
+    description: >-
+      Cluster is disabling TLS certificate verification when communicating with the server. This makes your HTTPS
+      connections insecure. Remove the 'insecure-skip-tls-verify: true' key to secure communication.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          cluster:
+            ...
+            insecure-skip-tls-verify: true
+        message: >-
+          Cluster is disabling TLS certificate verification when communicating with the server. This makes your HTTPS
+          connections insecure. Remove the 'insecure-skip-tls-verify: true' key to secure communication.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - >-
+        https://kubernetes.io/docs/reference/config-api/client-authentication.v1beta1/#client-authentication-k8s-io-v1beta1-Cluster
+    tags:
+      - kubernetes
+  - id: skip-tls-verify-service
+    name: skip-tls-verify-service
+    description: >-
+      Service is disabling TLS certificate verification when communicating with the server. This makes your HTTPS
+      connections insecure. Remove the 'insecureSkipTLSVerify: true' key to secure communication.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          spec:
+            ...
+            insecureSkipTLSVerify: true
+        message: >-
+          Service is disabling TLS certificate verification when communicating with the server. This makes your HTTPS
+          connections insecure. Remove the 'insecureSkipTLSVerify: true' key to secure communication.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#apiservice-v1-apiregistration-k8s-io
+    tags:
+      - kubernetes
+  - id: writable-filesystem-container
+    name: writable-filesystem-container
+    description: >-
+      Container $CONTAINER is running with a writable root filesystem. This may allow malicious applications to download
+      and run additional payloads, or modify container files. If an application inside a container has to save something
+      temporarily consider using a tmpfs. Add 'readOnlyRootFilesystem: true' to this container to prevent this.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          image: ...
+          ...
+        message: >-
+          Container $CONTAINER is running with a writable root filesystem. This may allow malicious applications to
+          download and run additional payloads, or modify container files. If an application inside a container has to
+          save something temporarily consider using a tmpfs. Add 'readOnlyRootFilesystem: true' to this container to
+          prevent this.
+    cwe:
+      - CWE-732
+    owasp:
+      - A05:2021
+      - A06:2017
+      - A02:2025
+    references:
+      - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#volumes-and-file-systems
+      - https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      - https://blog.atomist.com/security-of-docker-kubernetes/
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html#rule-8-set-filesystem-and-volumes-to-read-only
+    tags:
+      - kubernetes
+  - id: api-key-in-query-parameter
+    name: api-key-in-query-parameter
+    description: >-
+      The $SECURITY_SCHEME security scheme passes an API key in a query parameter. API keys should not be passed as
+      query parameters in security schemes.  Pass the API key in the header or body. If using a query parameter is
+      necessary, ensure that the API key is tightly scoped and short lived.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          $SECURITY_SCHEME:
+            ...
+            type: apiKey
+            ...
+            in: query
+            
+        message: >-
+          The $SECURITY_SCHEME security scheme passes an API key in a query parameter. API keys should not be passed as
+          query parameters in security schemes.  Pass the API key in the header or body. If using a query parameter is
+          necessary, ensure that the API key is tightly scoped and short lived.
+    cwe:
+      - CWE-598
+    owasp:
+      - A04:2021
+      - A07:2021
+    references:
+      - https://datatracker.ietf.org/doc/html/rfc6749
+      - https://cwe.mitre.org/data/definitions/598.html
+      - https://owasp.org/Top10/A04_2021-Insecure_Design/
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+    tags:
+      - openapi
+  - id: openai-consequential-action-false
+    name: openai-consequential-action-false
+    description: >-
+      Found 'x-openai-isConsequential: false' in a state-changing HTTP method: $METHOD $PATH. This Action configuration
+      will enable the 'Always Allow' option for state-changing HTTP methods, such as POST, PUT, PATCH, or DELETE. The
+      risk of a user selecting the 'Always Allow' button is that the agent could perform unintended actions on behalf of
+      the user. When working with sensitive functionality, it is always best to include a Human In The Loop (HITL) type
+      of control. Consider the trade-off between security  and user friction and then make a risk-based decision about
+      this function.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Found 'x-openai-isConsequential: false' in a state-changing HTTP method: $METHOD $PATH. This Action
+          configuration will enable the 'Always Allow' option for state-changing HTTP methods, such as POST, PUT, PATCH,
+          or DELETE. The risk of a user selecting the 'Always Allow' button is that the agent could perform unintended
+          actions on behalf of the user. When working with sensitive functionality, it is always best to include a Human
+          In The Loop (HITL) type of control. Consider the trade-off between security  and user friction and then make a
+          risk-based decision about this function.
+    cwe:
+      - CWE-441
+    owasp:
+      - A04:2021
+    references:
+      - https://platform.openai.com/docs/actions/consequential-flag
+      - https://owasp.org/Top10/A04_2021-Insecure_Design/
+      - >-
+        https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-2023-v1_1.pdf
+    tags:
+      - openapi
+      - openai
+  - id: use-of-basic-authentication
+    name: use-of-basic-authentication
+    description: >-
+      Basic authentication is considered weak and should be avoided.  Use a different authentication scheme, such of
+      OAuth2, OpenID Connect, or mTLS.
+    category: auth
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          type: http
+          ...
+          scheme: basic
+        message: >-
+          Basic authentication is considered weak and should be avoided.  Use a different authentication scheme, such of
+          OAuth2, OpenID Connect, or mTLS.
+    cwe:
+      - CWE-287
+    owasp:
+      - A04:2021
+      - A07:2021
+    references:
+      - https://cwe.mitre.org/data/definitions/287.html
+      - https://owasp.org/Top10/A04_2021-Insecure_Design/
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+    tags:
+      - openapi
+  - id: lang-consistency-bash
+    name: lang-consistency-bash
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'bash' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'bash' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-cpp
+    name: lang-consistency-cpp
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'cpp' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'cpp' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-csharp
+    name: lang-consistency-csharp
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'csharp' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'csharp' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-dockerfile
+    name: lang-consistency-dockerfile
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'dockerfile' instead.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'dockerfile' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-elixir
+    name: lang-consistency-elixir
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'elixir' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'elixir' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-go
+    name: lang-consistency-go
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'go' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'go' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-hcl
+    name: lang-consistency-hcl
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'hcl' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'hcl' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-js
+    name: lang-consistency-js
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'js' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'js' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-kotlin
+    name: lang-consistency-kotlin
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'kotlin' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'kotlin' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-python
+    name: lang-consistency-python
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'python' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'python' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-regex
+    name: lang-consistency-regex
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'regex' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'regex' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-solidity
+    name: lang-consistency-solidity
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'solidity' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'solidity' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: lang-consistency-ts
+    name: lang-consistency-ts
+    description: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'ts' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: $X
+        message: Found '$X' in language config which diverges from semgrep.dev normalization. Please use 'ts' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: duplicate-id
+    name: duplicate-id
+    description: The 'id' field $X was used multiple times. The 'id' field needs to be unique.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          id: $X
+        message: The 'id' field $X was used multiple times. The 'id' field needs to be unique.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: duplicate-pattern
+    name: duplicate-pattern
+    description: >-
+      Two identical pattern clauses were detected. This will cause Semgrep to run the same pattern twice. Remove one of
+      the duplicate pattern clauses.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          pattern: $X
+        message: >-
+          Two identical pattern clauses were detected. This will cause Semgrep to run the same pattern twice. Remove one
+          of the duplicate pattern clauses.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: empty-message
+    name: empty-message
+    description: >-
+      This rule has an empty message field. Consider adding a message field that communicates why this rule is an issue
+      and how to fix it. This will increase the chance that the finding gets addressed.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          message: ""
+        message: >-
+          This rule has an empty message field. Consider adding a message field that communicates why this rule is an
+          issue and how to fix it. This will increase the chance that the finding gets addressed.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: interfile-true-under-metadata-and-no-options
+    name: interfile-true-under-metadata-and-no-options
+    description: '`interfile: true` should be under the `options` field, not the `metadata` field.'
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          rules:
+            - id: $ID
+              ...
+              $METADATA:
+                ...
+                $INTERFILE: true
+                ...
+              ...
+        message: '`interfile: true` should be under the `options` field, not the `metadata` field.'
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: interfile-true-under-metadata-and-options-already-present
+    name: interfile-true-under-metadata-and-options-already-present
+    description: '`interfile: true` should be under the `options` field, not the `metadata` field.'
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          rules:
+            - id: $ID
+              ...
+              $METADATA:
+                ...
+                $INTERFILE: true
+                ...
+              ...
+        message: '`interfile: true` should be under the `options` field, not the `metadata` field.'
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: yaml-key-indentation-check
+    name: yaml-key-indentation-check
+    description: >-
+      It looks like you have an YAML indentation issue -- instead of writing `$KEY`,  put a space between the hyphen and
+      what comes after! Otherwise, it reads  as a single string. 
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          It looks like you have an YAML indentation issue -- instead of writing `$KEY`,  put a space between the hyphen
+          and what comes after! Otherwise, it reads  as a single string. 
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository
+    tags:
+      - semgrep
+  - id: message-whitespace-check
+    name: message-whitespace-check
+    description: >-
+      It looks like you have an additional space in your rule message, this can look awkward in the finding output,
+      please remove the additional whitespace!
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          message: >-
+            $VALUE
+        message: >-
+          It looks like you have an additional space in your rule message, this can look awkward in the finding output,
+          please remove the additional whitespace!
+      - regex: \w.*
+        message: >-
+          It looks like you have an additional space in your rule message, this can look awkward in the finding output,
+          please remove the additional whitespace!
+      - regex: \s{2,}
+        message: >-
+          It looks like you have an additional space in your rule message, this can look awkward in the finding output,
+          please remove the additional whitespace!
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository
+    tags:
+      - semgrep
+  - id: metadata-category
+    name: metadata-category
+    description: >-
+      This Semgrep rule is missing a valid 'category' field in the 'metadata'. 'category' must be one of 'security',
+      'correctness', 'best-practice', 'performance', 'maintainability', or 'portability'.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'id: $RULEID'
+        message: >-
+          This Semgrep rule is missing a valid 'category' field in the 'metadata'. 'category' must be one of 'security',
+          'correctness', 'best-practice', 'performance', 'maintainability', or 'portability'.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: metadata-confidence-incorrect-value
+    name: metadata-confidence-incorrect-value
+    description: >-
+      Semgrep rule confidence: $VALUE detected, but the value must be LOW, MEDIUM, or HIGH. For more information visit:
+      https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          confidence: $VALUE
+        message: >-
+          Semgrep rule confidence: $VALUE detected, but the value must be LOW, MEDIUM, or HIGH. For more information
+          visit: https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    tags:
+      - semgrep
+  - id: metadata-confidence
+    name: metadata-confidence
+    description: >-
+      This Semgrep rule is missing a valid 'confidence' field in the 'metadata'. which should be either LOW, MEDIUM, or
+      HIGH. For more information visit https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This Semgrep rule is missing a valid 'confidence' field in the 'metadata'. which should be either LOW, MEDIUM,
+          or HIGH. For more information visit
+          https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository
+    tags:
+      - semgrep
+  - id: example-allowed
+    name: example-allowed
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-257
+    owasp: []
+    references: []
+    tags: []
+  - id: example-prohibited
+    name: example-prohibited
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-320
+    owasp: []
+    references: []
+    tags: []
+  - id: metadata-cwe-prohibited-or-discouraged
+    name: metadata-cwe-prohibited-or-discouraged
+    description: Vulnerability mapping for this CWE is discouraged or prohibited.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'cwe: $CWE'
+        message: Vulnerability mapping for this CWE is discouraged or prohibited.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - cwe
+      - semgrep
+  - id: example-1
+    name: example-1
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-123
+    owasp: []
+    references: []
+    tags: []
+  - id: example-2
+    name: example-2
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: example-3
+    name: example-3
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-123
+    owasp: []
+    references: []
+    tags: []
+  - id: example-4
+    name: example-4
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-123
+    owasp: []
+    references: []
+    tags: []
+  - id: metadata-cwe
+    name: metadata-cwe
+    description: '$...CWE The cwe tag in rule metadata should always be in the format "CWE-000: Title".'
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'cwe: ...'
+        message: '$...CWE The cwe tag in rule metadata should always be in the format "CWE-000: Title".'
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: metadata-deepsemgrep
+    name: metadata-deepsemgrep
+    description: 'We no longer support `deepsemgrep: true`, please use `interfile:true`'
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: 'We no longer support `deepsemgrep: true`, please use `interfile:true`'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/
+    tags:
+      - semgrep
+  - id: metadata-impact-incorrect-value
+    name: metadata-impact-incorrect-value
+    description: >-
+      Semgrep rule impact: $VALUE detected, but the value must be LOW, MEDIUM, or HIGH. For more information visit:
+      https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          impact: $VALUE
+        message: >-
+          Semgrep rule impact: $VALUE detected, but the value must be LOW, MEDIUM, or HIGH. For more information visit:
+          https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    tags:
+      - semgrep
+  - id: metadata-impact
+    name: metadata-impact
+    description: >-
+      This Semgrep rule is missing a valid 'impact' field in the 'metadata'. which should be either LOW, MEDIUM, or
+      HIGH. For more information visit https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This Semgrep rule is missing a valid 'impact' field in the 'metadata'. which should be either LOW, MEDIUM, or
+          HIGH. For more information visit
+          https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/writing-rules/rule-syntax/#TODO
+    tags:
+      - semgrep
+  - id: metadata-incorrect-option
+    name: metadata-incorrect-option
+    description: It looks like $KEY is not in the default list of expected options, if this is a new key update this rule
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          $KEY: $VALUE
+        message: It looks like $KEY is not in the default list of expected options, if this is a new key update this rule
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository
+    tags:
+      - semgrep
+  - id: metadata-license
+    name: metadata-license
+    description: The license should not be set in rule metadata, it gets added by Semgrep app at the registry level.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          license: ...
+        message: The license should not be set in rule metadata, it gets added by Semgrep app at the registry level.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: metadata-likelihood-incorrect-value
+    name: metadata-likelihood-incorrect-value
+    description: >-
+      Semgrep rule likelihood: $VALUE detected, but the value must be LOW, MEDIUM, or HIGH. For more information visit:
+      https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          likelihood: $VALUE
+        message: >-
+          Semgrep rule likelihood: $VALUE detected, but the value must be LOW, MEDIUM, or HIGH. For more information
+          visit: https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    tags:
+      - semgrep
+  - id: metadata-likelihood
+    name: metadata-likelihood
+    description: >-
+      This Semgrep rule is missing a valid 'likelihood' field in the 'metadata'. which should be either LOW, MEDIUM, or
+      HIGH. For more information visit https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This Semgrep rule is missing a valid 'likelihood' field in the 'metadata'. which should be either LOW, MEDIUM,
+          or HIGH. For more information visit
+          https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    tags:
+      - semgrep
+  - id: example-5
+    name: example-5
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe: []
+    owasp:
+      - A05:2021
+      - A06:2017
+    references: []
+    tags: []
+  - id: example-6
+    name: example-6
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe: []
+    owasp:
+      - A5:2021
+      - A06:2017
+    references: []
+    tags: []
+  - id: metadata-owasp
+    name: metadata-owasp
+    description: >-
+      The `owasp` tag in Semgrep rule metadata should start with the format "A00:YYYY", where A00 is the OWASP top ten
+      number and YYYY is the OWASP top ten year.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          The `owasp` tag in Semgrep rule metadata should start with the format "A00:YYYY", where A00 is the OWASP top
+          ten number and YYYY is the OWASP top ten year.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: metadata-references
+    name: metadata-references
+    description: The references in rule metadata should always be a list, even if there's only one.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: |
+          references: ...
+        message: The references in rule metadata should always be a list, even if there's only one.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: metadata-subcategory-incorrect-value
+    name: metadata-subcategory-incorrect-value
+    description: >-
+      Semgrep rule likelihood: $VALUE detected, but the value must be vuln, audit, or secure default. For more
+      information visit: https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          subcategory: 
+            - $VALUE
+        message: >-
+          Semgrep rule likelihood: $VALUE detected, but the value must be vuln, audit, or secure default. For more
+          information visit: https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    tags:
+      - semgrep
+  - id: metadata-subcategory
+    name: metadata-subcategory
+    description: >-
+      This Semgrep rule is missing a valid 'subcategory' field in the 'metadata'. which should be either audit, vuln, or
+      secure default. For more information visit
+      https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This Semgrep rule is missing a valid 'subcategory' field in the 'metadata'. which should be either audit,
+          vuln, or secure default. For more information visit
+          https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository/
+    tags:
+      - semgrep
+  - id: metadata-technology
+    name: metadata-technology
+    description: >-
+      This Semgrep rule is missing a 'technology' field in the 'metadata'. Consider adding a list of technologies based
+      on the rule's associated library or framework, or another piece of relevant information.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This Semgrep rule is missing a 'technology' field in the 'metadata'. Consider adding a list of technologies
+          based on the rule's associated library or framework, or another piece of relevant information.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: missing-language-field
+    name: missing-language-field
+    description: Please include a 'languages' field for your rule!
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'id: $RULEID'
+        message: Please include a 'languages' field for your rule!
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: missing-message-field
+    name: missing-message-field
+    description: >-
+      This rule does not have a message. Semgrep requires that rules have a message. Include a message to explain what
+      the rule does. Consider writing a message that explains why this is an issue and how to fix it.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: 'id: $RULEID'
+        message: >-
+          This rule does not have a message. Semgrep requires that rules have a message. Include a message to explain
+          what the rule does. Consider writing a message that explains why this is an issue and how to fix it.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: multi-line-message
+    name: multi-line-message
+    description: >-
+      This rule has a multi-line message field, which may display poorly in a terminal. Consider ensuring it is on one
+      line. For example, use `message: >-`, not `message: |`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          message: "=~/[\\n\\r]/"
+        message: >-
+          This rule has a multi-line message field, which may display poorly in a terminal. Consider ensuring it is on
+          one line. For example, use `message: >-`, not `message: |`.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/semgrep/semgrep-rules/issues/1431
+    tags:
+      - semgrep
+  - id: missing-deconstructed-value
+    name: missing-deconstructed-value
+    description: >-
+      Looks like this value is deconstructing a const/var/let you need to use all three `const {...} =` `var {...} =`
+      and `let {...} =` to provide accurate coverage consider adding the missing patterns in a `pattern-inside` for
+      better coverage.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Looks like this value is deconstructing a const/var/let you need to use all three `const {...} =` `var {...}
+          =` and `let {...} =` to provide accurate coverage consider adding the missing patterns in a `pattern-inside`
+          for better coverage.
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/docs/contributing/contributing-to-semgrep-rules-repository
+    tags:
+      - semgrep
+  - id: slow-pattern-general-func
+    name: slow-pattern-general-func
+    description: Using patterns like `function (...) {...}` is too general it will probably slow down the rule performance.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: function[^{]*{[\s\n]*\.\.\.[\s\n]*}
+        message: Using patterns like `function (...) {...}` is too general it will probably slow down the rule performance.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: slow-pattern-general-property
+    name: slow-pattern-general-property
+    description: Using patterns like `$X.$Y` may be too general and may slow down the rule performance.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: \$[A-Z]*\.\$[A-Z]*
+        message: Using patterns like `$X.$Y` may be too general and may slow down the rule performance.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: slow-pattern-single-metavariable
+    name: slow-pattern-single-metavariable
+    description: >-
+      Using a single metavariable as a pattern drastically slows down the rule performance because it will match every
+      expression in a file. Instead, try to match something specific such as a function name, or anchor on a statement
+      that may occur above or below the pattern. The more specific you can be, the faster the pattern will run.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          Using a single metavariable as a pattern drastically slows down the rule performance because it will match
+          every expression in a file. Instead, try to match something specific such as a function name, or anchor on a
+          statement that may occur above or below the pattern. The more specific you can be, the faster the pattern will
+          run.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: slow-pattern-top-ellipsis
+    name: slow-pattern-top-ellipsis
+    description: Using the ellipsis operator `...` at the top of the pattern drastically slows down the rule performance.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: \|\s*\n\s*\.\.\.\s*\n[^\n]*\n\s*\.\.\.
+        message: Using the ellipsis operator `...` at the top of the pattern drastically slows down the rule performance.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: unnecessary-parent-operator
+    name: unnecessary-parent-operator
+    description: Unnecessary parent operator. Remove one to fix.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: Unnecessary parent operator. Remove one to fix.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: unsatisfiable-rule
+    name: unsatisfiable-rule
+    description: You can not use 'pattern' $A and 'pattern-not' $A together; this will always be empty.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - regex: .*
+        message: You can not use 'pattern' $A and 'pattern-not' $A together; this will always be empty.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep

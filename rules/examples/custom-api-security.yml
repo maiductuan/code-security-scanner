@@ -1,0 +1,66 @@
+# Custom Rule: API Security
+# Place this file in your custom rules directory and reference it in .deepscan.yml
+
+rules:
+  - id: custom/no-cors-wildcard
+    name: "CORS Wildcard Origin"
+    description: "CORS with wildcard origin (*) allows any website to make requests to your API"
+    category: auth
+    severity: high
+    confidence: high
+    cwe:
+      - CWE-942
+    languages:
+      - javascript
+      - typescript
+    patterns:
+      - regex: "cors\\s*\\(\\s*\\{[^}]*origin\\s*:\\s*['\"]\\*['\"]"
+        message: "CORS configured with wildcard origin"
+      - regex: "Access-Control-Allow-Origin.*\\*"
+        message: "Access-Control-Allow-Origin set to wildcard"
+    fix:
+      description: "Specify explicit allowed origins instead of using wildcard"
+    tags:
+      - cors
+      - api-security
+    references:
+      - https://owasp.org/www-community/attacks/CORS_OriginHeaderScrutiny
+
+  - id: custom/missing-rate-limit
+    name: "Missing Rate Limiting"
+    description: "API endpoints should have rate limiting to prevent abuse"
+    category: auth
+    severity: medium
+    confidence: low
+    cwe:
+      - CWE-770
+    languages:
+      - javascript
+      - typescript
+    patterns:
+      - regex: "app\\.(post|put|patch|delete)\\s*\\("
+        message: "Write endpoint without rate limiting - consider adding express-rate-limit"
+    fix:
+      description: "Add rate limiting middleware (e.g., express-rate-limit)"
+    tags:
+      - rate-limiting
+      - api-security
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html
+
+  - id: custom/no-helmet
+    name: "Missing Security Headers"
+    description: "Express app should use helmet() middleware for security headers"
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - javascript
+      - typescript
+    patterns:
+      - regex: "app\\.listen\\("
+        message: "Express server started - ensure helmet() middleware is configured"
+    fix:
+      description: "Add helmet() middleware: app.use(helmet())"
+    tags:
+      - security-headers

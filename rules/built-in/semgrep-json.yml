@@ -1,0 +1,360 @@
+rules:
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode
+  - id: public-s3-bucket
+    name: public-s3-bucket
+    description: >-
+      Detected public S3 bucket. This policy allows anyone to have some kind of access to the bucket. The exact level of
+      access and types of actions allowed will depend on the configuration of bucket policy and ACLs. Please review the
+      bucket configuration to make sure they are set with intended values.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - json
+    patterns:
+      - regex: .*
+        message: >-
+          Detected public S3 bucket. This policy allows anyone to have some kind of access to the bucket. The exact
+          level of access and types of actions allowed will depend on the configuration of bucket policy and ACLs.
+          Please review the bucket configuration to make sure they are set with intended values.
+    cwe:
+      - CWE-264
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html
+    tags:
+      - aws
+  - id: public-s3-policy-statement
+    name: public-s3-policy-statement
+    description: >-
+      Detected public S3 bucket policy. This policy allows anyone to access certain properties of or items in the
+      bucket. Do not do this unless you will never have sensitive data inside the bucket.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - json
+    patterns:
+      - pattern: |
+          {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Resource": [
+              ..., "=~/arn:aws:s3.*/", ...
+            ],
+            ...
+          }
+        message: >-
+          Detected public S3 bucket policy. This policy allows anyone to access certain properties of or items in the
+          bucket. Do not do this unless you will never have sensitive data inside the bucket.
+    cwe:
+      - CWE-264
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteAccessPermissionsReqd.html
+    tags:
+      - aws
+  - id: wildcard-assume-role
+    name: wildcard-assume-role
+    description: >-
+      Detected wildcard access granted to sts:AssumeRole. This means anyone with your AWS account ID and the name of the
+      role can assume the role. Instead, limit to a specific identity in your account, like this:
+      `arn:aws:iam::<account_id>:root`.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+    patterns:
+      - pattern: |
+          "Principal": {..., "AWS": "*", ...}
+        message: >-
+          Detected wildcard access granted to sts:AssumeRole. This means anyone with your AWS account ID and the name of
+          the role can assume the role. Instead, limit to a specific identity in your account, like this:
+          `arn:aws:iam::<account_id>:root`.
+    cwe:
+      - CWE-250
+    owasp:
+      - A06:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://rhinosecuritylabs.com/aws/assume-worst-aws-assume-role-enumeration/
+    tags:
+      - aws
+  - id: package-dependencies-check
+    name: package-dependencies-check
+    description: >-
+      Package dependencies with variant versions may lead to dependency hijack and confusion attacks. Better to specify
+      an exact version or use package-lock.json for a specific version of the package.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - json
+    patterns:
+      - regex: .*
+        message: >-
+          Package dependencies with variant versions may lead to dependency hijack and confusion attacks. Better to
+          specify an exact version or use package-lock.json for a specific version of the package.
+    cwe:
+      - CWE-427
+    owasp:
+      - A05:2021
+    references:
+      - https://security.snyk.io/vuln/SNYK-JS-COLORS-2331906
+      - https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610
+      - https://cwe.mitre.org/data/definitions/427.html
+    tags:
+      - npm
+  - id: renovate-missing-minimum-release-age
+    name: renovate-missing-minimum-release-age
+    description: >-
+      This Renovate configuration does not set a minimum release age. Newly published packages can be malicious or
+      unstable. Add `"minimumReleaseAge": "7 days"` within a `packageRules` entry to wait 7 days before proposing
+      updates to newly published package versions. Set `"minimumReleaseAge": false` to set an exception for minimal
+      release age for the package rule. Added in: v42
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - json
+    patterns:
+      - regex: .*
+        message: >-
+          This Renovate configuration does not set a minimum release age. Newly published packages can be malicious or
+          unstable. Add `"minimumReleaseAge": "7 days"` within a `packageRules` entry to wait 7 days before proposing
+          updates to newly published package versions. Set `"minimumReleaseAge": false` to set an exception for minimal
+          release age for the package rule. Added in: v42
+    cwe:
+      - CWE-829
+    owasp:
+      - A08:2021
+    references:
+      - https://docs.renovatebot.com/configuration-options/#minimumreleaseage
+    tags:
+      - renovate
+  - id: example-allowed
+    name: example-allowed
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-257
+    owasp: []
+    references: []
+    tags: []
+  - id: example-prohibited
+    name: example-prohibited
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-320
+    owasp: []
+    references: []
+    tags: []
+  - id: example-1
+    name: example-1
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-123
+    owasp: []
+    references: []
+    tags: []
+  - id: example-2
+    name: example-2
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe: []
+    owasp: []
+    references: []
+    tags: []
+  - id: example-3
+    name: example-3
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-123
+    owasp: []
+    references: []
+    tags: []
+  - id: example-4
+    name: example-4
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe:
+      - CWE-123
+    owasp: []
+    references: []
+    tags: []
+  - id: example-5
+    name: example-5
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe: []
+    owasp:
+      - A05:2021
+      - A06:2017
+    references: []
+    tags: []
+  - id: example-6
+    name: example-6
+    description: Example
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: ...
+        message: Example
+    cwe: []
+    owasp:
+      - A5:2021
+      - A06:2017
+    references: []
+    tags: []
+  - id: metadata-owasp
+    name: metadata-owasp
+    description: >-
+      The `owasp` tag in Semgrep rule metadata should start with the format "A00:YYYY", where A00 is the OWASP top ten
+      number and YYYY is the OWASP top ten year.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          The `owasp` tag in Semgrep rule metadata should start with the format "A00:YYYY", where A00 is the OWASP top
+          ten number and YYYY is the OWASP top ten year.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep
+  - id: metadata-references
+    name: metadata-references
+    description: The references in rule metadata should always be a list, even if there's only one.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - json
+      - yaml
+    patterns:
+      - pattern: |
+          references: ...
+        message: The references in rule metadata should always be a list, even if there's only one.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - semgrep

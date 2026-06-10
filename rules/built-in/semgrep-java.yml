@@ -1,0 +1,4219 @@
+rules:
+  - id: anthropic-hardcoded-api-key-java
+    name: anthropic-hardcoded-api-key-java
+    description: Anthropic API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $OBJ.apiKey("$KEY")
+        message: Anthropic API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/initial-setup
+    tags:
+      - anthropic
+  - id: gemini-hardcoded-api-key-java
+    name: gemini-hardcoded-api-key-java
+    description: Google Gemini API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $OBJ.apiKey("$KEY")
+        message: Google Gemini API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://ai.google.dev/gemini-api/docs/api-key
+    tags:
+      - gemini
+      - google
+  - id: llm-api-key-in-source-java
+    name: llm-api-key-in-source-java
+    description: >-
+      AI/LLM API key found hardcoded in source code. Detected key prefix matches a known AI provider (OpenAI, Anthropic,
+      Google, Hugging Face). Use environment variables or a secrets manager instead.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          AI/LLM API key found hardcoded in source code. Detected key prefix matches a known AI provider (OpenAI,
+          Anthropic, Google, Hugging Face). Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+    tags:
+      - openai
+      - anthropic
+      - google
+      - huggingface
+  - id: openai-hardcoded-api-key-java
+    name: openai-hardcoded-api-key-java
+    description: OpenAI API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: new OpenAiService("$KEY")
+        message: OpenAI API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety
+    tags:
+      - openai
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode
+  - id: tainted-sql-string
+    name: tainted-sql-string
+    description: >-
+      Detected user input used to manually construct a SQL string. This is usually bad practice because manual
+      construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or
+      modify contents of the database. Instead, use a parameterized query which is available by default in most database
+      engines. Alternatively, consider using an object-relational mapper (ORM) such as Sequelize which will protect your
+      queries.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input used to manually construct a SQL string. This is usually bad practice because manual
+          construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or
+          modify contents of the database. Instead, use a parameterized query which is available by default in most
+          database engines. Alternatively, consider using an object-relational mapper (ORM) such as Sequelize which will
+          protect your queries.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/www-community/attacks/SQL_Injection
+    tags:
+      - aws-lambda
+  - id: tainted-sqli
+    name: tainted-sqli
+    description: >-
+      Detected SQL statement that is tainted by `$EVENT` object. This could lead to SQL injection if variables in the
+      SQL statement are not properly sanitized. Use parameterized SQL queries or properly sanitize user input instead.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SQL statement that is tainted by `$EVENT` object. This could lead to SQL injection if variables in
+          the SQL statement are not properly sanitized. Use parameterized SQL queries or properly sanitize user input
+          instead.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - sql
+      - java
+      - aws-lambda
+  - id: java-jwt-decode-without-verify
+    name: java-jwt-decode-without-verify
+    description: >-
+      Detected the decoding of a JWT token without a verify step. JWT tokens must be verified before use, otherwise the
+      token's integrity is unknown. This means a malicious actor could forge a JWT token with any claims. Call
+      '.verify()' before using the token.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          com.auth0.jwt.JWT.decode(...);
+        message: >-
+          Detected the decoding of a JWT token without a verify step. JWT tokens must be verified before use, otherwise
+          the token's integrity is unknown. This means a malicious actor could forge a JWT token with any claims. Call
+          '.verify()' before using the token.
+    cwe:
+      - CWE-345
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures
+    tags:
+      - jwt
+  - id: java-jwt-hardcoded-secret
+    name: java-jwt-hardcoded-secret
+    description: >-
+      A hard-coded credential was detected. It is not recommended to store credentials in source-code, as this risks
+      secrets being leaked and used by either an internal or external malicious adversary. It is recommended to use
+      environment variables to securely provide credentials or retrieve credentials from a secure vault or HSM (Hardware
+      Security Module).
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A hard-coded credential was detected. It is not recommended to store credentials in source-code, as this risks
+          secrets being leaked and used by either an internal or external malicious adversary. It is recommended to use
+          environment variables to securely provide credentials or retrieve credentials from a secure vault or HSM
+          (Hardware Security Module).
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+    tags:
+      - java
+      - secrets
+      - jwt
+  - id: java-jwt-none-alg
+    name: java-jwt-none-alg
+    description: >-
+      Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token has
+      already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+      verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    category: auth
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $JWT.sign(com.auth0.jwt.algorithms.Algorithm.none());
+        message: >-
+          Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token
+          has already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+          verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+      - pattern: |
+          $NONE = com.auth0.jwt.algorithms.Algorithm.none();
+          ...
+          $JWT.sign($NONE);
+        message: >-
+          Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token
+          has already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+          verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+      - pattern: |-
+          class $CLASS {
+            ...
+            $TYPE $NONE = com.auth0.jwt.algorithms.Algorithm.none();
+            ...
+            $RETURNTYPE $FUNC (...) {
+              ...
+              $JWT.sign($NONE);
+              ...
+            }
+            ...
+          }
+        message: >-
+          Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token
+          has already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+          verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - jwt
+  - id: insecure-resteasy-deserialization
+    name: insecure-resteasy-deserialization
+    description: >-
+      When a Restful webservice endpoint is configured to use wildcard mediaType {*/*} as a value for the @Consumes
+      annotation, an attacker could abuse the SerializableProvider by sending a HTTP Request with a Content-Type of
+      application/x-java-serialized-object. The body of that request would be processed by the SerializationProvider and
+      could contain a malicious payload, which may lead to arbitrary code execution when calling the $Y.getObject
+      method.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          @Consumes({"application/x-java-serialized-object"})
+        message: >-
+          When a Restful webservice endpoint is configured to use wildcard mediaType {*/*} as a value for the @Consumes
+          annotation, an attacker could abuse the SerializableProvider by sending a HTTP Request with a Content-Type of
+          application/x-java-serialized-object. The body of that request would be processed by the SerializationProvider
+          and could contain a malicious payload, which may lead to arbitrary code execution when calling the
+          $Y.getObject method.
+      - pattern: |
+          @Consumes({"*/*"})
+        message: >-
+          When a Restful webservice endpoint is configured to use wildcard mediaType {*/*} as a value for the @Consumes
+          annotation, an attacker could abuse the SerializableProvider by sending a HTTP Request with a Content-Type of
+          application/x-java-serialized-object. The body of that request would be processed by the SerializationProvider
+          and could contain a malicious payload, which may lead to arbitrary code execution when calling the
+          $Y.getObject method.
+      - pattern: |
+          @Consumes("*/*")
+        message: >-
+          When a Restful webservice endpoint is configured to use wildcard mediaType {*/*} as a value for the @Consumes
+          annotation, an attacker could abuse the SerializableProvider by sending a HTTP Request with a Content-Type of
+          application/x-java-serialized-object. The body of that request would be processed by the SerializationProvider
+          and could contain a malicious payload, which may lead to arbitrary code execution when calling the
+          $Y.getObject method.
+      - pattern: |
+          @Consumes({MediaType.WILDCARD_TYPE})
+        message: >-
+          When a Restful webservice endpoint is configured to use wildcard mediaType {*/*} as a value for the @Consumes
+          annotation, an attacker could abuse the SerializableProvider by sending a HTTP Request with a Content-Type of
+          application/x-java-serialized-object. The body of that request would be processed by the SerializationProvider
+          and could contain a malicious payload, which may lead to arbitrary code execution when calling the
+          $Y.getObject method.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://access.redhat.com/blogs/766093/posts/3162112
+    tags:
+      - jax-rs
+  - id: default-resteasy-provider-abuse
+    name: default-resteasy-provider-abuse
+    description: >-
+      When a Restful webservice endpoint isn't configured with a @Consumes annotation, an attacker could abuse the
+      SerializableProvider by sending a HTTP Request with a Content-Type of application/x-java-serialized-object. The
+      body of that request would be processed by the SerializationProvider and could contain a malicious payload, which
+      may lead to arbitrary code execution. Instead, add a @Consumes annotation to the function or class.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          @Path("...")
+          public $RETURNTYPE $METHOD(...) { ...}
+        message: >-
+          When a Restful webservice endpoint isn't configured with a @Consumes annotation, an attacker could abuse the
+          SerializableProvider by sending a HTTP Request with a Content-Type of application/x-java-serialized-object.
+          The body of that request would be processed by the SerializationProvider and could contain a malicious
+          payload, which may lead to arbitrary code execution. Instead, add a @Consumes annotation to the function or
+          class.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://access.redhat.com/blogs/766093/posts/3162112
+    tags:
+      - jax-rs
+  - id: jax-rs-path-traversal
+    name: jax-rs-path-traversal
+    description: >-
+      Detected a potential path traversal. A malicious actor could control the location of this file, to include going
+      backwards in the directory with '../'. To address this, ensure that user-controlled variables in file paths are
+      sanitized. You may also consider using a utility method such as org.apache.commons.io.FilenameUtils.getName(...)
+      to only retrieve the file name from the path.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $RETURNTYPE $FUNC (..., @PathParam(...) $TYPE $VAR, ...) {
+            ...
+            new File(..., $VAR, ...);
+            ...
+          }
+        message: >-
+          Detected a potential path traversal. A malicious actor could control the location of this file, to include
+          going backwards in the directory with '../'. To address this, ensure that user-controlled variables in file
+          paths are sanitized. You may also consider using a utility method such as
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.
+      - pattern: |-
+          $RETURNTYPE $FUNC (..., @javax.ws.rs.PathParam(...) $TYPE $VAR, ...) {
+            ...
+            new File(..., $VAR, ...);
+            ...
+          }
+        message: >-
+          Detected a potential path traversal. A malicious actor could control the location of this file, to include
+          going backwards in the directory with '../'. To address this, ensure that user-controlled variables in file
+          paths are sanitized. You may also consider using a utility method such as
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.owasp.org/index.php/Path_Traversal
+    tags:
+      - jax-rs
+  - id: seam-log-injection
+    name: seam-log-injection
+    description: >-
+      Seam Logging API support an expression language to introduce bean property to log messages. The expression
+      language can also be the source to unwanted code execution. In this context, an expression is built with a dynamic
+      value. The source of the value(s) should be verified to avoid that unfiltered values fall into this risky code
+      evaluation.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $LOG.$INFO($X + $Y,...)
+        message: >-
+          Seam Logging API support an expression language to introduce bean property to log messages. The expression
+          language can also be the source to unwanted code execution. In this context, an expression is built with a
+          dynamic value. The source of the value(s) should be verified to avoid that unfiltered values fall into this
+          risky code evaluation.
+    cwe:
+      - CWE-95
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - jboss
+  - id: find-sql-string-concatenation
+    name: find-sql-string-concatenation
+    description: In $METHOD, $X is used to construct a SQL query via string concatenation.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $RETURN $METHOD(...,String $X,...){
+            ...
+            Session $SESSION = ...;
+            ...
+            String $QUERY = ... + $X + ...;
+            ...
+            PreparedStatement $PS = $SESSION.connection().prepareStatement($QUERY);
+            ...
+            ResultSet $RESULT = $PS.executeQuery();
+            ...
+          }
+        message: In $METHOD, $X is used to construct a SQL query via string concatenation.
+      - pattern: |
+          $RETURN $METHOD(...,String $X,...){
+            ...
+            String $QUERY = ... + $X + ...;
+            ...
+            Session $SESSION = ...;
+            ...
+            PreparedStatement $PS = $SESSION.connection().prepareStatement($QUERY);
+            ...
+            ResultSet $RESULT = $PS.executeQuery();
+            ...
+          }
+        message: In $METHOD, $X is used to construct a SQL query via string concatenation.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - jboss
+  - id: jjwt-none-alg
+    name: jjwt-none-alg
+    description: >-
+      Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token has
+      already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+      verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    category: auth
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          io.jsonwebtoken.Jwts.builder();
+        message: >-
+          Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token
+          has already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+          verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - jwt
+  - id: assignment-comparison
+    name: assignment-comparison
+    description: The value of `$X` is being ignored and will be used in the conditional test
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: if ($X=true) { ... }
+        message: The value of `$X` is being ignored and will be used in the conditional test
+      - pattern: if ($X=false) { ... }
+        message: The value of `$X` is being ignored and will be used in the conditional test
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - java
+  - id: eqeq
+    name: eqeq
+    description: >-
+      `$X == $X` or `$X != $X` is always true. (Unless the value compared is a float or double). To test if `$X` is
+      not-a-number, use `Double.isNaN($X)`.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          `$X == $X` or `$X != $X` is always true. (Unless the value compared is a float or double). To test if `$X` is
+          not-a-number, use `Double.isNaN($X)`.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - java
+  - id: hardcoded-conditional
+    name: hardcoded-conditional
+    description: This if statement will always have the same behavior and is therefore unnecessary.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: This if statement will always have the same behavior and is therefore unnecessary.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - java
+  - id: no-string-eqeq
+    name: no-string-eqeq
+    description: Strings should not be compared with '=='. This is a reference comparison operator. Use '.equals()' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $X == (String $Y)
+        message: Strings should not be compared with '=='. This is a reference comparison operator. Use '.equals()' instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - java
+  - id: anonymous-ldap-bind
+    name: anonymous-ldap-bind
+    description: >-
+      Detected anonymous LDAP bind. This permits anonymous users to execute LDAP statements. Consider enforcing
+      authentication for LDAP. See https://docs.oracle.com/javase/tutorial/jndi/ldap/auth_mechs.html for more
+      information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $ENV.put($CTX.SECURITY_AUTHENTICATION, "none");
+          ...
+          $DCTX = new InitialDirContext($ENV, ...);
+        message: >-
+          Detected anonymous LDAP bind. This permits anonymous users to execute LDAP statements. Consider enforcing
+          authentication for LDAP. See https://docs.oracle.com/javase/tutorial/jndi/ldap/auth_mechs.html for more
+          information.
+    cwe:
+      - CWE-287
+    owasp:
+      - A02:2017
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - java
+  - id: bad-hexa-conversion
+    name: bad-hexa-conversion
+    description: >-
+      'Integer.toHexString()' strips leading zeroes from each byte if read byte-by-byte. This mistake weakens the hash
+      value computed since it introduces more collisions. Use 'String.format("%02X", ...)' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |-
+          $X $METHOD(...) {
+            ...
+            MessageDigest $MD = ...;
+            ...
+            $MD.digest(...);
+            ...
+            Integer.toHexString(...);
+          }
+        message: >-
+          'Integer.toHexString()' strips leading zeroes from each byte if read byte-by-byte. This mistake weakens the
+          hash value computed since it introduces more collisions. Use 'String.format("%02X", ...)' instead.
+    cwe:
+      - CWE-704
+    owasp:
+      - A03:2017
+    references:
+      - https://cwe.mitre.org/data/definitions/704.html
+    tags:
+      - java
+  - id: blowfish-insufficient-key-size
+    name: blowfish-insufficient-key-size
+    description: Using less than 128 bits for Blowfish is considered insecure. Use 128 bits or more, or switch to use AES instead.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $KEYGEN = KeyGenerator.getInstance("Blowfish");
+          ...
+          $KEYGEN.init($SIZE);
+        message: >-
+          Using less than 128 bits for Blowfish is considered insecure. Use 128 bits or more, or switch to use AES
+          instead.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: cbc-padding-oracle
+    name: cbc-padding-oracle
+    description: >-
+      Using CBC with PKCS5Padding is susceptible to padding oracle attacks. A malicious actor could discern the
+      difference between plaintext with valid or invalid padding. Further, CBC mode does not include any integrity
+      checks. Use 'AES/GCM/NoPadding' instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          "=~/.*\/CBC\/PKCS5Padding/"
+        message: >-
+          Using CBC with PKCS5Padding is susceptible to padding oracle attacks. A malicious actor could discern the
+          difference between plaintext with valid or invalid padding. Further, CBC mode does not include any integrity
+          checks. Use 'AES/GCM/NoPadding' instead.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://capec.mitre.org/data/definitions/463.html
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#cipher-modes
+      - https://find-sec-bugs.github.io/bugs.htm#CIPHER_INTEGRITY
+    tags:
+      - java
+  - id: command-injection-formatted-runtime-call
+    name: command-injection-formatted-runtime-call
+    description: >-
+      A formatted or concatenated string was detected as input to a java.lang.Runtime call. This is dangerous if a
+      variable is controlled by user input and could result in a command injection. Ensure your variables are not
+      controlled by users or sufficiently sanitized.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A formatted or concatenated string was detected as input to a java.lang.Runtime call. This is dangerous if a
+          variable is controlled by user input and could result in a command injection. Ensure your variables are not
+          controlled by users or sufficiently sanitized.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: command-injection-process-builder
+    name: command-injection-process-builder
+    description: >-
+      A formatted or concatenated string was detected as input to a ProcessBuilder call. This is dangerous if a variable
+      is controlled by user input and could result in a command injection. Ensure your variables are not controlled by
+      users or sufficiently sanitized.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A formatted or concatenated string was detected as input to a ProcessBuilder call. This is dangerous if a
+          variable is controlled by user input and could result in a command injection. Ensure your variables are not
+          controlled by users or sufficiently sanitized.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: cookie-missing-httponly
+    name: cookie-missing-httponly
+    description: >-
+      A cookie was detected without setting the 'HttpOnly' flag. The 'HttpOnly' flag for cookies instructs the browser
+      to forbid client-side scripts from reading the cookie. Set the 'HttpOnly' flag by calling
+      'cookie.setHttpOnly(true);'
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A cookie was detected without setting the 'HttpOnly' flag. The 'HttpOnly' flag for cookies instructs the
+          browser to forbid client-side scripts from reading the cookie. Set the 'HttpOnly' flag by calling
+          'cookie.setHttpOnly(true);'
+    cwe:
+      - CWE-1004
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://owasp.org/Top10/A05_2021-Security_Misconfiguration
+    tags:
+      - java
+  - id: cookie-missing-secure-flag
+    name: cookie-missing-secure-flag
+    description: >-
+      A cookie was detected without setting the 'secure' flag. The 'secure' flag for cookies prevents the client from
+      transmitting the cookie over insecure channels such as HTTP. Set the 'secure' flag by calling
+      '$COOKIE.setSecure(true);'
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A cookie was detected without setting the 'secure' flag. The 'secure' flag for cookies prevents the client
+          from transmitting the cookie over insecure channels such as HTTP. Set the 'secure' flag by calling
+          '$COOKIE.setSecure(true);'
+    cwe:
+      - CWE-614
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://owasp.org/Top10/A05_2021-Security_Misconfiguration
+    tags:
+      - java
+  - id: crlf-injection-logs
+    name: crlf-injection-logs
+    description: >-
+      When data from an untrusted source is put into a logger and not neutralized correctly, an attacker could forge log
+      entries or include malicious content.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          When data from an untrusted source is put into a logger and not neutralized correctly, an attacker could forge
+          log entries or include malicious content.
+    cwe:
+      - CWE-93
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: des-is-deprecated
+    name: des-is-deprecated
+    description: >-
+      DES is considered deprecated. AES is the recommended cipher. Upgrade to use AES. See
+      https://www.nist.gov/news-events/news/2005/06/nist-withdraws-outdated-data-encryption-standard for more
+      information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+      - kt
+    patterns:
+      - regex: .*
+        message: >-
+          DES is considered deprecated. AES is the recommended cipher. Upgrade to use AES. See
+          https://www.nist.gov/news-events/news/2005/06/nist-withdraws-outdated-data-encryption-standard for more
+          information.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://www.nist.gov/news-events/news/2005/06/nist-withdraws-outdated-data-encryption-standard
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#algorithms
+    tags:
+      - java
+  - id: desede-is-deprecated
+    name: desede-is-deprecated
+    description: Triple DES (3DES or DESede) is considered deprecated. AES is the recommended cipher. Upgrade to use AES.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+      - kt
+    patterns:
+      - regex: .*
+        message: Triple DES (3DES or DESede) is considered deprecated. AES is the recommended cipher. Upgrade to use AES.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://csrc.nist.gov/News/2017/Update-to-Current-Use-and-Deprecation-of-TDEA
+    tags:
+      - java
+  - id: ecb-cipher
+    name: ecb-cipher
+    description: >-
+      Cipher in ECB mode is detected. ECB mode produces the same output for the same input each time which allows an
+      attacker to intercept and replay the data. Further, ECB mode does not provide any integrity checking. See
+      https://find-sec-bugs.github.io/bugs.htm#CIPHER_INTEGRITY.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          Cipher $VAR = $CIPHER.getInstance($MODE);
+        message: >-
+          Cipher in ECB mode is detected. ECB mode produces the same output for the same input each time which allows an
+          attacker to intercept and replay the data. Further, ECB mode does not provide any integrity checking. See
+          https://find-sec-bugs.github.io/bugs.htm#CIPHER_INTEGRITY.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: gcm-detection
+    name: gcm-detection
+    description: >-
+      GCM detected, please check that IV/nonce is not reused, an Initialization Vector (IV) is a nonce used to randomize
+      the encryption, so that even if multiple messages with identical plaintext are encrypted, the generated
+      corresponding ciphertexts are different. Unlike the Key, the IV usually does not need to be secret, rather it is
+      important that it is random and unique. Certain encryption schemes the IV is exchanged in public as part of the
+      ciphertext. Reusing same Initialization Vector with the same Key to encrypt multiple plaintext blocks allows an
+      attacker to compare the ciphertexts and then, with some assumptions on the content of the messages, to gain
+      important information about the data being encrypted.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          GCM detected, please check that IV/nonce is not reused, an Initialization Vector (IV) is a nonce used to
+          randomize the encryption, so that even if multiple messages with identical plaintext are encrypted, the
+          generated corresponding ciphertexts are different. Unlike the Key, the IV usually does not need to be secret,
+          rather it is important that it is random and unique. Certain encryption schemes the IV is exchanged in public
+          as part of the ciphertext. Reusing same Initialization Vector with the same Key to encrypt multiple plaintext
+          blocks allows an attacker to compare the ciphertexts and then, with some assumptions on the content of the
+          messages, to gain important information about the data being encrypted.
+    cwe:
+      - CWE-323
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/323.html
+    tags:
+      - java
+  - id: gcm-nonce-reuse
+    name: gcm-nonce-reuse
+    description: 'GCM IV/nonce is reused: encryption can be totally useless'
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: 'GCM IV/nonce is reused: encryption can be totally useless'
+    cwe:
+      - CWE-323
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: no-null-cipher
+    name: no-null-cipher
+    description: >-
+      NullCipher was detected. This will not encrypt anything; the cipher text will be the same as the plain text. Use a
+      valid, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+      https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          NullCipher was detected. This will not encrypt anything; the cipher text will be the same as the plain text.
+          Use a valid, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: no-static-initialization-vector
+    name: no-static-initialization-vector
+    description: >-
+      Initialization Vectors (IVs) for block ciphers should be randomly generated each time they are used. Using a
+      static IV means the same plaintext encrypts to the same ciphertext every time, weakening the strength of the
+      encryption.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          byte[] $IV = {
+              ...
+          };
+          ...
+          new IvParameterSpec($IV, ...);
+        message: >-
+          Initialization Vectors (IVs) for block ciphers should be randomly generated each time they are used. Using a
+          static IV means the same plaintext encrypts to the same ciphertext every time, weakening the strength of the
+          encryption.
+      - pattern: |
+          class $CLASS {
+              byte[] $IV = {
+                  ...
+              };
+              ...
+              $METHOD(...) {
+                  ...
+                  new IvParameterSpec($IV, ...);
+                  ...
+              }
+          }
+        message: >-
+          Initialization Vectors (IVs) for block ciphers should be randomly generated each time they are used. Using a
+          static IV means the same plaintext encrypts to the same ciphertext every time, weakening the strength of the
+          encryption.
+    cwe:
+      - CWE-329
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/329.html
+    tags:
+      - java
+  - id: rsa-no-padding
+    name: rsa-no-padding
+    description: Using RSA without OAEP mode weakens the encryption.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+      - kt
+    patterns:
+      - pattern: $CIPHER.getInstance("=~/RSA/[Nn][Oo][Nn][Ee]/NoPadding/")
+        message: Using RSA without OAEP mode weakens the encryption.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://rdist.root.org/2009/10/06/why-rsa-encryption-padding-is-critical/
+    tags:
+      - java
+      - kotlin
+  - id: avoid-implementing-custom-digests
+    name: avoid-implementing-custom-digests
+    description: >-
+      Cryptographic algorithms are notoriously difficult to get right. By implementing a custom message digest, you risk
+      introducing security issues into your program. Use one of the many sound message digests already available to you:
+      MessageDigest sha256Digest = MessageDigest.getInstance("SHA256");
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |-
+          class $CLASS extends MessageDigest {
+            ...
+          }
+        message: >-
+          Cryptographic algorithms are notoriously difficult to get right. By implementing a custom message digest, you
+          risk introducing security issues into your program. Use one of the many sound message digests already
+          available to you: MessageDigest sha256Digest = MessageDigest.getInstance("SHA256");
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#custom-algorithms
+    tags:
+      - java
+  - id: defaulthttpclient-is-deprecated
+    name: defaulthttpclient-is-deprecated
+    description: >-
+      DefaultHttpClient is deprecated. Further, it does not support connections using TLS1.2, which makes using
+      DefaultHttpClient a security hazard. Use HttpClientBuilder instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: new DefaultHttpClient(...);
+        message: >-
+          DefaultHttpClient is deprecated. Further, it does not support connections using TLS1.2, which makes using
+          DefaultHttpClient a security hazard. Use HttpClientBuilder instead.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: insecure-hostname-verifier
+    name: insecure-hostname-verifier
+    description: >-
+      Insecure HostnameVerifier implementation detected. This will accept any SSL certificate with any hostname, which
+      creates the possibility for man-in-the-middle attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          class $CLASS implements HostnameVerifier {
+            ...
+            public boolean verify(...) { return true; }
+          }
+        message: >-
+          Insecure HostnameVerifier implementation detected. This will accept any SSL certificate with any hostname,
+          which creates the possibility for man-in-the-middle attacks.
+      - pattern: |-
+          new HostnameVerifier(...){
+            public boolean verify(...) {
+              return true;
+            }
+          }
+        message: >-
+          Insecure HostnameVerifier implementation detected. This will accept any SSL certificate with any hostname,
+          which creates the possibility for man-in-the-middle attacks.
+      - pattern: import org.apache.http.conn.ssl.NoopHostnameVerifier;
+        message: >-
+          Insecure HostnameVerifier implementation detected. This will accept any SSL certificate with any hostname,
+          which creates the possibility for man-in-the-middle attacks.
+    cwe:
+      - CWE-295
+    owasp:
+      - A03:2017
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - java
+  - id: insecure-trust-manager
+    name: insecure-trust-manager
+    description: >-
+      Detected empty trust manager implementations. This is dangerous because it accepts any certificate, enabling
+      man-in-the-middle attacks. Consider using a KeyStore and TrustManagerFactory instead. See
+      https://stackoverflow.com/questions/2642777/trusting-all-certificates-using-httpclient-over-https for more
+      information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected empty trust manager implementations. This is dangerous because it accepts any certificate, enabling
+          man-in-the-middle attacks. Consider using a KeyStore and TrustManagerFactory instead. See
+          https://stackoverflow.com/questions/2642777/trusting-all-certificates-using-httpclient-over-https for more
+          information.
+    cwe:
+      - CWE-295
+    owasp:
+      - A03:2017
+      - A07:2021
+      - A07:2025
+    references:
+      - https://stackoverflow.com/questions/2642777/trusting-all-certificates-using-httpclient-over-https
+    tags:
+      - java
+  - id: unencrypted-socket
+    name: unencrypted-socket
+    description: >-
+      Detected use of a Java socket that is not encrypted. As a result, the traffic could be read by an attacker
+      intercepting the network traffic. Use an SSLSocket created by 'SSLSocketFactory' or 'SSLServerSocketFactory'
+      instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: new ServerSocket(...)
+        message: >-
+          Detected use of a Java socket that is not encrypted. As a result, the traffic could be read by an attacker
+          intercepting the network traffic. Use an SSLSocket created by 'SSLSocketFactory' or 'SSLServerSocketFactory'
+          instead.
+      - pattern: new Socket(...)
+        message: >-
+          Detected use of a Java socket that is not encrypted. As a result, the traffic could be read by an attacker
+          intercepting the network traffic. Use an SSLSocket created by 'SSLSocketFactory' or 'SSLServerSocketFactory'
+          instead.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: use-of-aes-ecb
+    name: use-of-aes-ecb
+    description: >-
+      Use of AES with ECB mode detected. ECB doesn't provide message confidentiality and  is not semantically secure so
+      should not be used. Instead, use a strong, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+      https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $CIPHER.getInstance("=~/AES/ECB.*/")
+        message: >-
+          Use of AES with ECB mode detected. ECB doesn't provide message confidentiality and  is not semantically secure
+          so should not be used. Instead, use a strong, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+      - https://googleprojectzero.blogspot.com/2022/10/rc4-is-still-considered-harmful.html
+    tags:
+      - java
+  - id: use-of-blowfish
+    name: use-of-blowfish
+    description: >-
+      Use of Blowfish was detected. Blowfish uses a 64-bit block size that  makes it vulnerable to birthday attacks, and
+      is therefore considered non-compliant.  Instead, use a strong, secure cipher:
+      Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+      https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $CIPHER.getInstance("Blowfish")
+        message: >-
+          Use of Blowfish was detected. Blowfish uses a 64-bit block size that  makes it vulnerable to birthday attacks,
+          and is therefore considered non-compliant.  Instead, use a strong, secure cipher:
+          Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+      - https://googleprojectzero.blogspot.com/2022/10/rc4-is-still-considered-harmful.html
+    tags:
+      - java
+  - id: use-of-default-aes
+    name: use-of-default-aes
+    description: >-
+      Use of AES with no settings detected. By default, java.crypto.Cipher uses ECB mode. ECB doesn't  provide message
+      confidentiality and is not semantically secure so should not be used. Instead, use a strong, secure cipher:
+      java.crypto.Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+      https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Use of AES with no settings detected. By default, java.crypto.Cipher uses ECB mode. ECB doesn't  provide
+          message confidentiality and is not semantically secure so should not be used. Instead, use a strong, secure
+          cipher: java.crypto.Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+      - https://googleprojectzero.blogspot.com/2022/10/rc4-is-still-considered-harmful.html
+    tags:
+      - java
+  - id: use-of-md5-digest-utils
+    name: use-of-md5-digest-utils
+    description: >-
+      Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not
+      suitable as a cryptographic signature. Use HMAC instead.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $DU.$GET_ALGO().digest(...)
+        message: >-
+          Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not
+          suitable as a cryptographic signature. Use HMAC instead.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: use-of-md5
+    name: use-of-md5
+    description: >-
+      Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not
+      suitable as a cryptographic signature. Use HMAC instead.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          java.security.MessageDigest.getInstance($ALGO, ...);
+        message: >-
+          Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not
+          suitable as a cryptographic signature. Use HMAC instead.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: use-of-rc2
+    name: use-of-rc2
+    description: >-
+      Use of RC2 was detected. RC2 is vulnerable to related-key attacks, and is therefore considered non-compliant.
+      Instead, use a strong, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+      https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $CIPHER.getInstance("RC2")
+        message: >-
+          Use of RC2 was detected. RC2 is vulnerable to related-key attacks, and is therefore considered non-compliant.
+          Instead, use a strong, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+      - https://googleprojectzero.blogspot.com/2022/10/rc4-is-still-considered-harmful.html
+    tags:
+      - java
+  - id: use-of-rc4
+    name: use-of-rc4
+    description: >-
+      Use of RC4 was detected. RC4 is vulnerable to several attacks, including stream cipher attacks and bit flipping
+      attacks. Instead, use a strong, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+      https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $CIPHER.getInstance("RC4")
+        message: >-
+          Use of RC4 was detected. RC4 is vulnerable to several attacks, including stream cipher attacks and bit
+          flipping attacks. Instead, use a strong, secure cipher: Cipher.getInstance("AES/CBC/PKCS7PADDING"). See
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+      - https://googleprojectzero.blogspot.com/2022/10/rc4-is-still-considered-harmful.html
+    tags:
+      - java
+  - id: use-of-sha1
+    name: use-of-sha1
+    description: >-
+      Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not
+      suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or SHA256 or SHA512 for other hash
+      function applications.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $DU.getSha1Digest().digest(...)
+        message: >-
+          Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore
+          not suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or SHA256 or SHA512 for
+          other hash function applications.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: use-of-sha224
+    name: use-of-sha224
+    description: >-
+      This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+      updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: org.apache.commons.codec.digest.DigestUtils.getSha3_224Digest()
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: org.apache.commons.codec.digest.DigestUtils.getSha512_224Digest()
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: org.apache.commons.codec.digest.DigestUtils.sha3_224(...)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: org.apache.commons.codec.digest.DigestUtils.sha3_224Hex(...)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: org.apache.commons.codec.digest.DigestUtils.sha512_224(...)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: org.apache.commons.codec.digest.DigestUtils.sha512_224Hex(...)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: >-
+          new
+          org.apache.commons.codec.digest.DigestUtils(org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_224)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: >-
+          new
+          org.apache.commons.codec.digest.DigestUtils(org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_512_224)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+      - pattern: >-
+          new
+          org.apache.commons.codec.digest.DigestUtils(org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA3_224)
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar3.ipd.pdf
+      - >-
+        https://www.cyber.gov.au/resources-business-and-government/essential-cyber-security/ism/cyber-security-guidelines/guidelines-cryptography
+    tags:
+      - java
+  - id: weak-random
+    name: weak-random
+    description: >-
+      Detected use of the functions `Math.random()` or `java.util.Random()`. These are both not cryptographically strong
+      random number generators (RNGs). If you are using these RNGs to create passwords or secret tokens, use
+      `java.security.SecureRandom` instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          new java.util.Random(...).$FUNC(...)
+        message: >-
+          Detected use of the functions `Math.random()` or `java.util.Random()`. These are both not cryptographically
+          strong random number generators (RNGs). If you are using these RNGs to create passwords or secret tokens, use
+          `java.security.SecureRandom` instead.
+      - pattern: |
+          java.lang.Math.random(...)
+        message: >-
+          Detected use of the functions `Math.random()` or `java.util.Random()`. These are both not cryptographically
+          strong random number generators (RNGs). If you are using these RNGs to create passwords or secret tokens, use
+          `java.security.SecureRandom` instead.
+    cwe:
+      - CWE-330
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - java
+  - id: use-of-weak-rsa-key
+    name: use-of-weak-rsa-key
+    description: RSA keys should be at least 2048 bits based on NIST recommendation.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          KeyPairGenerator $KEY = $G.getInstance("RSA");
+          ...
+          $KEY.initialize($BITS);
+        message: RSA keys should be at least 2048 bits based on NIST recommendation.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#algorithms
+    tags:
+      - java
+  - id: dangerous-groovy-shell
+    name: dangerous-groovy-shell
+    description: >-
+      A expression is built with a dynamic value. The source of the value(s) should be verified to avoid that unfiltered
+      values fall into this risky code evaluation.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+          unfiltered values fall into this risky code evaluation.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - groovy
+  - id: el-injection
+    name: el-injection
+    description: >-
+      An expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+      unfiltered values fall into this risky code evaluation.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          An expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+          unfiltered values fall into this risky code evaluation.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: formatted-sql-string
+    name: formatted-sql-string
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a
+      PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can
+          obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+      - https://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html#create_ps
+      - https://software-security.sans.org/developer-how-to/fix-sql-injection-in-java-using-prepared-callable-statement
+    tags:
+      - java
+  - id: http-response-splitting
+    name: http-response-splitting
+    description: >-
+      Older Java application servers are vulnerable to HTTP response splitting, which may occur if an HTTP request can
+      be injected with CRLF characters. This finding is reported for completeness; it is recommended to ensure your
+      environment is not affected by testing this yourself.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $VAR = $REQ.getParameter(...);
+          ...
+          $COOKIE = new Cookie(..., $VAR, ...);
+          ...
+          $RESP.addCookie($COOKIE, ...);
+        message: >-
+          Older Java application servers are vulnerable to HTTP response splitting, which may occur if an HTTP request
+          can be injected with CRLF characters. This finding is reported for completeness; it is recommended to ensure
+          your environment is not affected by testing this yourself.
+    cwe:
+      - CWE-113
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.owasp.org/index.php/HTTP_Response_Splitting
+    tags:
+      - java
+  - id: insecure-smtp-connection
+    name: insecure-smtp-connection
+    description: >-
+      Insecure SMTP connection detected. This connection will trust any SSL certificate. Enable certificate verification
+      by setting 'email.setSSLCheckServerIdentity(true)'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $EMAIL.send(...);
+        message: >-
+          Insecure SMTP connection detected. This connection will trust any SSL certificate. Enable certificate
+          verification by setting 'email.setSSLCheckServerIdentity(true)'.
+    cwe:
+      - CWE-297
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+    tags:
+      - java
+  - id: java-reverse-shell
+    name: java-reverse-shell
+    description: Semgrep found potential reverse shell behavior
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: Semgrep found potential reverse shell behavior
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: jdbc-sql-formatted-string
+    name: jdbc-sql-formatted-string
+    description: >-
+      Possible JDBC injection detected. Use the parameterized query feature available in queryForObject instead of
+      concatenating or formatting strings: 'jdbc.queryForObject("select * from table where name = ?", Integer.class,
+      parameterName);'
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Possible JDBC injection detected. Use the parameterized query feature available in queryForObject instead of
+          concatenating or formatting strings: 'jdbc.queryForObject("select * from table where name = ?", Integer.class,
+          parameterName);'
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - jdbc
+  - id: ldap-entry-poisoning
+    name: ldap-entry-poisoning
+    description: >-
+      An object-returning LDAP search will allow attackers to control the LDAP response. This could lead to Remote Code
+      Execution.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          new SearchControls($S, $CL, $TL, $AT, true, $DEREF)
+        message: >-
+          An object-returning LDAP search will allow attackers to control the LDAP response. This could lead to Remote
+          Code Execution.
+      - pattern: |
+          SearchControls $VAR = new SearchControls();
+          ...
+          $VAR.setReturningObjFlag(true);
+        message: >-
+          An object-returning LDAP search will allow attackers to control the LDAP response. This could lead to Remote
+          Code Execution.
+    cwe:
+      - CWE-90
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf
+      - https://cheatsheetseries.owasp.org/cheatsheets/LDAP_Injection_Prevention_Cheat_Sheet.html
+    tags:
+      - java
+  - id: ldap-injection
+    name: ldap-injection
+    description: >-
+      Detected non-constant data passed into an LDAP query. If this data can be controlled by an external user, this is
+      an LDAP injection. Ensure data passed to an LDAP query is not controllable; or properly sanitize the data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            $CTX.search($Y,$INPUT,...);
+            ...
+          }
+        message: >-
+          Detected non-constant data passed into an LDAP query. If this data can be controlled by an external user, this
+          is an LDAP injection. Ensure data passed to an LDAP query is not controllable; or properly sanitize the data.
+    cwe:
+      - CWE-90
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: md5-used-as-password
+    name: md5-used-as-password
+    description: >-
+      It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+      cracked by an attacker in a short amount of time. Use a suitable password hashing function such as PBKDF2 or
+      bcrypt. You can use `javax.crypto.SecretKeyFactory` with `SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")` or,
+      if using Spring, `org.springframework.security.crypto.bcrypt`.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+          cracked by an attacker in a short amount of time. Use a suitable password hashing function such as PBKDF2 or
+          bcrypt. You can use `javax.crypto.SecretKeyFactory` with `SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")`
+          or, if using Spring, `org.springframework.security.crypto.bcrypt`.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://tools.ietf.org/id/draft-lvelvindron-tls-md5-sha1-deprecate-01.html
+      - https://github.com/returntocorp/semgrep-rules/issues/1609
+      - https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory
+      - >-
+        https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/crypto/bcrypt/BCryptPasswordEncoder.html
+    tags:
+      - java
+      - md5
+  - id: object-deserialization
+    name: object-deserialization
+    description: >-
+      Found object deserialization using ObjectInputStream. Deserializing entire Java objects is dangerous because
+      malicious actors can create Java object streams with unintended consequences. Ensure that the objects being
+      deserialized are not user-controlled. If this must be done, consider using HMACs to sign the data stream to make
+      sure it is not tampered with, or consider only transmitting object fields and populating a new object.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: new ObjectInputStream(...);
+        message: >-
+          Found object deserialization using ObjectInputStream. Deserializing entire Java objects is dangerous because
+          malicious actors can create Java object streams with unintended consequences. Ensure that the objects being
+          deserialized are not user-controlled. If this must be done, consider using HMACs to sign the data stream to
+          make sure it is not tampered with, or consider only transmitting object fields and populating a new object.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://www.owasp.org/index.php/Deserialization_of_untrusted_data
+      - https://www.oracle.com/java/technologies/javase/seccodeguide.html#8
+    tags:
+      - java
+  - id: ognl-injection
+    name: ognl-injection
+    description: >-
+      A expression is built with a dynamic value. The source of the value(s) should be verified to avoid that unfiltered
+      values fall into this risky code evaluation.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+          unfiltered values fall into this risky code evaluation.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - ognl
+  - id: overly-permissive-file-permission
+    name: overly-permissive-file-permission
+    description: >-
+      Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad practices
+      to set overly permissive file permission such as read+write+exec for all users. If the file affected is a
+      configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information leakage.
+      Instead, follow the principle of least privilege and give users only the  permissions they need.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: >-
+          java.nio.file.Files.setPosixFilePermissions($FILE,
+          java.nio.file.attribute.PosixFilePermissions.fromString("=~/(^......r..$)|(^.......w.$)|(^........x$)/"));
+        message: >-
+          Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad
+          practices to set overly permissive file permission such as read+write+exec for all users. If the file affected
+          is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information
+          leakage. Instead, follow the principle of least privilege and give users only the  permissions they need.
+      - pattern: >
+          $TYPE $P =
+          java.nio.file.attribute.PosixFilePermissions.fromString("=~/(^......r..$)|(^.......w.$)|(^........x$)/");
+
+          ...
+
+          java.nio.file.Files.setPosixFilePermissions($FILE, $P);
+        message: >-
+          Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad
+          practices to set overly permissive file permission such as read+write+exec for all users. If the file affected
+          is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information
+          leakage. Instead, follow the principle of least privilege and give users only the  permissions they need.
+      - pattern: |
+          $P.add(java.nio.file.attribute.PosixFilePermission.OTHERS_READ);
+          ...
+          java.nio.file.Files.setPosixFilePermissions($FILE, $P);
+        message: >-
+          Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad
+          practices to set overly permissive file permission such as read+write+exec for all users. If the file affected
+          is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information
+          leakage. Instead, follow the principle of least privilege and give users only the  permissions they need.
+      - pattern: |
+          $P.add(java.nio.file.attribute.PosixFilePermission.OTHERS_WRITE);
+          ...
+          java.nio.file.Files.setPosixFilePermissions($FILE, $P);
+        message: >-
+          Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad
+          practices to set overly permissive file permission such as read+write+exec for all users. If the file affected
+          is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information
+          leakage. Instead, follow the principle of least privilege and give users only the  permissions they need.
+      - pattern: |-
+          $P.add(java.nio.file.attribute.PosixFilePermission.OTHERS_EXECUTE);
+          ...
+          java.nio.file.Files.setPosixFilePermissions($FILE, $P);
+        message: >-
+          Detected file permissions that are overly permissive (read, write, and execute). It is generally a bad
+          practices to set overly permissive file permission such as read+write+exec for all users. If the file affected
+          is a configuration, a binary, a script or sensitive data, it can lead to privilege escalation or information
+          leakage. Instead, follow the principle of least privilege and give users only the  permissions they need.
+    cwe:
+      - CWE-276
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - java
+  - id: permissive-cors
+    name: permissive-cors
+    description: >-
+      https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious application
+      to communicate with the victim application in an inappropriate way, leading to spoofing, data theft, relay and
+      other attacks.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          HttpServletResponse $RES = ...;
+          ...
+          $RES.addHeader("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          HttpServletResponse $RES = ...;
+          ...
+          $RES.setHeader("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          ServerHttpResponse $RES = ...;
+          ...
+          $RES.getHeaders().add("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          HttpHeaders $HEADERS = ...;
+          ...
+          $HEADERS.set("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          ServerWebExchange $SWE = ...;
+          ...
+          $SWE.getResponse().getHeaders().add("Access-Control-Allow-Origin", "*");
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...) {
+            ...
+            $RES.addHeader("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+            ...
+          }
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...) {
+            ...
+            $RES.setHeader("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+            ...
+          }
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          $X $METHOD(...,ServerHttpResponse $RES,...) {
+            ...
+            $RES.getHeaders().add("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+            ...
+          }
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: |
+          $X $METHOD(...,ServerWebExchange $SWE,...) {
+            ...
+            $SWE.getResponse().getHeaders().add("=~/access-control-allow-origin/i", "=~/^\*|null$/i");
+            ...
+          }
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: ResponseEntity.$RES().header("=~/access-control-allow-origin/i", "=~/^\*|null$/i")
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+      - pattern: ServerResponse.$RES().header("=~/access-control-allow-origin/i", "=~/^\*|null$/i")
+        message: >-
+          https://find-sec-bugs.github.io/bugs.htm#PERMISSIVE_CORS Permissive CORS policy will allow a malicious
+          application to communicate with the victim application in an inappropriate way, leading to spoofing, data
+          theft, relay and other attacks.
+    cwe:
+      - CWE-183
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://owasp.org/Top10/A04_2021-Insecure_Design
+    tags:
+      - java
+  - id: script-engine-injection
+    name: script-engine-injection
+    description: >-
+      Detected potential code injection using ScriptEngine. Ensure user-controlled data cannot enter '.eval()',
+      otherwise, this is a code injection vulnerability.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            $SE.eval(...);
+            ...
+          }
+        message: >-
+          Detected potential code injection using ScriptEngine. Ensure user-controlled data cannot enter '.eval()',
+          otherwise, this is a code injection vulnerability.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: hibernate-sqli
+    name: hibernate-sqli
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a
+      PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: org.hibernate.criterion.Restrictions.sqlRestriction(String.format(...),...)
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can
+          obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - hibernate
+  - id: jdbc-sqli
+    name: jdbc-sqli
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a
+      PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can
+          obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - jdbc
+  - id: jdo-sqli
+    name: jdo-sqli
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a
+      PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can
+          obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: jpa-sqli
+    name: jpa-sqli
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a
+      PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can
+          obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - jpa
+  - id: tainted-sql-from-http-request
+    name: tainted-sql-from-http-request
+    description: >-
+      Detected input from a HTTPServletRequest going into a SQL sink or statement. This could lead to SQL injection if
+      variables in the SQL statement are not properly sanitized. Use parameterized SQL queries or properly sanitize user
+      input instead.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected input from a HTTPServletRequest going into a SQL sink or statement. This could lead to SQL injection
+          if variables in the SQL statement are not properly sanitized. Use parameterized SQL queries or properly
+          sanitize user input instead.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+      - https://owasp.org/www-community/attacks/SQL_Injection
+    tags:
+      - sql
+      - java
+      - servlets
+      - spring
+  - id: turbine-sqli
+    name: turbine-sqli
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a
+      PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can
+          obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - turbine
+  - id: vertx-sqli
+    name: vertx-sqli
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a
+      PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can
+          obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - vertx
+  - id: tainted-cmd-from-http-request
+    name: tainted-cmd-from-http-request
+    description: >-
+      Detected input from a HTTPServletRequest going into a 'ProcessBuilder' or 'exec' command. This could lead to
+      command injection if variables passed into the exec commands are not properly sanitized. Instead, avoid using
+      these OS commands with user-supplied input, or, if you must use these commands, use a whitelist of specific
+      values.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected input from a HTTPServletRequest going into a 'ProcessBuilder' or 'exec' command. This could lead to
+          command injection if variables passed into the exec commands are not properly sanitized. Instead, avoid using
+          these OS commands with user-supplied input, or, if you must use these commands, use a whitelist of specific
+          values.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: tainted-env-from-http-request
+    name: tainted-env-from-http-request
+    description: >-
+      Detected input from a HTTPServletRequest going into the environment variables of an 'exec' command.  Instead, call
+      the command with user-supplied arguments by using the overloaded method with one String array as the argument.
+      `exec({"command", "arg1", "arg2"})`.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected input from a HTTPServletRequest going into the environment variables of an 'exec' command.  Instead,
+          call the command with user-supplied arguments by using the overloaded method with one String array as the
+          argument. `exec({"command", "arg1", "arg2"})`.
+    cwe:
+      - CWE-454
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: tainted-ldapi-from-http-request
+    name: tainted-ldapi-from-http-request
+    description: >-
+      Detected input from a HTTPServletRequest going into an LDAP query. This could lead to LDAP injection if the input
+      is not properly sanitized, which could result in attackers modifying objects in the LDAP tree structure. Ensure
+      data passed to an LDAP query is not controllable or properly sanitize the data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected input from a HTTPServletRequest going into an LDAP query. This could lead to LDAP injection if the
+          input is not properly sanitized, which could result in attackers modifying objects in the LDAP tree structure.
+          Ensure data passed to an LDAP query is not controllable or properly sanitize the data.
+    cwe:
+      - CWE-90
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://sensei.securecodewarrior.com/recipes/scw%3Ajava%3ALDAP-injection
+    tags:
+      - java
+  - id: tainted-session-from-http-request
+    name: tainted-session-from-http-request
+    description: >-
+      Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User input into such a
+      command could lead to an attacker inputting malicious code into your session parameters, blurring the line between
+      what's trusted and untrusted, and therefore leading to a trust boundary violation. This could lead to programmers
+      trusting unvalidated data. Instead, thoroughly sanitize user input before passing it into such function calls.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User input into
+          such a command could lead to an attacker inputting malicious code into your session parameters, blurring the
+          line between what's trusted and untrusted, and therefore leading to a trust boundary violation. This could
+          lead to programmers trusting unvalidated data. Instead, thoroughly sanitize user input before passing it into
+          such function calls.
+    cwe:
+      - CWE-501
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://owasp.org/Top10/A04_2021-Insecure_Design
+    tags:
+      - java
+  - id: tainted-xpath-from-http-request
+    name: tainted-xpath-from-http-request
+    description: >-
+      Detected input from a HTTPServletRequest going into a XPath evaluate or compile command. This could lead to xpath
+      injection if variables passed into the evaluate or compile commands are not properly sanitized. Xpath injection
+      could lead to unauthorized access to sensitive information in XML documents. Instead, thoroughly sanitize user
+      input or use parameterized xpath queries if you can.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected input from a HTTPServletRequest going into a XPath evaluate or compile command. This could lead to
+          xpath injection if variables passed into the evaluate or compile commands are not properly sanitized. Xpath
+          injection could lead to unauthorized access to sensitive information in XML documents. Instead, thoroughly
+          sanitize user input or use parameterized xpath queries if you can.
+    cwe:
+      - CWE-643
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: unsafe-reflection
+    name: unsafe-reflection
+    description: >-
+      If an attacker can supply values that the application then uses to determine which class to instantiate or which
+      method to invoke, the potential exists for the attacker to create control flow paths through the application that
+      were not intended by the application developers. This attack vector may allow the attacker to bypass
+      authentication or access control checks or otherwise cause the application to behave in an unexpected manner.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          Class.forName($CLASS,...)
+        message: >-
+          If an attacker can supply values that the application then uses to determine which class to instantiate or
+          which method to invoke, the potential exists for the attacker to create control flow paths through the
+          application that were not intended by the application developers. This attack vector may allow the attacker to
+          bypass authentication or access control checks or otherwise cause the application to behave in an unexpected
+          manner.
+    cwe:
+      - CWE-470
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: unvalidated-redirect
+    name: unvalidated-redirect
+    description: >-
+      Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+      could direct users to malicious locations. Consider using an allowlist to validate URLs.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...,String $URL,...) {
+            ...
+            $RES.sendRedirect($URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,String $URL,...,HttpServletResponse $RES,...) {
+            ...
+            $RES.sendRedirect($URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletRequest $REQ,...,HttpServletResponse $RES,...) {
+            ...
+            String $URL = $REQ.getParameter(...);
+            ...
+            $RES.sendRedirect($URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...,HttpServletRequest $REQ,...) {
+            ...
+            String $URL = $REQ.getParameter(...);
+            ...
+            $RES.sendRedirect($URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,String $URL,...) {
+            ...
+            HttpServletResponse $RES = ...;
+            ...
+            $RES.sendRedirect($URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletRequest $REQ,...,HttpServletResponse $RES,...) {
+            ...
+            $RES.sendRedirect($REQ.getParameter(...));
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...,HttpServletRequest $REQ,...) {
+            ...
+            $RES.sendRedirect($REQ.getParameter(...));
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...,String $URL,...) {
+            ...
+            $RES.addHeader("Location",$URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,String $URL,...,HttpServletResponse $RES,...) {
+            ...
+            $RES.addHeader("Location",$URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletRequest $REQ,...,HttpServletResponse $RES,...) {
+            ...
+            String $URL = $REQ.getParameter(...);
+            ...
+            $RES.addHeader("Location",$URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...,HttpServletRequest $REQ,...) {
+            ...
+            String $URL = $REQ.getParameter(...);
+            ...
+            $RES.addHeader("Location",$URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,String $URL,...) {
+            ...
+            HttpServletResponse $RES = ...;
+            ...
+            $RES.addHeader("Location",$URL);
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |
+          $X $METHOD(...,HttpServletRequest $REQ,...,HttpServletResponse $RES,...) {
+            ...
+            $RES.addHeader("Location",$REQ.getParameter(...));
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+      - pattern: |-
+          $X $METHOD(...,HttpServletResponse $RES,...,HttpServletRequest $REQ,...) {
+            ...
+            $RES.addHeader("Location",$REQ.getParameter(...));
+            ...
+          }
+        message: >-
+          Application redirects to a destination URL specified by a user-supplied parameter that is not validated. This
+          could direct users to malicious locations. Consider using an allowlist to validate URLs.
+    cwe:
+      - CWE-601
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - java
+  - id: url-rewriting
+    name: url-rewriting
+    description: >-
+      URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by third
+      parties.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...) {
+            ...
+            $RES.encodeURL(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...) {
+            ...
+            $RES.encodeUrl(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...) {
+            ...
+            $RES.encodeRedirectURL(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+      - pattern: |
+          $X $METHOD(...,HttpServletResponse $RES,...) {
+            ...
+            $RES.encodeRedirectUrl(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            HttpServletResponse $RES = ...;
+            ...
+            $RES.encodeURL(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            HttpServletResponse $RES = ...;
+            ...
+            $RES.encodeUrl(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            HttpServletResponse $RES = ...;
+            ...
+            $RES.encodeRedirectURL(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+      - pattern: |-
+          $X $METHOD(...) {
+            ...
+            HttpServletResponse $RES = ...;
+            ...
+            $RES.encodeRedirectUrl(...);
+            ...
+          }
+        message: >-
+          URL rewriting has significant security risks. Since session ID appears in the URL, it may be easily seen by
+          third parties.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - java
+  - id: weak-ssl-context
+    name: weak-ssl-context
+    description: >-
+      An insecure SSL context was detected. TLS versions 1.0, 1.1, and all SSL versions are considered weak encryption
+      and are deprecated. Use SSLContext.getInstance("TLSv1.2") for the best security.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: SSLContext.getInstance("...")
+        message: >-
+          An insecure SSL context was detected. TLS versions 1.0, 1.1, and all SSL versions are considered weak
+          encryption and are deprecated. Use SSLContext.getInstance("TLSv1.2") for the best security.
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://tools.ietf.org/html/rfc7568
+      - https://tools.ietf.org/id/draft-ietf-tls-oldversions-deprecate-02.html
+    tags:
+      - java
+  - id: xml-decoder
+    name: xml-decoder
+    description: >-
+      XMLDecoder should not be used to parse untrusted data. Deserializing user input can lead to arbitrary code
+      execution. Use an alternative and explicitly disable external entities. See
+      https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html for alternatives
+      and vulnerability prevention.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            new XMLDecoder(...);
+            ...
+          }
+        message: >-
+          XMLDecoder should not be used to parse untrusted data. Deserializing user input can lead to arbitrary code
+          execution. Use an alternative and explicitly disable external entities. See
+          https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html for
+          alternatives and vulnerability prevention.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+    tags:
+      - java
+  - id: no-direct-response-writer
+    name: no-direct-response-writer
+    description: >-
+      Detected a request with potential user-input going into a OutputStream or Writer object. This bypasses any view or
+      template environments, including HTML escaping, which may expose this application to cross-site scripting (XSS)
+      vulnerabilities. Consider using a view technology such as JavaServer Faces (JSFs) which automatically escapes HTML
+      views.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a request with potential user-input going into a OutputStream or Writer object. This bypasses any
+          view or template environments, including HTML escaping, which may expose this application to cross-site
+          scripting (XSS) vulnerabilities. Consider using a view technology such as JavaServer Faces (JSFs) which
+          automatically escapes HTML views.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaServerFaces.html
+    tags:
+      - java
+      - servlets
+  - id: xssrequestwrapper-is-insecure
+    name: xssrequestwrapper-is-insecure
+    description: >-
+      It looks like you're using an implementation of XSSRequestWrapper from dzone.
+      (https://www.javacodegeeks.com/2012/07/anti-cross-site-scripting-xss-filter.html) The XSS filtering in this code
+      is not secure and can be bypassed by malicious actors. It is recommended to use a stack that automatically escapes
+      in your view or templates instead of filtering yourself.
+    category: xss
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          class XSSRequestWrapper extends HttpServletRequestWrapper {
+            ...
+          }
+        message: >-
+          It looks like you're using an implementation of XSSRequestWrapper from dzone.
+          (https://www.javacodegeeks.com/2012/07/anti-cross-site-scripting-xss-filter.html) The XSS filtering in this
+          code is not secure and can be bypassed by malicious actors. It is recommended to use a stack that
+          automatically escapes in your view or templates instead of filtering yourself.
+      - pattern: |-
+          $P = $X.compile("</script>", $X.CASE_INSENSITIVE);
+          $V = $P.matcher(...).replaceAll("");
+        message: >-
+          It looks like you're using an implementation of XSSRequestWrapper from dzone.
+          (https://www.javacodegeeks.com/2012/07/anti-cross-site-scripting-xss-filter.html) The XSS filtering in this
+          code is not secure and can be bypassed by malicious actors. It is recommended to use a stack that
+          automatically escapes in your view or templates instead of filtering yourself.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: documentbuilderfactory-disallow-doctype-decl-false
+    name: documentbuilderfactory-disallow-doctype-decl-false
+    description: >-
+      DOCTYPE declarations are enabled for $DBFACTORY. Without prohibiting external entity declarations, this is
+      vulnerable to XML external entity attacks. Disable this by setting the feature
+      "http://apache.org/xml/features/disallow-doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only
+      prohibit external entities declarations. This can be done by setting the features
+      "http://xml.org/sax/features/external-general-entities" and
+      "http://xml.org/sax/features/external-parameter-entities" to false.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $DBFACTORY.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+        message: >-
+          DOCTYPE declarations are enabled for $DBFACTORY. Without prohibiting external entity declarations, this is
+          vulnerable to XML external entity attacks. Disable this by setting the feature
+          "http://apache.org/xml/features/disallow-doctype-decl" to true. Alternatively, allow DOCTYPE declarations and
+          only prohibit external entities declarations. This can be done by setting the features
+          "http://xml.org/sax/features/external-general-entities" and
+          "http://xml.org/sax/features/external-parameter-entities" to false.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://blog.sonarsource.com/secure-xml-processor
+      - https://xerces.apache.org/xerces2-j/features.html
+    tags:
+      - java
+      - xml
+  - id: documentbuilderfactory-disallow-doctype-decl-missing
+    name: documentbuilderfactory-disallow-doctype-decl-missing
+    description: >-
+      DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external entity
+      attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-doctype-decl" to true.
+      Alternatively, allow DOCTYPE declarations and only prohibit external entities declarations. This can be done by
+      setting the features "http://xml.org/sax/features/external-general-entities" and
+      "http://xml.org/sax/features/external-parameter-entities" to false.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external entity
+          attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-doctype-decl" to true.
+          Alternatively, allow DOCTYPE declarations and only prohibit external entities declarations. This can be done
+          by setting the features "http://xml.org/sax/features/external-general-entities" and
+          "http://xml.org/sax/features/external-parameter-entities" to false.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://blog.sonarsource.com/secure-xml-processor
+      - https://xerces.apache.org/xerces2-j/features.html
+    tags:
+      - java
+      - xml
+  - id: documentbuilderfactory-external-general-entities-true
+    name: documentbuilderfactory-external-general-entities-true
+    description: >-
+      External entities are allowed for $DBFACTORY. This is vulnerable to XML external entity attacks. Disable this by
+      setting the feature "http://xml.org/sax/features/external-general-entities" to false.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $DBFACTORY.setFeature("http://xml.org/sax/features/external-general-entities", true);
+        message: >-
+          External entities are allowed for $DBFACTORY. This is vulnerable to XML external entity attacks. Disable this
+          by setting the feature "http://xml.org/sax/features/external-general-entities" to false.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://blog.sonarsource.com/secure-xml-processor
+    tags:
+      - java
+      - xml
+  - id: documentbuilderfactory-external-parameter-entities-true
+    name: documentbuilderfactory-external-parameter-entities-true
+    description: >-
+      External entities are allowed for $DBFACTORY. This is vulnerable to XML external entity attacks. Disable this by
+      setting the feature "http://xml.org/sax/features/external-parameter-entities" to false.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $DBFACTORY.setFeature("http://xml.org/sax/features/external-parameter-entities", true);
+        message: >-
+          External entities are allowed for $DBFACTORY. This is vulnerable to XML external entity attacks. Disable this
+          by setting the feature "http://xml.org/sax/features/external-parameter-entities" to false.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://blog.sonarsource.com/secure-xml-processor
+    tags:
+      - java
+      - xml
+  - id: saxparserfactory-disallow-doctype-decl-missing
+    name: saxparserfactory-disallow-doctype-decl-missing
+    description: >-
+      DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external entity attacks.
+      Disable this by setting the feature `http://apache.org/xml/features/disallow-doctype-decl` to true. Alternatively,
+      allow DOCTYPE declarations and only prohibit external entities declarations. This can be done by setting the
+      features `http://xml.org/sax/features/external-general-entities` and
+      `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The previous links are not meant to be
+      clicked. They are the literal config key values that are supposed to be used to disable these features. For more
+      information, see https://semgrep.dev/docs/cheat-sheets/java-xxe/#3a-documentbuilderfactory.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external entity attacks.
+          Disable this by setting the feature `http://apache.org/xml/features/disallow-doctype-decl` to true.
+          Alternatively, allow DOCTYPE declarations and only prohibit external entities declarations. This can be done
+          by setting the features `http://xml.org/sax/features/external-general-entities` and
+          `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The previous links are not meant to
+          be clicked. They are the literal config key values that are supposed to be used to disable these features. For
+          more information, see https://semgrep.dev/docs/cheat-sheets/java-xxe/#3a-documentbuilderfactory.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://blog.sonarsource.com/secure-xml-processor
+      - https://xerces.apache.org/xerces2-j/features.html
+    tags:
+      - java
+      - xml
+  - id: transformerfactory-dtds-not-disabled
+    name: transformerfactory-dtds-not-disabled
+    description: >-
+      DOCTYPE declarations are enabled for this TransformerFactory. This is vulnerable to XML external entity attacks.
+      Disable this by setting the attributes "accessExternalDTD" and "accessExternalStylesheet" to "".
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          DOCTYPE declarations are enabled for this TransformerFactory. This is vulnerable to XML external entity
+          attacks. Disable this by setting the attributes "accessExternalDTD" and "accessExternalStylesheet" to "".
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://blog.sonarsource.com/secure-xml-processor
+      - https://xerces.apache.org/xerces2-j/features.html
+    tags:
+      - java
+      - xml
+  - id: do-privileged-use
+    name: do-privileged-use
+    description: >-
+      Marking code as privileged enables a piece of trusted code to temporarily enable access to more resources than are
+      available directly to the code that called it. Be very careful in your use of the privileged construct, and always
+      remember to make the privileged code section as small as possible.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Marking code as privileged enables a piece of trusted code to temporarily enable access to more resources than
+          are available directly to the code that called it. Be very careful in your use of the privileged construct,
+          and always remember to make the privileged code section as small as possible.
+    cwe:
+      - CWE-269
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://docs.oracle.com/javase/8/docs/technotes/guides/security/doprivileged.html
+      - https://wiki.sei.cmu.edu/confluence/display/java/Privilege+Escalation
+      - http://phrack.org/papers/escaping_the_java_sandbox.html
+    tags:
+      - java
+  - id: httpservlet-path-traversal
+    name: httpservlet-path-traversal
+    description: >-
+      Detected a potential path traversal. A malicious actor could control the location of this file, to include going
+      backwards in the directory with '../'. To address this, ensure that user-controlled variables in file paths are
+      sanitized. You may also consider using a utility method such as org.apache.commons.io.FilenameUtils.getName(...)
+      to only retrieve the file name from the path.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a potential path traversal. A malicious actor could control the location of this file, to include
+          going backwards in the directory with '../'. To address this, ensure that user-controlled variables in file
+          paths are sanitized. You may also consider using a utility method such as
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.owasp.org/index.php/Path_Traversal
+    tags:
+      - java
+  - id: insecure-jms-deserialization
+    name: insecure-jms-deserialization
+    description: >-
+      JMS Object messages depend on Java Serialization for marshalling/unmarshalling of the message payload when
+      ObjectMessage.getObject() is called. Deserialization of untrusted data can lead to security flaws; a remote
+      attacker could via a crafted JMS ObjectMessage to execute arbitrary code with the permissions of the application
+      listening/consuming JMS Messages. In this case, the JMS MessageListener consume an ObjectMessage type received
+      inside the onMessage method, which may lead to arbitrary code execution when calling the $Y.getObject method.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          JMS Object messages depend on Java Serialization for marshalling/unmarshalling of the message payload when
+          ObjectMessage.getObject() is called. Deserialization of untrusted data can lead to security flaws; a remote
+          attacker could via a crafted JMS ObjectMessage to execute arbitrary code with the permissions of the
+          application listening/consuming JMS Messages. In this case, the JMS MessageListener consume an ObjectMessage
+          type received inside the onMessage method, which may lead to arbitrary code execution when calling the
+          $Y.getObject method.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - >-
+        https://www.blackhat.com/docs/us-16/materials/us-16-Kaiser-Pwning-Your-Java-Messaging-With-Deserialization-Vulnerabilities-wp.pdf
+    tags:
+      - java
+  - id: jackson-unsafe-deserialization
+    name: jackson-unsafe-deserialization
+    description: >-
+      When using Jackson to marshall/unmarshall JSON to Java objects, enabling default typing is dangerous and can lead
+      to RCE. If an attacker can control `$JSON` it might be possible to provide a malicious JSON which can be used to
+      exploit unsecure deserialization. In order to prevent this issue, avoid to enable default typing (globally or by
+      using "Per-class" annotations) and avoid using `Object` and other dangerous types for member variable declaration
+      which creating classes for Jackson based deserialization.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          When using Jackson to marshall/unmarshall JSON to Java objects, enabling default typing is dangerous and can
+          lead to RCE. If an attacker can control `$JSON` it might be possible to provide a malicious JSON which can be
+          used to exploit unsecure deserialization. In order to prevent this issue, avoid to enable default typing
+          (globally or by using "Per-class" annotations) and avoid using `Object` and other dangerous types for member
+          variable declaration which creating classes for Jackson based deserialization.
+    cwe:
+      - CWE-502
+    owasp:
+      - A8:2017
+      - A8:2021
+    references:
+      - https://swapneildash.medium.com/understanding-insecure-implementation-of-jackson-deserialization-7b3d409d2038
+      - https://cowtowncoder.medium.com/on-jackson-cves-dont-panic-here-is-what-you-need-to-know-54cd0d6e8062
+      - https://adamcaudill.com/2017/10/04/exploiting-jackson-rce-cve-2017-7525/
+    tags:
+      - jackson
+  - id: java-pattern-from-string-parameter
+    name: java-pattern-from-string-parameter
+    description: >-
+      A regular expression is being used directly from a String method parameter. This could be a Regular Expression
+      Denial of Service (ReDoS) vulnerability if the parameter is user-controlled and not properly validated. Ensure
+      that a validation is in place to prevent evaluation using a regular expression prone to ReDoS.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          A regular expression is being used directly from a String method parameter. This could be a Regular Expression
+          Denial of Service (ReDoS) vulnerability if the parameter is user-controlled and not properly validated. Ensure
+          that a validation is in place to prevent evaluation using a regular expression prone to ReDoS.
+    cwe:
+      - CWE-1333
+    owasp:
+      - A03:2021
+    references:
+      - https://en.wikipedia.org/wiki/ReDoS
+      - https://learn.snyk.io/lesson/redos
+    tags:
+      - java
+  - id: servletresponse-writer-xss
+    name: servletresponse-writer-xss
+    description: >-
+      Cross-site scripting detected in HttpServletResponse writer with variable '$VAR'. User input was detected going
+      directly from the HttpServletRequest into output. Ensure your data is properly encoded using
+      org.owasp.encoder.Encode.forHtml: 'Encode.forHtml($VAR)'.
+    category: xss
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Cross-site scripting detected in HttpServletResponse writer with variable '$VAR'. User input was detected
+          going directly from the HttpServletRequest into output. Ensure your data is properly encoded using
+          org.owasp.encoder.Encode.forHtml: 'Encode.forHtml($VAR)'.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - java
+  - id: use-snakeyaml-constructor
+    name: use-snakeyaml-constructor
+    description: >-
+      Used SnakeYAML org.yaml.snakeyaml.Yaml() constructor with no arguments, which is vulnerable to deserialization
+      attacks. Use the one-argument Yaml(...) constructor instead, with SafeConstructor or a custom Constructor as the
+      argument.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $Y = new org.yaml.snakeyaml.Yaml();
+          ...
+          $Y.load(...);
+        message: >-
+          Used SnakeYAML org.yaml.snakeyaml.Yaml() constructor with no arguments, which is vulnerable to deserialization
+          attacks. Use the one-argument Yaml(...) constructor instead, with SafeConstructor or a custom Constructor as
+          the argument.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - >-
+        https://securitylab.github.com/research/swagger-yaml-parser-vulnerability/#snakeyaml-deserialization-vulnerability
+    tags:
+      - snakeyaml
+  - id: xmlinputfactory-external-entities-enabled
+    name: xmlinputfactory-external-entities-enabled
+    description: >-
+      XML external entities are enabled for this XMLInputFactory. This is vulnerable to XML external entity attacks.
+      Disable external entities by setting "javax.xml.stream.isSupportingExternalEntities" to false.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          XML external entities are enabled for this XMLInputFactory. This is vulnerable to XML external entity attacks.
+          Disable external entities by setting "javax.xml.stream.isSupportingExternalEntities" to false.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://www.blackhat.com/docs/us-15/materials/us-15-Wang-FileCry-The-New-Age-Of-XXE-java-wp.pdf
+    tags:
+      - java
+  - id: xmlinputfactory-possible-xxe
+    name: xmlinputfactory-possible-xxe
+    description: >-
+      XML external entities are not explicitly disabled for this XMLInputFactory. This could be vulnerable to XML
+      external entity vulnerabilities. Explicitly disable external entities by setting
+      "javax.xml.stream.isSupportingExternalEntities" to false.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          XML external entities are not explicitly disabled for this XMLInputFactory. This could be vulnerable to XML
+          external entity vulnerabilities. Explicitly disable external entities by setting
+          "javax.xml.stream.isSupportingExternalEntities" to false.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://semgrep.dev/blog/2022/xml-security-in-java
+      - https://semgrep.dev/docs/cheat-sheets/java-xxe/
+      - https://www.blackhat.com/docs/us-15/materials/us-15-Wang-FileCry-The-New-Age-Of-XXE-java-wp.pdf
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#xmlinputfactory-a-stax-parser
+    tags:
+      - java
+  - id: mongodb-nosqli
+    name: mongodb-nosqli
+    description: >-
+      Detected non-constant data passed into a NoSQL query using the 'where' evaluation operator. If this data can be
+      controlled by an external user, this is a NoSQL injection. Ensure data passed to the NoSQL query is not user
+      controllable, or properly sanitize the data. Ideally, avoid using the 'where' operator at all and instead use the
+      helper methods provided by com.mongodb.client.model.Filters with comparative operators such as eq, ne, lt, gt,
+      etc.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected non-constant data passed into a NoSQL query using the 'where' evaluation operator. If this data can
+          be controlled by an external user, this is a NoSQL injection. Ensure data passed to the NoSQL query is not
+          user controllable, or properly sanitize the data. Ideally, avoid using the 'where' operator at all and instead
+          use the helper methods provided by com.mongodb.client.model.Filters with comparative operators such as eq, ne,
+          lt, gt, etc.
+    cwe:
+      - CWE-943
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+      - https://www.mongodb.com/docs/manual/tutorial/query-documents/
+      - https://www.mongodb.com/docs/manual/reference/operator/query/where/
+    tags:
+      - nosql
+      - mongodb
+  - id: server-dangerous-class-deserialization
+    name: server-dangerous-class-deserialization
+    description: >-
+      Using a non-primitive class with Java RMI may be an insecure deserialization vulnerability. Depending on the
+      underlying implementation. This object could be manipulated by a malicious actor allowing them to execute code on
+      your system. Instead, use an integer ID to look up your object, or consider alternative serialization schemes such
+      as JSON.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          interface $INTERFACE extends Remote {
+            $RETURNTYPE $METHOD($CLASS $PARAM) throws RemoteException;
+          }
+        message: >-
+          Using a non-primitive class with Java RMI may be an insecure deserialization vulnerability. Depending on the
+          underlying implementation. This object could be manipulated by a malicious actor allowing them to execute code
+          on your system. Instead, use an integer ID to look up your object, or consider alternative serialization
+          schemes such as JSON.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://mogwailabs.de/blog/2019/03/attacking-java-rmi-services-after-jep-290/
+    tags:
+      - rmi
+  - id: server-dangerous-object-deserialization
+    name: server-dangerous-object-deserialization
+    description: >-
+      Using an arbitrary object ('$PARAMTYPE $PARAM') with Java RMI is an insecure deserialization vulnerability. This
+      object can be manipulated by a malicious actor allowing them to execute code on your system. Instead, use an
+      integer ID to look up your object, or consider alternative serialization schemes such as JSON.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          interface $INTERFACE extends Remote {
+            $RETURNTYPE $METHOD($PARAMTYPE $PARAM) throws RemoteException;
+          }
+        message: >-
+          Using an arbitrary object ('$PARAMTYPE $PARAM') with Java RMI is an insecure deserialization vulnerability.
+          This object can be manipulated by a malicious actor allowing them to execute code on your system. Instead, use
+          an integer ID to look up your object, or consider alternative serialization schemes such as JSON.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://frohoff.github.io/appseccali-marshalling-pickles/
+      - https://book.hacktricks.xyz/network-services-pentesting/1099-pentesting-java-rmi
+      - https://youtu.be/t_aw1mDNhzI
+      - https://github.com/qtc-de/remote-method-guesser
+      - https://github.com/openjdk/jdk/blob/master/src/java.rmi/share/classes/sun/rmi/server/UnicastRef.java#L303C4-L331
+    tags:
+      - rmi
+  - id: cookie-issecure-false
+    name: cookie-issecure-false
+    description: >-
+      Default session middleware settings: `setSecure` not set to true. This ensures that the cookie is sent only over
+      HTTPS to prevent cross-site scripting attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $COOKIE = new Cookie($...ARGS);
+        message: >-
+          Default session middleware settings: `setSecure` not set to true. This ensures that the cookie is sent only
+          over HTTPS to prevent cross-site scripting attacks.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://docs.oracle.com/javaee/6/api/javax/servlet/http/Cookie.html#setSecure(boolean)
+      - https://owasp.org/www-community/controls/SecureCookieAttribute
+    tags:
+      - java
+      - cookie
+  - id: cookie-setSecure
+    name: cookie-setSecure
+    description: >-
+      Default session middleware settings: `setSecure` not set to true. This ensures that the cookie is sent only over
+      HTTPS to prevent cross-site scripting attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Default session middleware settings: `setSecure` not set to true. This ensures that the cookie is sent only
+          over HTTPS to prevent cross-site scripting attacks.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://docs.oracle.com/javaee/6/api/javax/servlet/http/Cookie.html#setSecure(boolean)
+      - https://owasp.org/www-community/controls/SecureCookieAttribute
+    tags:
+      - java
+      - cookie
+  - id: spel-injection
+    name: spel-injection
+    description: >-
+      A Spring expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+      unfiltered values fall into this risky code evaluation.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            $PARSER.parseExpression(...);
+            ...
+          }
+        message: >-
+          A Spring expression is built with a dynamic value. The source of the value(s) should be verified to avoid that
+          unfiltered values fall into this risky code evaluation.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - spring
+  - id: spring-csrf-disabled
+    name: spring-csrf-disabled
+    description: CSRF protection is disabled for this configuration. This is a security risk.
+    category: api-security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $OBJ.csrf(...).disable(...)
+        message: CSRF protection is disabled for this configuration. This is a security risk.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - spring
+  - id: spring-sqli
+    name: spring-sqli
+    description: >-
+      Detected a string argument from a public method contract in a raw SQL statement. This could lead to SQL injection
+      if variables in the SQL statement are not properly sanitized. Use a prepared statements
+      (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a string argument from a public method contract in a raw SQL statement. This could lead to SQL
+          injection if variables in the SQL statement are not properly sanitized. Use a prepared statements
+          (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - spring
+  - id: spring-unvalidated-redirect
+    name: spring-unvalidated-redirect
+    description: Application redirects a user to a destination URL specified by a user supplied parameter that is not validated.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $X $METHOD(...,String $URL,...) {
+            return "redirect:" + $URL;
+          }
+        message: >-
+          Application redirects a user to a destination URL specified by a user supplied parameter that is not
+          validated.
+      - pattern: |
+          $X $METHOD(...,String $URL,...) {
+            ...
+            String $REDIR = "redirect:" + $URL;
+            ...
+            return $REDIR;
+            ...
+          }
+        message: >-
+          Application redirects a user to a destination URL specified by a user supplied parameter that is not
+          validated.
+      - pattern: |
+          $X $METHOD(...,String $URL,...) {
+            ...
+            new ModelAndView("redirect:" + $URL);
+            ...
+          }
+        message: >-
+          Application redirects a user to a destination URL specified by a user supplied parameter that is not
+          validated.
+      - pattern: |-
+          $X $METHOD(...,String $URL,...) {
+            ...
+            String $REDIR = "redirect:" + $URL;
+            ...
+            new ModelAndView($REDIR);
+            ...
+          }
+        message: >-
+          Application redirects a user to a destination URL specified by a user supplied parameter that is not
+          validated.
+    cwe:
+      - CWE-601
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - spring
+  - id: tainted-file-path
+    name: tainted-file-path
+    description: >-
+      Detected user input controlling a file path. An attacker could control the location of this file, to include going
+      backwards in the directory with '../'. To address this, ensure that user-controlled variables in file paths are
+      sanitized. You may also consider using a utility method such as org.apache.commons.io.FilenameUtils.getName(...)
+      to only retrieve the file name from the path.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input controlling a file path. An attacker could control the location of this file, to include
+          going backwards in the directory with '../'. To address this, ensure that user-controlled variables in file
+          paths are sanitized. You may also consider using a utility method such as
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.
+    cwe:
+      - CWE-23
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/www-community/attacks/Path_Traversal
+    tags:
+      - java
+      - spring
+  - id: tainted-html-string
+    name: tainted-html-string
+    description: >-
+      Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure
+      methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting
+      vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the HTML
+      is rendered safely. You can use the OWASP ESAPI encoder if you must render user data.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure
+          methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting
+          vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the
+          HTML is rendered safely. You can use the OWASP ESAPI encoder if you must render user data.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+    tags:
+      - java
+      - spring
+  - id: tainted-system-command
+    name: tainted-system-command
+    description: >-
+      Detected user input entering a method which executes a system command. This could result in a command injection
+      vulnerability, which allows an attacker to inject an arbitrary system command onto the server. The attacker could
+      download malware onto or steal data from the server. Instead, use ProcessBuilder, separating the command into
+      individual arguments, like this: `new ProcessBuilder("ls", "-al", targetDirectory)`. Further, make sure you
+      hardcode or allowlist the actual command so that attackers can't run arbitrary commands.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input entering a method which executes a system command. This could result in a command
+          injection vulnerability, which allows an attacker to inject an arbitrary system command onto the server. The
+          attacker could download malware onto or steal data from the server. Instead, use ProcessBuilder, separating
+          the command into individual arguments, like this: `new ProcessBuilder("ls", "-al", targetDirectory)`. Further,
+          make sure you hardcode or allowlist the actual command so that attackers can't run arbitrary commands.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.stackhawk.com/blog/command-injection-java/
+      - https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html
+      - https://github.com/github/codeql/blob/main/java/ql/src/Security/CWE/CWE-078/ExecUnescaped.java
+    tags:
+      - java
+      - spring
+  - id: tainted-url-host
+    name: tainted-url-host
+    description: >-
+      User data flows into the host portion of this manually-constructed URL. This could allow an attacker to send data
+      to their own server, potentially exposing sensitive data such as cookies or authorization information sent with
+      this request. They could also probe internal servers or other resources that the server running this code can
+      access. (This is called server-side request forgery, or SSRF.) Do not allow arbitrary hosts. Instead, create an
+      allowlist for approved hosts, hardcode the correct host, or ensure that the user data can only affect the path or
+      parameters.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          User data flows into the host portion of this manually-constructed URL. This could allow an attacker to send
+          data to their own server, potentially exposing sensitive data such as cookies or authorization information
+          sent with this request. They could also probe internal servers or other resources that the server running this
+          code can access. (This is called server-side request forgery, or SSRF.) Do not allow arbitrary hosts. Instead,
+          create an allowlist for approved hosts, hardcode the correct host, or ensure that the user data can only
+          affect the path or parameters.
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+      - A01:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+    tags:
+      - java
+      - spring
+  - id: unrestricted-request-mapping
+    name: unrestricted-request-mapping
+    description: >-
+      Detected a method annotated with 'RequestMapping' that does not specify the HTTP method. CSRF protections are not
+      enabled for GET, HEAD, TRACE, or OPTIONS, and by default all HTTP methods are allowed when the HTTP method is not
+      explicitly specified. This means that a method that performs state changes could be vulnerable to CSRF attacks. To
+      mitigate, add the 'method' field and specify the HTTP method (such as 'RequestMethod.POST').
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          RequestMapping
+        message: >-
+          Detected a method annotated with 'RequestMapping' that does not specify the HTTP method. CSRF protections are
+          not enabled for GET, HEAD, TRACE, or OPTIONS, and by default all HTTP methods are allowed when the HTTP method
+          is not explicitly specified. This means that a method that performs state changes could be vulnerable to CSRF
+          attacks. To mitigate, add the 'method' field and specify the HTTP method (such as 'RequestMethod.POST').
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://find-sec-bugs.github.io/bugs.htm#SPRING_CSRF_UNRESTRICTED_REQUEST_MAPPING
+    tags:
+      - spring
+  - id: bypass-tls-verification
+    name: bypass-tls-verification
+    description: >-
+      Checks for redefinitions of functions that check TLS/SSL certificate verification. This can lead to
+      vulnerabilities, as simple errors in the code can result in lack of proper certificate validation. This should
+      only be used for debugging purposes because it leads to vulnerability to MTM attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          new HostnameVerifier() {
+            ...
+            public boolean verify(String hostname, SSLSession session) {
+              ...
+            }
+            ...
+          };
+        message: >-
+          Checks for redefinitions of functions that check TLS/SSL certificate verification. This can lead to
+          vulnerabilities, as simple errors in the code can result in lack of proper certificate validation. This should
+          only be used for debugging purposes because it leads to vulnerability to MTM attacks.
+      - pattern: >
+          public RestTemplate restTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException
+          {
+            ...
+            TrustStrategy $FUNCNAME = (X509Certificate[] chain, String authType) -> ...;
+            ...
+          }
+        message: >-
+          Checks for redefinitions of functions that check TLS/SSL certificate verification. This can lead to
+          vulnerabilities, as simple errors in the code can result in lack of proper certificate validation. This should
+          only be used for debugging purposes because it leads to vulnerability to MTM attacks.
+      - pattern: |
+          TrustStrategy $FUNCNAME= new TrustStrategy() {
+            ...
+            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+              ...
+            }
+            ...
+          };
+        message: >-
+          Checks for redefinitions of functions that check TLS/SSL certificate verification. This can lead to
+          vulnerabilities, as simple errors in the code can result in lack of proper certificate validation. This should
+          only be used for debugging purposes because it leads to vulnerability to MTM attacks.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://stackoverflow.com/questions/4072585/disabling-ssl-certificate-validation-in-spring-resttemplate
+      - >-
+        https://stackoverflow.com/questions/35530558/how-to-fix-unsafe-implementation-of-x509trustmanager-in-android-app?rq=1
+    tags:
+      - spring
+  - id: spring-ftp-request
+    name: spring-ftp-request
+    description: >-
+      Checks for outgoing connections to ftp servers via Spring plugin ftpSessionFactory. FTP does not encrypt traffic,
+      possibly leading to PII being sent plaintext over the network.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $SF = new DefaultFtpSessionFactory(...);
+          ...
+          $SF.setHost("=~/^[fF][tT][pP]://.*/");
+          ...
+          $SF.$FUNC(...);
+        message: >-
+          Checks for outgoing connections to ftp servers via Spring plugin ftpSessionFactory. FTP does not encrypt
+          traffic, possibly leading to PII being sent plaintext over the network.
+      - pattern: |
+          $SF = new DefaultFtpSessionFactory(...);
+          ...
+          String $URL = "=~/^[fF][tT][pP]://.*/";
+          ...
+          $SF.setHost($URL);
+          ...
+          $SF.$FUNC(...);
+        message: >-
+          Checks for outgoing connections to ftp servers via Spring plugin ftpSessionFactory. FTP does not encrypt
+          traffic, possibly leading to PII being sent plaintext over the network.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - >-
+        https://docs.spring.io/spring-integration/api/org/springframework/integration/ftp/session/AbstractFtpSessionFactory.html#setClientMode-int-
+    tags:
+      - spring
+  - id: spring-http-request
+    name: spring-http-request
+    description: >-
+      Checks for requests sent via Java Spring RestTemplate API to http:// URLS. This is dangerous because the server is
+      attempting to connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https://
+      URLS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for requests sent via Java Spring RestTemplate API to http:// URLS. This is dangerous because the
+          server is attempting to connect to a website that does not encrypt traffic with TLS. Instead, send requests
+          only to https:// URLS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - >-
+        https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html#delete-java.lang.String-java.util.Map-
+      - https://www.baeldung.com/rest-template
+    tags:
+      - spring
+  - id: disallow-old-tls-versions1
+    name: disallow-old-tls-versions1
+    description: >-
+      Detects direct creations of SSLConnectionSocketFactories that don't disallow SSL v2, SSL v3, and TLS v1.
+      SSLSocketFactory can be used to validate the identity of the HTTPS server against a list of trusted certificates.
+      These protocols are deprecated due to POODLE, man in the middle attacks, and other vulnerabilities.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          new SSLConnectionSocketFactory(...);
+        message: >-
+          Detects direct creations of SSLConnectionSocketFactories that don't disallow SSL v2, SSL v3, and TLS v1.
+          SSLSocketFactory can be used to validate the identity of the HTTPS server against a list of trusted
+          certificates. These protocols are deprecated due to POODLE, man in the middle attacks, and other
+          vulnerabilities.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://stackoverflow.com/questions/26429751/java-http-clients-and-poodle
+    tags:
+      - java
+  - id: disallow-old-tls-versions2
+    name: disallow-old-tls-versions2
+    description: >-
+      Detects setting client protocols to insecure versions of TLS and SSL. These protocols are deprecated due to
+      POODLE, man in the middle attacks, and other vulnerabilities.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: $VALUE. ... .setProperty("jdk.tls.client.protocols", "$PATTERNS");
+        message: >-
+          Detects setting client protocols to insecure versions of TLS and SSL. These protocols are deprecated due to
+          POODLE, man in the middle attacks, and other vulnerabilities.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://stackoverflow.com/questions/26504653/is-it-possible-to-disable-sslv3-for-all-java-applications
+    tags:
+      - java
+  - id: ftp-request
+    name: ftp-request
+    description: >-
+      Checks for outgoing connections to ftp servers. FTP does not encrypt traffic, possibly leading to PII being sent
+      plaintext over the network.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          FTPClient $FTPCLIENT = new FTPClient();
+          ...
+          $FTPCLIENT.connect(...);
+        message: >-
+          Checks for outgoing connections to ftp servers. FTP does not encrypt traffic, possibly leading to PII being
+          sent plaintext over the network.
+      - pattern: |
+          URL $URL = new URL("=~/^[fF][tT][pP]://.*/");
+          ...
+          URLConnection $CONN = $URL.openConnection(...);
+        message: >-
+          Checks for outgoing connections to ftp servers. FTP does not encrypt traffic, possibly leading to PII being
+          sent plaintext over the network.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://www.codejava.net/java-se/ftp/connect-and-login-to-a-ftp-server
+      - https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
+    tags:
+      - java
+  - id: http-components-request
+    name: http-components-request
+    description: >-
+      Checks for requests sent via Apache HTTP Components to http:// URLS. This is dangerous because the server is
+      attempting to connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https://
+      URLS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $HTTPCLIENT = HttpClients.$CREATE(...);
+          ...
+          $HTTPREQ = new $HTTPFUNC("=~/[hH][tT][tT][pP]://.*/");
+          ...
+          $RESPONSE = $HTTPCLIENT.execute($HTTPREQ);
+        message: >-
+          Checks for requests sent via Apache HTTP Components to http:// URLS. This is dangerous because the server is
+          attempting to connect to a website that does not encrypt traffic with TLS. Instead, send requests only to
+          https:// URLS.
+      - pattern: |
+          $HTTPCLIENT = HttpClients.$CREATE(...);
+          ...
+          $RESPONSE = $HTTPCLIENT.execute(new $HTTPFUNC("=~/[hH][tT][tT][pP]://.*/"));
+        message: >-
+          Checks for requests sent via Apache HTTP Components to http:// URLS. This is dangerous because the server is
+          attempting to connect to a website that does not encrypt traffic with TLS. Instead, send requests only to
+          https:// URLS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://hc.apache.org/httpcomponents-client-ga/quickstart.html
+    tags:
+      - java
+  - id: httpclient-http-request
+    name: httpclient-http-request
+    description: >-
+      Checks for requests sent via HttpClient to http:// URLS. This is dangerous because the server is attempting to
+      connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for requests sent via HttpClient to http:// URLS. This is dangerous because the server is attempting to
+          connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://openjdk.java.net/groups/net/httpclient/intro.html
+    tags:
+      - java
+  - id: httpget-http-request
+    name: httpget-http-request
+    description: >-
+      Detected an HTTP request sent via HttpGet. This could lead to sensitive information being sent  over an insecure
+      channel. Instead, it is recommended to send requests over HTTPS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          "=~/[Hh][Tt][Tt][Pp]://.*/"
+        message: >-
+          Detected an HTTP request sent via HttpGet. This could lead to sensitive information being sent  over an
+          insecure channel. Instead, it is recommended to send requests over HTTPS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URLConnection.html
+      - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URL.html#openConnection()
+    tags:
+      - java
+  - id: httpurlconnection-http-request
+    name: httpurlconnection-http-request
+    description: >-
+      Detected an HTTP request sent via HttpURLConnection. This could lead to sensitive information being sent over an
+      insecure channel. Instead, it is recommended to send requests over HTTPS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          "=~/[Hh][Tt][Tt][Pp]://.*/"
+        message: >-
+          Detected an HTTP request sent via HttpURLConnection. This could lead to sensitive information being sent over
+          an insecure channel. Instead, it is recommended to send requests over HTTPS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URLConnection.html
+      - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/URL.html#openConnection()
+    tags:
+      - java
+  - id: socket-request
+    name: socket-request
+    description: >-
+      Insecure transport rules to catch socket connections to http, telnet, and ftp servers. This is dangerous because
+      these are protocols that do not encrypt traffic.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $SOCKET = new Socket("=~/[tT][eE][lL][nN][eE][tT]://.*/", ...);
+          ...
+          $OUT = new PrintWriter($SOCKET.getOutputStream(...), ...);
+          ...
+          $OUT.$FUNC(...);
+        message: >-
+          Insecure transport rules to catch socket connections to http, telnet, and ftp servers. This is dangerous
+          because these are protocols that do not encrypt traffic.
+      - pattern: |
+          $SOCKET = new Socket("=~/^[fF][tT][pP]://.*/", ...);
+          ...
+          $OUT = new PrintWriter($SOCKET.getOutputStream(...), ...);
+          ...
+          $OUT.$FUNC(...);
+        message: >-
+          Insecure transport rules to catch socket connections to http, telnet, and ftp servers. This is dangerous
+          because these are protocols that do not encrypt traffic.
+      - pattern: |
+          $SOCKET = new Socket("=~/[hH][tT][tT][pP]://.*/", ...);
+          ...
+          $OUT = new PrintWriter($SOCKET.getOutputStream(...), ...);
+          ...
+          $OUT.$FUNC(...);
+        message: >-
+          Insecure transport rules to catch socket connections to http, telnet, and ftp servers. This is dangerous
+          because these are protocols that do not encrypt traffic.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://docs.oracle.com/javase/8/docs/api/java/net/Socket.html
+    tags:
+      - java
+  - id: telnet-request
+    name: telnet-request
+    description: >-
+      Checks for attempts to connect through telnet. This is insecure as the telnet protocol supports no encryption, and
+      data passes through unencrypted.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          $TELNETCLIENT = new TelnetClient(...);
+          ...
+          $TELNETCLIENT.connect(...);
+        message: >-
+          Checks for attempts to connect through telnet. This is insecure as the telnet protocol supports no encryption,
+          and data passes through unencrypted.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://commons.apache.org/proper/commons-net/javadocs/api-3.6/org/apache/commons/net/telnet/TelnetClient.html
+    tags:
+      - java
+  - id: tls-renegotiation
+    name: tls-renegotiation
+    description: >-
+      Checks for cases where java applications are allowing unsafe renegotiation. This leaves the application vulnerable
+      to a man-in-the-middle attack where chosen plain text is injected as prefix to a TLS connection.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          java.lang.System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", true);
+        message: >-
+          Checks for cases where java applications are allowing unsafe renegotiation. This leaves the application
+          vulnerable to a man-in-the-middle attack where chosen plain text is injected as prefix to a TLS connection.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://www.oracle.com/java/technologies/javase/tlsreadme.html
+    tags:
+      - java
+  - id: unirest-http-request
+    name: unirest-http-request
+    description: >-
+      Checks for requests sent via Unirest to http:// URLS. This is dangerous because the server is attempting to
+      connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - java
+    patterns:
+      - pattern: |
+          Unirest.get("=~/[hH][tT][tT][pP]://.*/")
+        message: >-
+          Checks for requests sent via Unirest to http:// URLS. This is dangerous because the server is attempting to
+          connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+      - pattern: |
+          Unirest.post("=~/[hH][tT][tT][pP]://.*/")
+        message: >-
+          Checks for requests sent via Unirest to http:// URLS. This is dangerous because the server is attempting to
+          connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://kong.github.io/unirest-java/#requests
+    tags:
+      - unirest

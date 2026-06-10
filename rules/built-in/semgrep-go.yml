@@ -1,0 +1,2898 @@
+rules:
+  - id: anthropic-hardcoded-api-key-go
+    name: anthropic-hardcoded-api-key-go
+    description: Anthropic API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: option.WithAPIKey("$KEY")
+        message: Anthropic API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://docs.anthropic.com/en/docs/initial-setup
+    tags:
+      - anthropic
+  - id: gemini-hardcoded-api-key-go
+    name: gemini-hardcoded-api-key-go
+    description: Google Gemini API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: option.WithAPIKey("$KEY")
+        message: Google Gemini API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://ai.google.dev/gemini-api/docs/api-key
+    tags:
+      - gemini
+      - google
+  - id: llm-api-key-in-source-go
+    name: llm-api-key-in-source-go
+    description: >-
+      AI/LLM API key found hardcoded in source code. Detected key prefix matches a known AI provider (OpenAI, Anthropic,
+      Google, Hugging Face). Use environment variables or a secrets manager instead.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          AI/LLM API key found hardcoded in source code. Detected key prefix matches a known AI provider (OpenAI,
+          Anthropic, Google, Hugging Face). Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+    tags:
+      - openai
+      - anthropic
+      - google
+      - huggingface
+  - id: openai-hardcoded-api-key-go
+    name: openai-hardcoded-api-key-go
+    description: OpenAI API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: openai.NewClient("$KEY")
+        message: OpenAI API key is hardcoded in source code. Use environment variables or a secrets manager instead.
+    cwe:
+      - CWE-798
+    owasp: []
+    references:
+      - https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety
+    tags:
+      - openai
+  - id: detect-gemini
+    name: detect-gemini
+    description: 'Possibly found usage of AI: Gemini'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: import "github.com/google/generative-ai-go"
+        message: 'Possibly found usage of AI: Gemini'
+      - pattern: genai.NewClient(...)
+        message: 'Possibly found usage of AI: Gemini'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: detect-openai
+    name: detect-openai
+    description: 'Possibly found usage of AI: OpenAI'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: import "github.com/sashabaranov/go-openai"
+        message: 'Possibly found usage of AI: OpenAI'
+      - pattern: gogpt.NewClient(...)
+        message: 'Possibly found usage of AI: OpenAI'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode
+  - id: database-sqli
+    name: database-sqli
+    description: >-
+      Detected SQL statement that is tainted by `$EVENT` object. This could lead to SQL injection if the variable is
+      user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+      prepared statements instead. You can use prepared statements with the 'Prepare' and 'PrepareContext' calls.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SQL statement that is tainted by `$EVENT` object. This could lead to SQL injection if the variable is
+          user-controlled and not properly sanitized. In order to prevent SQL injection, use parameterized queries or
+          prepared statements instead. You can use prepared statements with the 'Prepare' and 'PrepareContext' calls.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://pkg.go.dev/database/sql#DB.Query
+    tags:
+      - aws-lambda
+      - database
+      - sql
+  - id: tainted-sql-string
+    name: tainted-sql-string
+    description: >-
+      Detected user input used to manually construct a SQL string. This is usually bad practice because manual
+      construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or
+      modify contents of the database. Instead, use a parameterized query which is available by default in most database
+      engines. Alternatively, consider using an object-relational mapper (ORM) such as Sequelize which will protect your
+      queries.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input used to manually construct a SQL string. This is usually bad practice because manual
+          construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or
+          modify contents of the database. Instead, use a parameterized query which is available by default in most
+          database engines. Alternatively, consider using an object-relational mapper (ORM) such as Sequelize which will
+          protect your queries.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/www-community/attacks/SQL_Injection
+    tags:
+      - aws-lambda
+  - id: handler-assignment-from-multiple-sources
+    name: handler-assignment-from-multiple-sources
+    description: >-
+      Variable $VAR is assigned from two different sources: '$Y' and '$R'. Make sure this is intended, as this could
+      cause logic bugs if they are treated as they are the same object.
+    category: injection
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Variable $VAR is assigned from two different sources: '$Y' and '$R'. Make sure this is intended, as this could
+          cause logic bugs if they are treated as they are the same object.
+    cwe:
+      - CWE-289
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/289.html
+    tags:
+      - gorilla
+  - id: session-cookie-missing-httponly
+    name: session-cookie-missing-httponly
+    description: >-
+      A session cookie was detected without setting the 'HttpOnly' flag. The 'HttpOnly' flag for cookies instructs the
+      browser to forbid client-side scripts from reading the cookie which mitigates XSS attacks. Set the 'HttpOnly' flag
+      by setting 'HttpOnly' to 'true' in the Options struct.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          &sessions.Options{
+            ...,
+          }
+        message: >-
+          A session cookie was detected without setting the 'HttpOnly' flag. The 'HttpOnly' flag for cookies instructs
+          the browser to forbid client-side scripts from reading the cookie which mitigates XSS attacks. Set the
+          'HttpOnly' flag by setting 'HttpOnly' to 'true' in the Options struct.
+    cwe:
+      - CWE-1004
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/0c34/govwa/blob/139693e56406b5684d2a6ae22c0af90717e149b8/user/session/session.go#L69
+    tags:
+      - gorilla
+  - id: session-cookie-missing-secure
+    name: session-cookie-missing-secure
+    description: >-
+      A session cookie was detected without setting the 'Secure' flag. The 'secure' flag for cookies prevents the client
+      from transmitting the cookie over insecure channels such as HTTP. Set the 'Secure' flag by setting 'Secure' to
+      'true' in the Options struct.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          &sessions.Options{
+            ...,
+          }
+        message: >-
+          A session cookie was detected without setting the 'Secure' flag. The 'secure' flag for cookies prevents the
+          client from transmitting the cookie over insecure channels such as HTTP. Set the 'Secure' flag by setting
+          'Secure' to 'true' in the Options struct.
+    cwe:
+      - CWE-614
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/0c34/govwa/blob/139693e56406b5684d2a6ae22c0af90717e149b8/user/session/session.go#L69
+    tags:
+      - gorilla
+  - id: session-cookie-samesitenone
+    name: session-cookie-samesitenone
+    description: >-
+      Found SameSiteNoneMode setting in Gorilla session options. Consider setting SameSite to Lax, Strict or Default for
+      enhanced security.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          &sessions.Options{
+            ...,
+          }
+        message: >-
+          Found SameSiteNoneMode setting in Gorilla session options. Consider setting SameSite to Lax, Strict or Default
+          for enhanced security.
+    cwe:
+      - CWE-1275
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://pkg.go.dev/github.com/gorilla/sessions#Options
+    tags:
+      - gorilla
+  - id: websocket-missing-origin-check
+    name: websocket-missing-origin-check
+    description: >-
+      The Origin header in the HTTP WebSocket handshake is used to guarantee that the connection accepted by the
+      WebSocket is from a trusted origin domain. Failure to enforce can lead to Cross Site Request Forgery (CSRF). As
+      per "gorilla/websocket" documentation: "A CheckOrigin function should carefully validate the request origin to
+      prevent cross-site request forgery."
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          The Origin header in the HTTP WebSocket handshake is used to guarantee that the connection accepted by the
+          WebSocket is from a trusted origin domain. Failure to enforce can lead to Cross Site Request Forgery (CSRF).
+          As per "gorilla/websocket" documentation: "A CheckOrigin function should carefully validate the request origin
+          to prevent cross-site request forgery."
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://pkg.go.dev/github.com/gorilla/websocket#Upgrader
+    tags:
+      - gorilla
+  - id: gorm-dangerous-method-usage
+    name: gorm-dangerous-method-usage
+    description: >-
+      Detected usage of dangerous method $METHOD which does not escape inputs (see link in references). If the argument
+      is user-controlled, this can lead to SQL injection. When using $METHOD function, do not trust user-submitted data
+      and only allow approved list of input (possibly, use an allowlist approach).
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected usage of dangerous method $METHOD which does not escape inputs (see link in references). If the
+          argument is user-controlled, this can lead to SQL injection. When using $METHOD function, do not trust
+          user-submitted data and only allow approved list of input (possibly, use an allowlist approach).
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://gorm.io/docs/security.html#SQL-injection-Methods
+      - https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+    tags:
+      - gorm
+  - id: grpc-client-insecure-connection
+    name: grpc-client-insecure-connection
+    description: >-
+      Found an insecure gRPC connection using 'grpc.WithInsecure()'. This creates a connection without encryption to a
+      gRPC server. A malicious attacker could tamper with the gRPC message, which could compromise the machine. Instead,
+      establish a secure connection with an SSL certificate using the 'grpc.WithTransportCredentials()' function. You
+      can create a create credentials using a 'tls.Config{}' struct with 'credentials.NewTLS()'. The final fix looks
+      like this: 'grpc.WithTransportCredentials(credentials.NewTLS(<config>))'.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: $GRPC.Dial($ADDR, ..., $GRPC.WithInsecure(...), ...)
+        message: >-
+          Found an insecure gRPC connection using 'grpc.WithInsecure()'. This creates a connection without encryption to
+          a gRPC server. A malicious attacker could tamper with the gRPC message, which could compromise the machine.
+          Instead, establish a secure connection with an SSL certificate using the 'grpc.WithTransportCredentials()'
+          function. You can create a create credentials using a 'tls.Config{}' struct with 'credentials.NewTLS()'. The
+          final fix looks like this: 'grpc.WithTransportCredentials(credentials.NewTLS(<config>))'.
+    cwe:
+      - CWE-300
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://blog.gopheracademy.com/advent-2019/go-grps-and-tls/#connection-without-encryption
+    tags:
+      - grpc
+  - id: grpc-server-insecure-connection
+    name: grpc-server-insecure-connection
+    description: >-
+      Found an insecure gRPC server without 'grpc.Creds()' or options with credentials. This allows for a connection
+      without encryption to this server. A malicious attacker could tamper with the gRPC message, which could compromise
+      the machine. Include credentials derived from an SSL certificate in order to create a secure gRPC connection. You
+      can create credentials using 'credentials.NewServerTLSFromFile("cert.pem", "cert.key")'.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Found an insecure gRPC server without 'grpc.Creds()' or options with credentials. This allows for a connection
+          without encryption to this server. A malicious attacker could tamper with the gRPC message, which could
+          compromise the machine. Include credentials derived from an SSL certificate in order to create a secure gRPC
+          connection. You can create credentials using 'credentials.NewServerTLSFromFile("cert.pem", "cert.key")'.
+    cwe:
+      - CWE-300
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://blog.gopheracademy.com/advent-2019/go-grps-and-tls/#connection-without-encryption
+    tags:
+      - grpc
+  - id: jwt-go-parse-unverified
+    name: jwt-go-parse-unverified
+    description: >-
+      Detected the decoding of a JWT token without a verify step. Don't use `ParseUnverified` unless you know what
+      you're doing This method parses the token but doesn't validate the signature. It's only ever useful in cases where
+      you know the signature is valid (because it has been checked previously in the stack) and you want to extract
+      values from it.
+    category: auth
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          $JWT.ParseUnverified(...)
+        message: >-
+          Detected the decoding of a JWT token without a verify step. Don't use `ParseUnverified` unless you know what
+          you're doing This method parses the token but doesn't validate the signature. It's only ever useful in cases
+          where you know the signature is valid (because it has been checked previously in the stack) and you want to
+          extract values from it.
+    cwe:
+      - CWE-345
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures
+    tags:
+      - jwt
+  - id: jwt-go-none-algorithm
+    name: jwt-go-none-algorithm
+    description: >-
+      Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token has
+      already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+      verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    category: auth
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected use of the 'none' algorithm in a JWT token. The 'none' algorithm assumes the integrity of the token
+          has already been verified. This would allow a malicious actor to forge a JWT token that will automatically be
+          verified. Do not explicitly use the 'none' algorithm. Instead, use an algorithm such as 'HS256'.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - jwt
+  - id: hardcoded-jwt-key
+    name: hardcoded-jwt-key
+    description: >-
+      A hard-coded credential was detected. It is not recommended to store credentials in source-code, as this risks
+      secrets being leaked and used by either an internal or external malicious adversary. It is recommended to use
+      environment variables to securely provide credentials or retrieve credentials from a secure vault or HSM (Hardware
+      Security Module).
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          A hard-coded credential was detected. It is not recommended to store credentials in source-code, as this risks
+          secrets being leaked and used by either an internal or external malicious adversary. It is recommended to use
+          environment variables to securely provide credentials or retrieve credentials from a secure vault or HSM
+          (Hardware Security Module).
+    cwe:
+      - CWE-798
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+    tags:
+      - jwt
+      - secrets
+  - id: channel-guarded-with-mutex
+    name: channel-guarded-with-mutex
+    description: >-
+      Detected a channel guarded with a mutex. Channels already have an internal mutex, so this is unnecessary. Remove
+      the mutex. See https://hackmongo.com/page/golang-antipatterns/#guarded-channel for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          $MUX.Lock()
+          $VALUE <- $CHANNEL
+          $MUX.Unlock()
+        message: >-
+          Detected a channel guarded with a mutex. Channels already have an internal mutex, so this is unnecessary.
+          Remove the mutex. See https://hackmongo.com/page/golang-antipatterns/#guarded-channel for more information.
+      - pattern: |
+          $MUX.Lock()
+          $VALUE = <- $CHANNEL
+          $MUX.Unlock()
+        message: >-
+          Detected a channel guarded with a mutex. Channels already have an internal mutex, so this is unnecessary.
+          Remove the mutex. See https://hackmongo.com/page/golang-antipatterns/#guarded-channel for more information.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: hidden-goroutine
+    name: hidden-goroutine
+    description: >-
+      Detected a hidden goroutine. Function invocations are expected to synchronous, and this function will execute
+      asynchronously because all it does is call a goroutine. Instead, remove the internal goroutine and call the
+      function using 'go'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          func $FUNC(...) {
+            go func() {
+              ...
+            }(...)
+          }
+        message: >-
+          Detected a hidden goroutine. Function invocations are expected to synchronous, and this function will execute
+          asynchronously because all it does is call a goroutine. Instead, remove the internal goroutine and call the
+          function using 'go'.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: exported_loop_pointer
+    name: exported_loop_pointer
+    description: >-
+      `$VALUE` is a loop pointer that may be exported from the loop. This pointer is shared between loop iterations, so
+      the exported reference will always point to the last loop value, which is likely unintentional. To fix, copy the
+      pointer to a new pointer within the loop.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          for _, $VALUE := range $SOURCE {
+            <... &($VALUE) ...>
+          }
+        message: >-
+          `$VALUE` is a loop pointer that may be exported from the loop. This pointer is shared between loop iterations,
+          so the exported reference will always point to the last loop value, which is likely unintentional. To fix,
+          copy the pointer to a new pointer within the loop.
+      - pattern: |
+          for _, $VALUE := range $SOURCE {
+            <... func() { <... &$VALUE ...> } ...>
+          }
+        message: >-
+          `$VALUE` is a loop pointer that may be exported from the loop. This pointer is shared between loop iterations,
+          so the exported reference will always point to the last loop value, which is likely unintentional. To fix,
+          copy the pointer to a new pointer within the loop.
+      - pattern: |
+          for _, $VALUE := range $SOURCE {
+            <... $ANYTHING(..., <... &$VALUE ...>, ...) ...>
+          }
+        message: >-
+          `$VALUE` is a loop pointer that may be exported from the loop. This pointer is shared between loop iterations,
+          so the exported reference will always point to the last loop value, which is likely unintentional. To fix,
+          copy the pointer to a new pointer within the loop.
+    cwe: []
+    owasp: []
+    references:
+      - https://github.com/kyoh86/looppointer
+    tags:
+      - go
+  - id: integer-overflow-int16
+    name: integer-overflow-int16
+    description: >-
+      Detected conversion of the result of a strconv.Atoi command to an int16. This could lead to an integer overflow,
+      which could possibly result in unexpected behavior and even privilege escalation. Instead, use `strconv.ParseInt`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          $F, $ERR := strconv.Atoi($NUM)
+          ...
+          int16($F)
+        message: >-
+          Detected conversion of the result of a strconv.Atoi command to an int16. This could lead to an integer
+          overflow, which could possibly result in unexpected behavior and even privilege escalation. Instead, use
+          `strconv.ParseInt`.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: integer-overflow-int32
+    name: integer-overflow-int32
+    description: >-
+      Detected conversion of the result of a strconv.Atoi command to an int32. This could lead to an integer overflow,
+      which could possibly result in unexpected behavior and even privilege escalation. Instead, use `strconv.ParseInt`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          $F, $ERR := strconv.Atoi($NUM)
+          ...
+          int32($F)
+        message: >-
+          Detected conversion of the result of a strconv.Atoi command to an int32. This could lead to an integer
+          overflow, which could possibly result in unexpected behavior and even privilege escalation. Instead, use
+          `strconv.ParseInt`.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: incorrect-default-permission
+    name: incorrect-default-permission
+    description: >-
+      Detected file permissions that are set to more than `0600` (user/owner can read and write). Setting file
+      permissions to higher than `0600` is most likely unnecessary and violates the principle of least privilege.
+      Instead, set permissions to be `0600` or less for os.Chmod, os.Mkdir, os.OpenFile, os.MkdirAll, and
+      ioutil.WriteFile
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected file permissions that are set to more than `0600` (user/owner can read and write). Setting file
+          permissions to higher than `0600` is most likely unnecessary and violates the principle of least privilege.
+          Instead, set permissions to be `0600` or less for os.Chmod, os.Mkdir, os.OpenFile, os.MkdirAll, and
+          ioutil.WriteFile
+    cwe:
+      - CWE-276
+    owasp: []
+    references:
+      - https://github.com/securego/gosec/blob/master/rules/fileperms.go
+    tags:
+      - go
+  - id: use-filepath-join
+    name: use-filepath-join
+    description: >-
+      `path.Join(...)` always joins using a forward slash. This may cause issues on Windows or other systems using a
+      different delimiter. Use `filepath.Join(...)` instead which uses OS-specific path separators.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          `path.Join(...)` always joins using a forward slash. This may cause issues on Windows or other systems using a
+          different delimiter. Use `filepath.Join(...)` instead which uses OS-specific path separators.
+    cwe: []
+    owasp: []
+    references:
+      - https://parsiya.net/blog/2019-03-09-path.join-considered-harmful/
+      - https://go.dev/src/path/path.go?s=4034:4066#L145
+    tags:
+      - go
+  - id: eqeq-is-bad
+    name: eqeq-is-bad
+    description: >-
+      Detected useless comparison operation `$X == $X` or `$X != $X`. This will always return 'True' or 'False' and
+      therefore is not necessary. Instead, remove this comparison operation or use another comparison expression that is
+      not deterministic.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected useless comparison operation `$X == $X` or `$X != $X`. This will always return 'True' or 'False' and
+          therefore is not necessary. Instead, remove this comparison operation or use another comparison expression
+          that is not deterministic.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: hardcoded-eq-true-or-false
+    name: hardcoded-eq-true-or-false
+    description: >-
+      Detected useless if statement. 'if (True)' and 'if (False)' always result in the same behavior, and therefore is
+      not necessary in the code. Remove the 'if (False)' expression completely or just the 'if (True)' comparison
+      depending on which expression is in the code.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: if (true) { ... }
+        message: >-
+          Detected useless if statement. 'if (True)' and 'if (False)' always result in the same behavior, and therefore
+          is not necessary in the code. Remove the 'if (False)' expression completely or just the 'if (True)' comparison
+          depending on which expression is in the code.
+      - pattern: if (false) { ... }
+        message: >-
+          Detected useless if statement. 'if (True)' and 'if (False)' always result in the same behavior, and therefore
+          is not necessary in the code. Remove the 'if (False)' expression completely or just the 'if (True)' comparison
+          depending on which expression is in the code.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: useless-if-conditional
+    name: useless-if-conditional
+    description: >-
+      Detected an if block that checks for the same condition on both branches (`$X`). The second condition check is
+      useless as it is the same as the first, and therefore can be removed from the code,
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          if ($X) {
+              ...
+          } else if ($X) {
+              ...
+          }
+        message: >-
+          Detected an if block that checks for the same condition on both branches (`$X`). The second condition check is
+          useless as it is the same as the first, and therefore can be removed from the code,
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: useless-if-body
+    name: useless-if-body
+    description: >-
+      Detected identical statements in the if body and the else body of an if-statement. This will lead to the same code
+      being executed no matter what the if-expression evaluates to. Instead, remove the if statement.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          if ($X) {
+              $S
+          } else {
+              $S
+          }
+        message: >-
+          Detected identical statements in the if body and the else body of an if-statement. This will lead to the same
+          code being executed no matter what the if-expression evaluates to. Instead, remove the if statement.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - go
+  - id: insecure-module-used
+    name: insecure-module-used
+    description: >-
+      The package `net/http/cgi` is on the import blocklist.  The package is vulnerable to httpoxy attacks
+      (CVE-2015-5386). It is recommended to use `net/http` or a web framework to build a web application instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          The package `net/http/cgi` is on the import blocklist.  The package is vulnerable to httpoxy attacks
+          (CVE-2015-5386). It is recommended to use `net/http` or a web framework to build a web application instead.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://godoc.org/golang.org/x/crypto/sha3
+    tags:
+      - go
+  - id: avoid-ssh-insecure-ignore-host-key
+    name: avoid-ssh-insecure-ignore-host-key
+    description: >-
+      Disabled host key verification detected. This allows man-in-the-middle attacks. Use the
+      'golang.org/x/crypto/ssh/knownhosts' package to do host key verification. See
+      https://skarlso.github.io/2019/02/17/go-ssh-with-host-key-verification/ to learn more about the problem and how to
+      fix it.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: ssh.InsecureIgnoreHostKey()
+        message: >-
+          Disabled host key verification detected. This allows man-in-the-middle attacks. Use the
+          'golang.org/x/crypto/ssh/knownhosts' package to do host key verification. See
+          https://skarlso.github.io/2019/02/17/go-ssh-with-host-key-verification/ to learn more about the problem and
+          how to fix it.
+    cwe:
+      - CWE-322
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://skarlso.github.io/2019/02/17/go-ssh-with-host-key-verification/
+      - https://gist.github.com/Skarlso/34321a230cf0245018288686c9e70b2d
+    tags:
+      - go
+  - id: math-random-used
+    name: math-random-used
+    description: Do not use `math/rand`. Use `crypto/rand` instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: Do not use `math/rand`. Use `crypto/rand` instead.
+    cwe:
+      - CWE-338
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation
+    tags:
+      - go
+  - id: missing-ssl-minversion
+    name: missing-ssl-minversion
+    description: >-
+      `MinVersion` is missing from this TLS configuration.  By default, as of Go 1.22, TLS 1.2 is currently used as the
+      minimum. General purpose web applications should default to TLS 1.3 with all other protocols disabled.  Only where
+      it is known that a web server must support legacy clients with unsupported an insecure browsers (such as Internet
+      Explorer 10), it may be necessary to enable TLS 1.0 to provide support. Add `MinVersion: tls.VersionTLS13' to the
+      TLS configuration to bump the minimum version to TLS 1.3.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          tls.Config{ $...CONF }
+        message: >-
+          `MinVersion` is missing from this TLS configuration.  By default, as of Go 1.22, TLS 1.2 is currently used as
+          the minimum. General purpose web applications should default to TLS 1.3 with all other protocols disabled. 
+          Only where it is known that a web server must support legacy clients with unsupported an insecure browsers
+          (such as Internet Explorer 10), it may be necessary to enable TLS 1.0 to provide support. Add `MinVersion:
+          tls.VersionTLS13' to the TLS configuration to bump the minimum version to TLS 1.3.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://go.dev/doc/go1.22#minor_library_changes
+      - https://pkg.go.dev/crypto/tls#:~:text=MinVersion
+      - https://www.us-cert.gov/ncas/alerts/TA14-290A
+    tags:
+      - go
+  - id: sha224-hash
+    name: sha224-hash
+    description: >-
+      This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+      updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          This code uses a 224-bit hash function, which is deprecated or disallowed in some security policies. Consider
+          updating to a stronger hash function such as SHA-384 or higher to ensure compliance and security.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar3.ipd.pdf
+      - >-
+        https://www.cyber.gov.au/resources-business-and-government/essential-cyber-security/ism/cyber-security-guidelines/guidelines-cryptography
+    tags:
+      - go
+  - id: ssl-v3-is-insecure
+    name: ssl-v3-is-insecure
+    description: >-
+      SSLv3 is insecure because it has known vulnerabilities. Starting with go1.14, SSLv3 will be removed. Instead, use
+      'tls.VersionTLS13'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: 'tls.Config{..., MinVersion: $TLS.VersionSSL30, ...}'
+        message: >-
+          SSLv3 is insecure because it has known vulnerabilities. Starting with go1.14, SSLv3 will be removed. Instead,
+          use 'tls.VersionTLS13'.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://golang.org/doc/go1.14#crypto/tls
+      - https://www.us-cert.gov/ncas/alerts/TA14-290A
+    tags:
+      - go
+  - id: tls-with-insecure-cipher
+    name: tls-with-insecure-cipher
+    description: >-
+      Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+      'tls.CipherSuites()' to get a list of good cipher suites. See
+      https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_RSA_WITH_RC4_128_SHA, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_RSA_WITH_3DES_EDE_CBC_SHA, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_RSA_WITH_AES_128_CBC_SHA256, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_ECDHE_RSA_WITH_RC4_128_SHA, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.Config{..., CipherSuites: []$TYPE{..., tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, ...}}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_RSA_WITH_RC4_128_SHA, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_RSA_WITH_3DES_EDE_CBC_SHA, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_RSA_WITH_AES_128_CBC_SHA256, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_ECDHE_RSA_WITH_RC4_128_SHA, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+      - pattern: |
+          tls.CipherSuite{..., TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, ...}
+        message: >-
+          Detected an insecure CipherSuite via the 'tls' module. This suite is considered weak. Use the function
+          'tls.CipherSuites()' to get a list of good cipher suites. See
+          https://golang.org/pkg/crypto/tls/#InsecureCipherSuites for why and what other cipher suites to use.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://golang.org/pkg/crypto/tls/#InsecureCipherSuites
+    tags:
+      - go
+  - id: use-of-md5
+    name: use-of-md5
+    description: >-
+      Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not
+      suitable as a cryptographic signature. Use SHA256 or SHA3 instead.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not
+          suitable as a cryptographic signature. Use SHA256 or SHA3 instead.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - go
+  - id: use-of-sha1
+    name: use-of-sha1
+    description: >-
+      Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not
+      suitable as a cryptographic signature. Use SHA256 or SHA3 instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore
+          not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.
+    cwe:
+      - CWE-328
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - go
+  - id: use-of-DES
+    name: use-of-DES
+    description: >-
+      Detected DES cipher algorithm which is insecure. The algorithm is considered weak and has been deprecated. Use AES
+      instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected DES cipher algorithm which is insecure. The algorithm is considered weak and has been deprecated. Use
+          AES instead.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - go
+  - id: use-of-rc4
+    name: use-of-rc4
+    description: Detected RC4 cipher algorithm which is insecure. The algorithm has many known vulnerabilities. Use AES instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: rc4.NewCipher(...)
+        message: >-
+          Detected RC4 cipher algorithm which is insecure. The algorithm has many known vulnerabilities. Use AES
+          instead.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+    tags:
+      - go
+  - id: use-of-weak-rsa-key
+    name: use-of-weak-rsa-key
+    description: RSA keys should be at least 2048 bits
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: RSA keys should be at least 2048 bits
+    cwe:
+      - CWE-326
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#algorithms
+    tags:
+      - go
+  - id: dangerous-command-write
+    name: dangerous-command-write
+    description: >-
+      Detected non-static command inside Write. Audit the input to '$CW.Write'. If unverified user data can reach this
+      call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+      arbitrary code.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          $CW.Write($BYTE)
+        message: >-
+          Detected non-static command inside Write. Audit the input to '$CW.Write'. If unverified user data can reach
+          this call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to
+          execute arbitrary code.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - go
+  - id: dangerous-exec-cmd
+    name: dangerous-exec-cmd
+    description: >-
+      Detected non-static command inside exec.Cmd. Audit the input to 'exec.Cmd'. If unverified user data can reach this
+      call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+      arbitrary code.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected non-static command inside exec.Cmd. Audit the input to 'exec.Cmd'. If unverified user data can reach
+          this call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to
+          execute arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - go
+  - id: dangerous-exec-command
+    name: dangerous-exec-command
+    description: >-
+      Detected non-static command inside Command. Audit the input to 'exec.Command'. If unverified user data can reach
+      this call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+      arbitrary code.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected non-static command inside Command. Audit the input to 'exec.Command'. If unverified user data can
+          reach this call site, this is a code injection vulnerability. A malicious actor can inject a malicious script
+          to execute arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - go
+  - id: dangerous-syscall-exec
+    name: dangerous-syscall-exec
+    description: >-
+      Detected non-static command inside Exec. Audit the input to 'syscall.Exec'. If unverified user data can reach this
+      call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+      arbitrary code.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected non-static command inside Exec. Audit the input to 'syscall.Exec'. If unverified user data can reach
+          this call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to
+          execute arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - go
+  - id: string-formatted-query
+    name: string-formatted-query
+    description: >-
+      String-formatted SQL query detected. This could lead to SQL injection if the string is not sanitized properly.
+      Audit this call to ensure the SQL is not manipulable by external data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          String-formatted SQL query detected. This could lead to SQL injection if the string is not sanitized properly.
+          Audit this call to ensure the SQL is not manipulable by external data.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - go
+  - id: md5-used-as-password
+    name: md5-used-as-password
+    description: >-
+      It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+      cracked by an attacker in a short amount of time. Use a suitable password hashing function such as bcrypt. You can
+      use the `golang.org/x/crypto/bcrypt` package.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          It looks like MD5 is used as a password hash. MD5 is not considered a secure password hash because it can be
+          cracked by an attacker in a short amount of time. Use a suitable password hashing function such as bcrypt. You
+          can use the `golang.org/x/crypto/bcrypt` package.
+    cwe:
+      - CWE-327
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://tools.ietf.org/id/draft-lvelvindron-tls-md5-sha1-deprecate-01.html
+      - https://security.stackexchange.com/questions/211/how-to-securely-hash-passwords
+      - https://github.com/returntocorp/semgrep-rules/issues/1609
+      - https://pkg.go.dev/golang.org/x/crypto/bcrypt
+    tags:
+      - md5
+  - id: avoid-bind-to-all-interfaces
+    name: avoid-bind-to-all-interfaces
+    description: >-
+      Detected a network listener listening on 0.0.0.0 or an empty string. This could unexpectedly expose the server
+      publicly as it binds to all available interfaces. Instead, specify another IP address that is not 0.0.0.0 nor the
+      empty string.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: tls.Listen($NETWORK, "=~/^0.0.0.0:.*$/", ...)
+        message: >-
+          Detected a network listener listening on 0.0.0.0 or an empty string. This could unexpectedly expose the server
+          publicly as it binds to all available interfaces. Instead, specify another IP address that is not 0.0.0.0 nor
+          the empty string.
+      - pattern: net.Listen($NETWORK, "=~/^0.0.0.0:.*$/", ...)
+        message: >-
+          Detected a network listener listening on 0.0.0.0 or an empty string. This could unexpectedly expose the server
+          publicly as it binds to all available interfaces. Instead, specify another IP address that is not 0.0.0.0 nor
+          the empty string.
+      - pattern: tls.Listen($NETWORK, "=~/^:.*$/", ...)
+        message: >-
+          Detected a network listener listening on 0.0.0.0 or an empty string. This could unexpectedly expose the server
+          publicly as it binds to all available interfaces. Instead, specify another IP address that is not 0.0.0.0 nor
+          the empty string.
+      - pattern: net.Listen($NETWORK, "=~/^:.*$/", ...)
+        message: >-
+          Detected a network listener listening on 0.0.0.0 or an empty string. This could unexpectedly expose the server
+          publicly as it binds to all available interfaces. Instead, specify another IP address that is not 0.0.0.0 nor
+          the empty string.
+    cwe:
+      - CWE-200
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - go
+  - id: cookie-missing-httponly
+    name: cookie-missing-httponly
+    description: >-
+      A session cookie was detected without setting the 'HttpOnly' flag. The 'HttpOnly' flag for cookies instructs the
+      browser to forbid client-side scripts from reading the cookie which mitigates XSS attacks. Set the 'HttpOnly' flag
+      by setting 'HttpOnly' to 'true' in the Cookie.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          http.Cookie{
+            ...,
+          }
+        message: >-
+          A session cookie was detected without setting the 'HttpOnly' flag. The 'HttpOnly' flag for cookies instructs
+          the browser to forbid client-side scripts from reading the cookie which mitigates XSS attacks. Set the
+          'HttpOnly' flag by setting 'HttpOnly' to 'true' in the Cookie.
+    cwe:
+      - CWE-1004
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/0c34/govwa/blob/139693e56406b5684d2a6ae22c0af90717e149b8/util/cookie.go
+      - https://golang.org/src/net/http/cookie.go
+    tags:
+      - go
+  - id: cookie-missing-secure
+    name: cookie-missing-secure
+    description: >-
+      A session cookie was detected without setting the 'Secure' flag. The 'secure' flag for cookies prevents the client
+      from transmitting the cookie over insecure channels such as HTTP. Set the 'Secure' flag by setting 'Secure' to
+      'true' in the Options struct.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          http.Cookie{
+            ...,
+          }
+        message: >-
+          A session cookie was detected without setting the 'Secure' flag. The 'secure' flag for cookies prevents the
+          client from transmitting the cookie over insecure channels such as HTTP. Set the 'Secure' flag by setting
+          'Secure' to 'true' in the Options struct.
+    cwe:
+      - CWE-614
+    owasp:
+      - A05:2021
+      - A02:2025
+    references:
+      - https://github.com/0c34/govwa/blob/139693e56406b5684d2a6ae22c0af90717e149b8/util/cookie.go
+      - https://golang.org/src/net/http/cookie.go
+    tags:
+      - go
+  - id: dynamic-httptrace-clienttrace
+    name: dynamic-httptrace-clienttrace
+    description: >-
+      Detected a potentially dynamic ClientTrace. This occurred because semgrep could not find a static definition for
+      '$TRACE'. Dynamic ClientTraces are dangerous because they deserialize function code to run when certain Request
+      events occur, which could lead to code being run without your knowledge. Ensure that your ClientTrace is
+      statically defined.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: httptrace.WithClientTrace($ANY, $TRACE)
+        message: >-
+          Detected a potentially dynamic ClientTrace. This occurred because semgrep could not find a static definition
+          for '$TRACE'. Dynamic ClientTraces are dangerous because they deserialize function code to run when certain
+          Request events occur, which could lead to code being run without your knowledge. Ensure that your ClientTrace
+          is statically defined.
+    cwe:
+      - CWE-913
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/returntocorp/semgrep-rules/issues/518
+    tags:
+      - go
+  - id: formatted-template-string
+    name: formatted-template-string
+    description: >-
+      Found a formatted template string passed to 'template.HTML()'. 'template.HTML()' does not escape contents. Be
+      absolutely sure there is no user-controlled data in this template. If user data can reach this template, you may
+      have a XSS vulnerability.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Found a formatted template string passed to 'template.HTML()'. 'template.HTML()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template. If user data can reach this template, you
+          may have a XSS vulnerability.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://golang.org/pkg/html/template/#HTML
+    tags:
+      - go
+  - id: fs-directory-listing
+    name: fs-directory-listing
+    description: >-
+      Detected usage of 'http.FileServer' as handler: this allows directory listing and an attacker could navigate
+      through directories looking for sensitive files. Be sure to disable directory listing or restrict access to
+      specific directories/files.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected usage of 'http.FileServer' as handler: this allows directory listing and an attacker could navigate
+          through directories looking for sensitive files. Be sure to disable directory listing or restrict access to
+          specific directories/files.
+    cwe:
+      - CWE-548
+    owasp:
+      - A06:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://github.com/OWASP/Go-SCP
+      - https://cwe.mitre.org/data/definitions/548.html
+    tags:
+      - go
+  - id: pprof-debug-exposure
+    name: pprof-debug-exposure
+    description: >-
+      The profiling 'pprof' endpoint is automatically exposed on /debug/pprof. This could leak information about the
+      server. Instead, use `import "net/http/pprof"`. See
+      https://www.farsightsecurity.com/blog/txt-record/go-remote-profiling-20161028/ for more information and
+      mitigation.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: http.ListenAndServe(...)
+        message: >-
+          The profiling 'pprof' endpoint is automatically exposed on /debug/pprof. This could leak information about the
+          server. Instead, use `import "net/http/pprof"`. See
+          https://www.farsightsecurity.com/blog/txt-record/go-remote-profiling-20161028/ for more information and
+          mitigation.
+    cwe:
+      - CWE-489
+    owasp:
+      - A06:2017
+    references:
+      - https://www.farsightsecurity.com/blog/txt-record/go-remote-profiling-20161028/
+    tags:
+      - go
+  - id: unescaped-data-in-htmlattr
+    name: unescaped-data-in-htmlattr
+    description: >-
+      Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+      contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the data
+      before passing it into the template.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: template.HTMLAttr($T + $X, ...)
+        message: >-
+          Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+          contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the
+          data before passing it into the template.
+      - pattern: template.HTMLAttr(fmt.$P("...", ...), ...)
+        message: >-
+          Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+          contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the
+          data before passing it into the template.
+      - pattern: |
+          $T = "..."
+          ...
+          $T = $FXN(..., $T, ...)
+          ...
+          template.HTMLAttr($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+          contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the
+          data before passing it into the template.
+      - pattern: |
+          $T = fmt.$P("...", ...)
+          ...
+          template.HTMLAttr($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+          contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the
+          data before passing it into the template.
+      - pattern: |
+          $T, $ERR = fmt.$P("...", ...)
+          ...
+          template.HTMLAttr($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+          contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the
+          data before passing it into the template.
+      - pattern: |
+          $T = $X + $Y
+          ...
+          template.HTMLAttr($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+          contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the
+          data before passing it into the template.
+      - pattern: |-
+          $T = "..."
+          ...
+          $OTHER, $ERR = fmt.$P(..., $T, ...)
+          ...
+          template.HTMLAttr($OTHER, ...)
+        message: >-
+          Found a formatted template string passed to 'template. HTMLAttr()'. 'template.HTMLAttr()' does not escape
+          contents. Be absolutely sure there is no user-controlled data in this template or validate and sanitize the
+          data before passing it into the template.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://golang.org/pkg/html/template/#HTMLAttr
+    tags:
+      - go
+  - id: unescaped-data-in-js
+    name: unescaped-data-in-js
+    description: >-
+      Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+      absolutely sure there is no user-controlled data in this template.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: template.JS($T + $X, ...)
+        message: >-
+          Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template.
+      - pattern: template.JS(fmt.$P("...", ...), ...)
+        message: >-
+          Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template.
+      - pattern: |
+          $T = "..."
+          ...
+          $T = $FXN(..., $T, ...)
+          ...
+          template.JS($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template.
+      - pattern: |
+          $T = fmt.$P("...", ...)
+          ...
+          template.JS($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template.
+      - pattern: |
+          $T, $ERR = fmt.$P("...", ...)
+          ...
+          template.JS($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template.
+      - pattern: |
+          $T = $X + $Y
+          ...
+          template.JS($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template.
+      - pattern: |
+          $T = "..."
+          ...
+          $OTHER, $ERR = fmt.$P(..., $T, ...)
+          ...
+          template.JS($OTHER, ...)
+        message: >-
+          Found a formatted template string passed to 'template.JS()'. 'template.JS()' does not escape contents. Be
+          absolutely sure there is no user-controlled data in this template.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://golang.org/pkg/html/template/#JS
+    tags:
+      - go
+  - id: unescaped-data-in-url
+    name: unescaped-data-in-url
+    description: >-
+      Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and this
+      could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data coming into
+      this function or make sure that no user-controlled input is coming into the function.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: template.URL($T + $X, ...)
+        message: >-
+          Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and
+          this could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data
+          coming into this function or make sure that no user-controlled input is coming into the function.
+      - pattern: template.URL(fmt.$P("...", ...), ...)
+        message: >-
+          Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and
+          this could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data
+          coming into this function or make sure that no user-controlled input is coming into the function.
+      - pattern: |
+          $T = "..."
+          ...
+          $T = $FXN(..., $T, ...)
+          ...
+          template.URL($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and
+          this could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data
+          coming into this function or make sure that no user-controlled input is coming into the function.
+      - pattern: |
+          $T = fmt.$P("...", ...)
+          ...
+          template.URL($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and
+          this could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data
+          coming into this function or make sure that no user-controlled input is coming into the function.
+      - pattern: |
+          $T, $ERR = fmt.$P("...", ...)
+          ...
+          template.URL($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and
+          this could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data
+          coming into this function or make sure that no user-controlled input is coming into the function.
+      - pattern: |
+          $T = $X + $Y
+          ...
+          template.URL($T, ...)
+        message: >-
+          Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and
+          this could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data
+          coming into this function or make sure that no user-controlled input is coming into the function.
+      - pattern: |-
+          $T = "..."
+          ...
+          $OTHER, $ERR = fmt.$P(..., $T, ...)
+          ...
+          template.URL($OTHER, ...)
+        message: >-
+          Found a formatted template string passed to 'template.URL()'. 'template.URL()' does not escape contents, and
+          this could result in XSS (cross-site scripting) and therefore confidential data being stolen. Sanitize data
+          coming into this function or make sure that no user-controlled input is coming into the function.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://golang.org/pkg/html/template/#URL
+    tags:
+      - go
+  - id: use-tls
+    name: use-tls
+    description: >-
+      Found an HTTP server without TLS. Use 'http.ListenAndServeTLS' instead. See
+      https://golang.org/pkg/net/http/#ListenAndServeTLS for more information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: http.ListenAndServe($ADDR, $HANDLER)
+        message: >-
+          Found an HTTP server without TLS. Use 'http.ListenAndServeTLS' instead. See
+          https://golang.org/pkg/net/http/#ListenAndServeTLS for more information.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+      - A02:2021
+      - A04:2025
+    references:
+      - https://golang.org/pkg/net/http/#ListenAndServeTLS
+    tags:
+      - go
+  - id: wip-xss-using-responsewriter-and-printf
+    name: wip-xss-using-responsewriter-and-printf
+    description: >-
+      Found data going from url query parameters into formatted data written to ResponseWriter. This could be XSS and
+      should not be done. If you must do this, ensure your data is sanitized or escaped.
+    category: xss
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Found data going from url query parameters into formatted data written to ResponseWriter. This could be XSS
+          and should not be done. If you must do this, ensure your data is sanitized or escaped.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - go
+  - id: reflect-makefunc
+    name: reflect-makefunc
+    description: >-
+      'reflect.MakeFunc' detected. This will sidestep protections that are normally afforded by Go's type system. Audit
+      this call and be sure that user input cannot be used to affect the code generated by MakeFunc; otherwise, you will
+      have a serious security vulnerability.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: reflect.MakeFunc(...)
+        message: >-
+          'reflect.MakeFunc' detected. This will sidestep protections that are normally afforded by Go's type system.
+          Audit this call and be sure that user input cannot be used to affect the code generated by MakeFunc;
+          otherwise, you will have a serious security vulnerability.
+    cwe:
+      - CWE-913
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - go
+  - id: gosql-sqli
+    name: gosql-sqli
+    description: >-
+      Detected string concatenation with a non-literal variable in a "database/sql" Go SQL statement. This could lead to
+      SQL injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection,
+      use parameterized queries or prepared statements instead. You can use prepared statements with the 'Prepare' and
+      'PrepareContext' calls.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected string concatenation with a non-literal variable in a "database/sql" Go SQL statement. This could
+          lead to SQL injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL
+          injection, use parameterized queries or prepared statements instead. You can use prepared statements with the
+          'Prepare' and 'PrepareContext' calls.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://golang.org/pkg/database/sql/
+    tags:
+      - go
+  - id: pg-orm-sqli
+    name: pg-orm-sqli
+    description: >-
+      Detected string concatenation with a non-literal variable in a go-pg ORM SQL statement. This could lead to SQL
+      injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection, do not
+      use strings concatenated with user-controlled input. Instead, use parameterized statements.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected string concatenation with a non-literal variable in a go-pg ORM SQL statement. This could lead to SQL
+          injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection, do
+          not use strings concatenated with user-controlled input. Instead, use parameterized statements.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://pg.uptrace.dev/queries/
+    tags:
+      - go-pg
+  - id: pg-sqli
+    name: pg-sqli
+    description: >-
+      Detected string concatenation with a non-literal variable in a go-pg SQL statement. This could lead to SQL
+      injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection, use
+      parameterized queries instead of string concatenation. You can use parameterized queries like so: '(SELECT ? FROM
+      table, data1)'
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected string concatenation with a non-literal variable in a go-pg SQL statement. This could lead to SQL
+          injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection,
+          use parameterized queries instead of string concatenation. You can use parameterized queries like so: '(SELECT
+          ? FROM table, data1)'
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://pg.uptrace.dev/
+      - https://pkg.go.dev/github.com/go-pg/pg/v10
+    tags:
+      - go-pg
+  - id: pgx-sqli
+    name: pgx-sqli
+    description: >-
+      Detected string concatenation with a non-literal variable in a pgx Go SQL statement. This could lead to SQL
+      injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection, use
+      parameterized queries instead. You can use parameterized queries like so: (`SELECT $1 FROM table`, `data1)
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected string concatenation with a non-literal variable in a pgx Go SQL statement. This could lead to SQL
+          injection if the variable is user-controlled and not properly sanitized. In order to prevent SQL injection,
+          use parameterized queries instead. You can use parameterized queries like so: (`SELECT $1 FROM table`, `data1)
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://github.com/jackc/pgx
+      - https://pkg.go.dev/github.com/jackc/pgx/v4#hdr-Connection_Pool
+    tags:
+      - pgx
+  - id: unsafe-reflect-by-name
+    name: unsafe-reflect-by-name
+    description: >-
+      If an attacker can supply values that the application then uses to determine which method or field to invoke, the
+      potential exists for the attacker to create control flow paths through the application that were not intended by
+      the application developers. This attack vector may allow the attacker to bypass authentication or access control
+      checks or otherwise cause the application to behave in an unexpected manner.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          If an attacker can supply values that the application then uses to determine which method or field to invoke,
+          the potential exists for the attacker to create control flow paths through the application that were not
+          intended by the application developers. This attack vector may allow the attacker to bypass authentication or
+          access control checks or otherwise cause the application to behave in an unexpected manner.
+    cwe:
+      - CWE-470
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - go
+  - id: use-of-unsafe-block
+    name: use-of-unsafe-block
+    description: >-
+      Using the unsafe package in Go gives you low-level memory management and many of the strengths of the C language,
+      but also steps around the type safety of Go and can lead to buffer overflows and possible arbitrary code execution
+      by an attacker. Only use this package if you absolutely know what you're doing.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: unsafe.$FUNC(...)
+        message: >-
+          Using the unsafe package in Go gives you low-level memory management and many of the strengths of the C
+          language, but also steps around the type safety of Go and can lead to buffer overflows and possible arbitrary
+          code execution by an attacker. Only use this package if you absolutely know what you're doing.
+    cwe:
+      - CWE-242
+    owasp: []
+    references:
+      - https://cwe.mitre.org/data/definitions/242.html
+    tags:
+      - go
+  - id: import-text-template
+    name: import-text-template
+    description: >-
+      When working with web applications that involve rendering user-generated  content, it's important to properly
+      escape any HTML content to prevent  Cross-Site Scripting (XSS) attacks. In Go, the `text/template` package does 
+      not automatically escape HTML content, which can leave your application  vulnerable to these types of attacks. To
+      mitigate this risk, it's  recommended to use the `html/template` package instead, which provides  built-in
+      functionality for HTML escaping. By using `html/template` to render  your HTML content, you can help to ensure
+      that your web application is more  secure and less susceptible to XSS vulnerabilities.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          import "$IMPORT"
+        message: >-
+          When working with web applications that involve rendering user-generated  content, it's important to properly
+          escape any HTML content to prevent  Cross-Site Scripting (XSS) attacks. In Go, the `text/template` package
+          does  not automatically escape HTML content, which can leave your application  vulnerable to these types of
+          attacks. To mitigate this risk, it's  recommended to use the `html/template` package instead, which provides 
+          built-in functionality for HTML escaping. By using `html/template` to render  your HTML content, you can help
+          to ensure that your web application is more  secure and less susceptible to XSS vulnerabilities.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://www.veracode.com/blog/secure-development/use-golang-these-mistakes-could-compromise-your-apps-security
+    tags:
+      - go
+  - id: no-direct-write-to-responsewriter
+    name: no-direct-write-to-responsewriter
+    description: >-
+      Detected directly writing or similar in 'http.ResponseWriter.write()'. This bypasses HTML escaping that prevents
+      cross-site scripting vulnerabilities. Instead, use the 'html/template' package and render data using
+      'template.Execute()'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected directly writing or similar in 'http.ResponseWriter.write()'. This bypasses HTML escaping that
+          prevents cross-site scripting vulnerabilities. Instead, use the 'html/template' package and render data using
+          'template.Execute()'.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://blogtitle.github.io/robn-go-security-pearls-cross-site-scripting-xss/
+    tags:
+      - go
+  - id: no-fprintf-to-responsewriter
+    name: no-fprintf-to-responsewriter
+    description: >-
+      Detected 'Fprintf' or similar writing to 'http.ResponseWriter'. This bypasses HTML escaping that prevents
+      cross-site scripting vulnerabilities. Instead, use the 'html/template' package to render data to users.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: fmt.$PRINTF($WRITER, ...)
+        message: >-
+          Detected 'Fprintf' or similar writing to 'http.ResponseWriter'. This bypasses HTML escaping that prevents
+          cross-site scripting vulnerabilities. Instead, use the 'html/template' package to render data to users.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://blogtitle.github.io/robn-go-security-pearls-cross-site-scripting-xss/
+    tags:
+      - go
+  - id: no-io-writestring-to-responsewriter
+    name: no-io-writestring-to-responsewriter
+    description: >-
+      Detected 'io.WriteString()' writing directly to 'http.ResponseWriter'. This bypasses HTML escaping that prevents
+      cross-site scripting vulnerabilities. Instead, use the 'html/template' package to render data to users.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: io.WriteString($WRITER, $STRING)
+        message: >-
+          Detected 'io.WriteString()' writing directly to 'http.ResponseWriter'. This bypasses HTML escaping that
+          prevents cross-site scripting vulnerabilities. Instead, use the 'html/template' package to render data to
+          users.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://blogtitle.github.io/robn-go-security-pearls-cross-site-scripting-xss/
+      - https://golang.org/pkg/io/#WriteString
+    tags:
+      - go
+  - id: no-printf-in-responsewriter
+    name: no-printf-in-responsewriter
+    description: >-
+      Detected 'printf' or similar in 'http.ResponseWriter.write()'. This bypasses HTML escaping that prevents
+      cross-site scripting vulnerabilities. Instead, use the 'html/template' package to render data to users.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          $WRITER.Write(<... fmt.$PRINTF(...) ...>, ...)
+        message: >-
+          Detected 'printf' or similar in 'http.ResponseWriter.write()'. This bypasses HTML escaping that prevents
+          cross-site scripting vulnerabilities. Instead, use the 'html/template' package to render data to users.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://blogtitle.github.io/robn-go-security-pearls-cross-site-scripting-xss/
+    tags:
+      - go
+  - id: unsafe-template-type
+    name: unsafe-template-type
+    description: >-
+      Semgrep could not determine that the argument to 'template.HTML()' is a constant. 'template.HTML()' and similar
+      does not escape contents. Be absolutely sure there is no user-controlled data in this template. If user data can
+      reach this template, you may have a XSS vulnerability. Instead, do not use this function and use
+      'template.Execute()'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Semgrep could not determine that the argument to 'template.HTML()' is a constant. 'template.HTML()' and
+          similar does not escape contents. Be absolutely sure there is no user-controlled data in this template. If
+          user data can reach this template, you may have a XSS vulnerability. Instead, do not use this function and use
+          'template.Execute()'.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://golang.org/pkg/html/template/#HTML
+      - https://github.com/0c34/govwa/blob/139693e56406b5684d2a6ae22c0af90717e149b8/vulnerability/xss/xss.go#L33
+    tags:
+      - go
+  - id: parsing-external-entities-enabled
+    name: parsing-external-entities-enabled
+    description: >-
+      Detected enabling of "XMLParseNoEnt", which allows parsing of external entities and can lead to XXE if user
+      controlled data is parsed by the library. Instead, do not enable "XMLParseNoEnt" or be sure to adequately sanitize
+      user-controlled data when it is being parsed by this library.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: $PARSER := parser.New(parser.XMLParseNoEnt)
+        message: >-
+          Detected enabling of "XMLParseNoEnt", which allows parsing of external entities and can lead to XXE if user
+          controlled data is parsed by the library. Instead, do not enable "XMLParseNoEnt" or be sure to adequately
+          sanitize user-controlled data when it is being parsed by this library.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://knowledge-base.secureflag.com/vulnerabilities/xml_injection/xml_entity_expansion_go_lang.html
+      - https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing
+    tags:
+      - libxml2
+  - id: bad-tmp-file-creation
+    name: bad-tmp-file-creation
+    description: File creation in shared tmp directory without using `io.CreateTemp`.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: ioutil.WriteFile("=~//tmp/.*$/", ...)
+        message: File creation in shared tmp directory without using `io.CreateTemp`.
+      - pattern: os.Create("=~//tmp/.*$/", ...)
+        message: File creation in shared tmp directory without using `io.CreateTemp`.
+      - pattern: os.WriteFile("=~//tmp/.*$/", ...)
+        message: File creation in shared tmp directory without using `io.CreateTemp`.
+    cwe:
+      - CWE-377
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+      - https://pkg.go.dev/io/ioutil#TempFile
+      - https://pkg.go.dev/os#CreateTemp
+      - https://github.com/securego/gosec/blob/5fd2a370447223541cddb35da8d1bc707b7bb153/rules/tempfiles.go#L67
+    tags:
+      - go
+  - id: potential-dos-via-decompression-bomb
+    name: potential-dos-via-decompression-bomb
+    description: >-
+      Detected a possible denial-of-service via a zip bomb attack. By limiting the max bytes read, you can mitigate this
+      attack. `io.CopyN()` can specify a size. 
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a possible denial-of-service via a zip bomb attack. By limiting the max bytes read, you can mitigate
+          this attack. `io.CopyN()` can specify a size. 
+    cwe:
+      - CWE-400
+    owasp: []
+    references:
+      - https://golang.org/pkg/io/#CopyN
+      - https://github.com/securego/gosec/blob/master/rules/decompression-bomb.go
+    tags:
+      - go
+  - id: go-unsafe-deserialization-interface
+    name: go-unsafe-deserialization-interface
+    description: >-
+      Deserializing into `interface{}` allows arbitrary data structures and types, which can lead to security
+      vulnerabilities (CWE-502). Use a concrete struct type instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Deserializing into `interface{}` allows arbitrary data structures and types, which can lead to security
+          vulnerabilities (CWE-502). Use a concrete struct type instead.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+    references:
+      - https://cwe.mitre.org/data/definitions/502.html
+    tags:
+      - go
+  - id: filepath-clean-misuse
+    name: filepath-clean-misuse
+    description: >-
+      `Clean` is not intended to sanitize against path traversal attacks. This function is for finding the shortest path
+      name equivalent to the given input. Using `Clean` to sanitize file reads may expose this application to path
+      traversal attacks, where an attacker could access arbitrary files on the server. To fix this easily, write this:
+      `filepath.FromSlash(path.Clean("/"+strings.Trim(req.URL.Path, "/")))` However, a better solution is using the
+      `SecureJoin` function in the package `filepath-securejoin`. See
+      https://pkg.go.dev/github.com/cyphar/filepath-securejoin#section-readme.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          `Clean` is not intended to sanitize against path traversal attacks. This function is for finding the shortest
+          path name equivalent to the given input. Using `Clean` to sanitize file reads may expose this application to
+          path traversal attacks, where an attacker could access arbitrary files on the server. To fix this easily,
+          write this: `filepath.FromSlash(path.Clean("/"+strings.Trim(req.URL.Path, "/")))` However, a better solution
+          is using the `SecureJoin` function in the package `filepath-securejoin`. See
+          https://pkg.go.dev/github.com/cyphar/filepath-securejoin#section-readme.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://pkg.go.dev/path#Clean
+      - http://technosophos.com/2016/03/31/go-quickly-cleaning-filepaths.html
+      - https://labs.detectify.com/2021/12/15/zero-day-path-traversal-grafana/
+      - https://dzx.cz/2021/04/02/go_path_traversal/
+      - https://pkg.go.dev/github.com/cyphar/filepath-securejoin#section-readme
+    tags:
+      - go
+  - id: open-redirect
+    name: open-redirect
+    description: >-
+      An HTTP redirect was found to be crafted from user-input `$REQUEST`. This can lead to open redirect
+      vulnerabilities, potentially allowing attackers to redirect users to malicious web sites. It is recommend where
+      possible to not allow user-input to craft the redirect URL. When user-input is necessary to craft the request, it
+      is recommended to follow OWASP best practices to restrict the URL to domains in an allowlist.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          An HTTP redirect was found to be crafted from user-input `$REQUEST`. This can lead to open redirect
+          vulnerabilities, potentially allowing attackers to redirect users to malicious web sites. It is recommend
+          where possible to not allow user-input to craft the redirect URL. When user-input is necessary to craft the
+          request, it is recommended to follow OWASP best practices to restrict the URL to domains in an allowlist.
+    cwe:
+      - CWE-601
+    owasp: []
+    references:
+      - >-
+        https://knowledge-base.secureflag.com/vulnerabilities/unvalidated_redirects___forwards/open_redirect_go_lang.html
+    tags:
+      - go
+  - id: raw-html-format
+    name: raw-html-format
+    description: >-
+      Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure
+      methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting
+      vulnerability, which could let attackers steal sensitive user data. Use the `html/template` package which will
+      safely render HTML instead, or inspect that the HTML is rendered safely.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure
+          methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting
+          vulnerability, which could let attackers steal sensitive user data. Use the `html/template` package which will
+          safely render HTML instead, or inspect that the HTML is rendered safely.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://blogtitle.github.io/robn-go-security-pearls-cross-site-scripting-xss/
+    tags:
+      - go
+  - id: tainted-url-host
+    name: tainted-url-host
+    description: >-
+      A request was found to be crafted from user-input `$REQUEST`. This can lead to Server-Side Request Forgery (SSRF)
+      vulnerabilities, potentially exposing sensitive data. It is recommend where possible to not allow user-input to
+      craft the base request, but to be treated as part of the path or query parameter. When user-input is necessary to
+      craft the request, it is recommended to follow OWASP best practices to prevent abuse, including using an
+      allowlist.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          A request was found to be crafted from user-input `$REQUEST`. This can lead to Server-Side Request Forgery
+          (SSRF) vulnerabilities, potentially exposing sensitive data. It is recommend where possible to not allow
+          user-input to craft the base request, but to be treated as part of the path or query parameter. When
+          user-input is necessary to craft the request, it is recommended to follow OWASP best practices to prevent
+          abuse, including using an allowlist.
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+      - A01:2025
+    references:
+      - https://goteleport.com/blog/ssrf-attacks/
+    tags:
+      - go
+  - id: reverseproxy-director
+    name: reverseproxy-director
+    description: >-
+      ReverseProxy can remove headers added by Director. Consider using ReverseProxy.Rewrite instead of
+      ReverseProxy.Director.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          ReverseProxy can remove headers added by Director. Consider using ReverseProxy.Rewrite instead of
+          ReverseProxy.Director.
+    cwe:
+      - CWE-115
+    owasp: []
+    references:
+      - https://github.com/golang/go/issues/50580
+    tags:
+      - go
+  - id: shared-url-struct-mutation
+    name: shared-url-struct-mutation
+    description: Shared URL struct may have been accidentally mutated. Ensure that this behavior is intended.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: Shared URL struct may have been accidentally mutated. Ensure that this behavior is intended.
+    cwe:
+      - CWE-436
+    owasp: []
+    references:
+      - https://github.com/golang/go/issues/63777
+    tags:
+      - go
+  - id: path-traversal-inside-zip-extraction
+    name: path-traversal-inside-zip-extraction
+    description: File traversal when extracting zip archive
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          reader, $ERR := zip.OpenReader($ARCHIVE)
+          ...
+          for _, $FILE := range reader.File {
+            ...
+            path := filepath.Join($TARGET, $FILE.Name)
+            ...
+          }
+        message: File traversal when extracting zip archive
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+    tags:
+      - go
+  - id: dangerous-execution
+    name: dangerous-execution
+    description: >-
+      Detected non-static script inside otto VM. Audit the input to 'VM.Run'. If unverified user data can reach this
+      call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+      arbitrary code.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: $VM.Run(...)
+        message: >-
+          Detected non-static script inside otto VM. Audit the input to 'VM.Run'. If unverified user data can reach this
+          call site, this is a code injection vulnerability. A malicious actor can inject a malicious script to execute
+          arbitrary code.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - otto
+      - vm
+  - id: go-insecure-templates
+    name: go-insecure-templates
+    description: >-
+      usage of insecure template types. They are documented as a security risk. See
+      https://golang.org/pkg/html/template/#HTML.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          usage of insecure template types. They are documented as a security risk. See
+          https://golang.org/pkg/html/template/#HTML.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://golang.org/pkg/html/template/#HTML
+      - https://twitter.com/empijei/status/1275177219011350528
+    tags:
+      - template
+  - id: go-ssti
+    name: go-ssti
+    description: >-
+      A server-side template injection occurs when an attacker is able to use native template syntax to inject a
+      malicious payload into a template, which is then executed server-side. When using "html/template" always check
+      that user inputs are validated and sanitized before included within the template.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: $TEMPLATE = fmt.Sprintf("...", $ARG, ...)
+        message: >-
+          A server-side template injection occurs when an attacker is able to use native template syntax to inject a
+          malicious payload into a template, which is then executed server-side. When using "html/template" always check
+          that user inputs are validated and sanitized before included within the template.
+    cwe:
+      - CWE-1336
+    owasp: []
+    references:
+      - https://www.onsecurity.io/blog/go-ssti-method-research/
+      - http://blog.takemyhand.xyz/2020/05/ssti-breaking-gos-template-engine-to.html
+    tags:
+      - go
+  - id: bypass-tls-verification
+    name: bypass-tls-verification
+    description: >-
+      Checks for disabling of TLS/SSL certificate verification. This should only be used for debugging purposes because
+      it leads to vulnerability to MTM attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          tls.Config{..., InsecureSkipVerify: true, ...}
+        message: >-
+          Checks for disabling of TLS/SSL certificate verification. This should only be used for debugging purposes
+          because it leads to vulnerability to MTM attacks.
+      - pattern: |
+          $CONFIG = &tls.Config{...}
+          ...
+          $CONFIG.InsecureSkipVerify = true
+        message: >-
+          Checks for disabling of TLS/SSL certificate verification. This should only be used for debugging purposes
+          because it leads to vulnerability to MTM attacks.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://stackoverflow.com/questions/12122159/how-to-do-a-https-request-with-bad-certificate
+    tags:
+      - go
+  - id: disallow-old-tls-versions
+    name: disallow-old-tls-versions
+    description: >-
+      Detects creations of tls configuration objects with an insecure MinVersion of TLS. These protocols are deprecated
+      due to POODLE, man in the middle attacks, and other vulnerabilities.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Detects creations of tls configuration objects with an insecure MinVersion of TLS. These protocols are
+          deprecated due to POODLE, man in the middle attacks, and other vulnerabilities.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://stackoverflow.com/questions/26429751/java-http-clients-and-poodle
+    tags:
+      - go
+  - id: ftp-request
+    name: ftp-request
+    description: >-
+      Checks for outgoing connections to ftp servers with the ftp package. FTP does not encrypt traffic, possibly
+      leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          ftp.Dial("=~/^[fF][tT][pP]://.*/", ...)
+        message: >-
+          Checks for outgoing connections to ftp servers with the ftp package. FTP does not encrypt traffic, possibly
+          leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+      - pattern: |
+          ftp.DialTimeout("=~/^[fF][tT][pP]://.*/", ...)
+        message: >-
+          Checks for outgoing connections to ftp servers with the ftp package. FTP does not encrypt traffic, possibly
+          leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+      - pattern: |
+          ftp.Connect("=~/^[fF][tT][pP]://.*/")
+        message: >-
+          Checks for outgoing connections to ftp servers with the ftp package. FTP does not encrypt traffic, possibly
+          leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+      - pattern: |
+          $URL = "=~/^[fF][tT][pP]://.*/"
+          ...
+          ftp.Dial($URL, ...)
+        message: >-
+          Checks for outgoing connections to ftp servers with the ftp package. FTP does not encrypt traffic, possibly
+          leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+      - pattern: |
+          $URL = "=~/^[fF][tT][pP]://.*/"
+          ...
+          ftp.DialTimeout($URL, ...)
+        message: >-
+          Checks for outgoing connections to ftp servers with the ftp package. FTP does not encrypt traffic, possibly
+          leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+      - pattern: |
+          $URL = "=~/^[fF][tT][pP]://.*/"
+          ...
+          ftp.Connect($URL)
+        message: >-
+          Checks for outgoing connections to ftp servers with the ftp package. FTP does not encrypt traffic, possibly
+          leading to PII being sent plaintext over the network. Instead, connect via the SFTP protocol.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://godoc.org/github.com/jlaffaye/ftp#Dial
+      - https://github.com/jlaffaye/ftp
+    tags:
+      - ftp
+  - id: gorequest-http-request
+    name: gorequest-http-request
+    description: >-
+      Checks for requests to http (unencrypted) sites using gorequest, a popular HTTP client library. This is dangerous
+      because it could result in plaintext PII being passed around the network.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for requests to http (unencrypted) sites using gorequest, a popular HTTP client library. This is
+          dangerous because it could result in plaintext PII being passed around the network.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://github.com/parnurzeal/gorequest
+    tags:
+      - gorequest
+  - id: grequests-http-request
+    name: grequests-http-request
+    description: >-
+      Checks for requests to http (unencrypted) sites using grequests, a popular HTTP client library. This is dangerous
+      because it could result in plaintext PII being passed around the network.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for requests to http (unencrypted) sites using grequests, a popular HTTP client library. This is
+          dangerous because it could result in plaintext PII being passed around the network.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://godoc.org/github.com/levigross/grequests#DoRegularRequest
+      - https://github.com/levigross/grequests
+    tags:
+      - grequests
+  - id: http-customized-request
+    name: http-customized-request
+    description: >-
+      Checks for requests sent via http.NewRequest to http:// URLS. This is dangerous because the server is attempting
+      to connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          http.NewRequest(..., "=~/[hH][tT][tT][pP]://.*/", ...)
+        message: >-
+          Checks for requests sent via http.NewRequest to http:// URLS. This is dangerous because the server is
+          attempting to connect to a website that does not encrypt traffic with TLS. Instead, send requests only to
+          https:// URLS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://golang.org/pkg/net/http/#NewRequest
+    tags:
+      - go
+  - id: http-request
+    name: http-request
+    description: >-
+      Checks for requests sent via http.$FUNC to http:// URLS. This is dangerous because the server is attempting to
+      connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for requests sent via http.$FUNC to http:// URLS. This is dangerous because the server is attempting to
+          connect to a website that does not encrypt traffic with TLS. Instead, send requests only to https:// URLS.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://golang.org/pkg/net/http/#Get
+    tags:
+      - go
+  - id: sling-http-request
+    name: sling-http-request
+    description: >-
+      Checks for requests to http (unencrypted) sites using gorequest, a popular HTTP client library. This is dangerous
+      because it could result in plaintext PII being passed around the network.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          Checks for requests to http (unencrypted) sites using gorequest, a popular HTTP client library. This is
+          dangerous because it could result in plaintext PII being passed around the network.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://godoc.org/github.com/dghubble/sling#Sling.Add
+      - https://github.com/dghubble/sling
+    tags:
+      - sling
+  - id: telnet-request
+    name: telnet-request
+    description: >-
+      Checks for attempts to connect to an insecure telnet server using the package telnet. This is bad because it can
+      lead to man in the middle attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - pattern: |
+          telnet.DialToAndCall(...)
+        message: >-
+          Checks for attempts to connect to an insecure telnet server using the package telnet. This is bad because it
+          can lead to man in the middle attacks.
+    cwe:
+      - CWE-319
+    owasp:
+      - A03:2017
+    references:
+      - https://godoc.org/github.com/reiver/go-telnet
+    tags:
+      - go-telnet
+  - id: libxml2-xxe-taint
+    name: libxml2-xxe-taint
+    description: >-
+      The application is using an XML parser that has not been safely configured. This might lead to XML External Entity
+      (XXE) vulnerabilities when parsing user-controlled input. An attacker can include document type definitions (DTDs)
+      which can interact with internal or external hosts. XXE can lead to other vulnerabilities, such as Local File
+      Inclusion (LFI), Remote Code Execution (RCE), and Server-side request forgery (SSRF), depending on the application
+      configuration. An attacker can also use DTDs to expand recursively, leading to a Denial-of-Service (DoS) attack,
+      also known as a `Billion Laughs Attack`. The best defense against XXE is to have an XML parser that supports
+      disabling DTDs. Limiting the use of external entities from the start can prevent the parser from being used to
+      process untrusted XML files. Reducing dependencies on external resources is also a good practice for performance
+      reasons. It is difficult to guarantee that even a trusted XML file on your server or during transmission has not
+      been tampered with by a malicious third-party. 
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - go
+    patterns:
+      - regex: .*
+        message: >-
+          The application is using an XML parser that has not been safely configured. This might lead to XML External
+          Entity (XXE) vulnerabilities when parsing user-controlled input. An attacker can include document type
+          definitions (DTDs) which can interact with internal or external hosts. XXE can lead to other vulnerabilities,
+          such as Local File Inclusion (LFI), Remote Code Execution (RCE), and Server-side request forgery (SSRF),
+          depending on the application configuration. An attacker can also use DTDs to expand recursively, leading to a
+          Denial-of-Service (DoS) attack, also known as a `Billion Laughs Attack`. The best defense against XXE is to
+          have an XML parser that supports disabling DTDs. Limiting the use of external entities from the start can
+          prevent the parser from being used to process untrusted XML files. Reducing dependencies on external resources
+          is also a good practice for performance reasons. It is difficult to guarantee that even a trusted XML file on
+          your server or during transmission has not been tampered with by a malicious third-party. 
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://owasp.org/Top10/A05_2021-Security_Misconfiguration
+    tags:
+      - go
+      - libxml2
+      - go
+      - go-net/http
+      - gin
+      - gin-gonic/gin

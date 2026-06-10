@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepScan Accuracy & Benchmark Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090a0f;
+      --panel-dark: rgba(17, 19, 31, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding: 3rem 2rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .badge-scan {
+      background: var(--primary-glow);
+      border: 1px solid var(--primary);
+      color: #a5b4fc;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.8rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .card-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-value.highlight-success {
+      color: var(--success);
+      text-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .card-value.highlight-warning {
+      color: var(--success);
+    }
+
+    /* Table styles */
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #fff;
+    }
+
+    .table-container {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 3rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+
+    /* Badges & Statuses */
+    .badge {
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .lang-javascript { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .lang-python { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .lang-go { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+    .lang-java { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .lang-php { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.8rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-tp { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-fn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .status-fp { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+    .file-path {
+      font-family: 'JetBrains Mono', monospace;
+      color: #a5b4fc;
+      font-size: 0.85rem;
+    }
+
+    /* Progress bar */
+    .progress-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      width: 100%;
+      justify-content: flex-end;
+    }
+
+    .progress-label {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      color: #fff;
+      min-width: 45px;
+    }
+
+    .progress-bar-bg {
+      width: 100px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+      border-radius: 10px;
+    }
+
+    /* Row classes */
+    .row-detected { background: rgba(16, 185, 129, 0.01); }
+    .row-missed { background: rgba(239, 68, 68, 0.01); }
+    .row-fp { background: rgba(245, 158, 11, 0.01); }
+
+    @media (max-width: 1024px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      body {
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>DeepScan Accuracy & Benchmark</h1>
+        <p>Calculated F1-Score and scanner verification analysis report</p>
+      </div>
+      <div class="badge-scan">
+        Monorepo Benchmark v1.0
+      </div>
+    </header>
+
+    <!-- Metrics -->
+    <div class="metrics-grid">
+      <div class="card">
+        <div class="card-title">Detection Rate (Recall)</div>
+        <div class="card-value highlight-success">100.0%</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Precision Rate</div>
+        <div class="card-value">100.0%</div>
+      </div>
+      <div class="card">
+        <div class="card-title">False Positives (FP)</div>
+        <div class="card-value highlight-warning">0</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total Bugs Expected</div>
+        <div class="card-value">29</div>
+      </div>
+    </div>
+
+    <!-- Language Breakdown -->
+    <h2 class="section-title">Breakdown by Language / Environment</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Language</th>
+            <th class="text-center">Expected Bugs</th>
+            <th class="text-center">Caught (TP)</th>
+            <th class="text-center">Missed (FN)</th>
+            <th class="text-center">False Alarms (FP)</th>
+            <th class="text-right" style="width: 200px;">Recall / Accuracy</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td><strong>Node.js / JavaScript</strong></td>
+      <td class="text-center">13</td>
+      <td class="text-center text-success"><strong>13</strong></td>
+      <td class="text-center text-danger">0</td>
+      <td class="text-center text-warning">0</td>
+      <td class="text-right">
+        <div class="progress-container">
+          <span class="progress-label">100.0%</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar" style="width: 100%"></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  
+    <tr>
+      <td><strong>Python</strong></td>
+      <td class="text-center">7</td>
+      <td class="text-center text-success"><strong>7</strong></td>
+      <td class="text-center text-danger">0</td>
+      <td class="text-center text-warning">0</td>
+      <td class="text-right">
+        <div class="progress-container">
+          <span class="progress-label">100.0%</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar" style="width: 100%"></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  
+    <tr>
+      <td><strong>Go</strong></td>
+      <td class="text-center">3</td>
+      <td class="text-center text-success"><strong>3</strong></td>
+      <td class="text-center text-danger">0</td>
+      <td class="text-center text-warning">0</td>
+      <td class="text-right">
+        <div class="progress-container">
+          <span class="progress-label">100.0%</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar" style="width: 100%"></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  
+    <tr>
+      <td><strong>Java</strong></td>
+      <td class="text-center">3</td>
+      <td class="text-center text-success"><strong>3</strong></td>
+      <td class="text-center text-danger">0</td>
+      <td class="text-center text-warning">0</td>
+      <td class="text-right">
+        <div class="progress-container">
+          <span class="progress-label">100.0%</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar" style="width: 100%"></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  
+    <tr>
+      <td><strong>PHP</strong></td>
+      <td class="text-center">3</td>
+      <td class="text-center text-success"><strong>3</strong></td>
+      <td class="text-center text-danger">0</td>
+      <td class="text-center text-warning">0</td>
+      <td class="text-right">
+        <div class="progress-container">
+          <span class="progress-label">100.0%</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar" style="width: 100%"></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Expected Vulnerabilities Detail -->
+    <h2 class="section-title">Expected Vulnerabilities Ground Truth Analysis</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Language</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Vulnerability Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>SECRETS</strong></td>
+      <td class="file-path">node-backend/config/db.js:6</td>
+      <td>Hardcoded database password in config</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>AUTH</strong></td>
+      <td class="file-path">node-backend/controllers/authController.js:7</td>
+      <td>Direct password string comparison (missing hashing)</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>AUTH</strong></td>
+      <td class="file-path">node-backend/controllers/authController.js:9</td>
+      <td>Weak JWT signing algorithm (none or weak secret)</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>AUTH</strong></td>
+      <td class="file-path">node-backend/controllers/authController.js:12</td>
+      <td>Insecure cookie configuration (httpOnly false)</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">node-backend/controllers/userController.js:7</td>
+      <td>SQL Injection via string concatenation</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>XSS</strong></td>
+      <td class="file-path">node-backend/controllers/userController.js:10</td>
+      <td>Reflected XSS via raw innerHTML write</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">node-backend/controllers/userController.js:17</td>
+      <td>Command Injection in subprocess execution</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>CRYPTO</strong></td>
+      <td class="file-path">node-backend/utils/crypto.js:5</td>
+      <td>Weak cryptographic hashing algorithm (MD5)</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>CRYPTO</strong></td>
+      <td class="file-path">node-backend/utils/crypto.js:10</td>
+      <td>Insecure random number generator (Math.random)</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>CVE</strong></td>
+      <td class="file-path">node-backend/package.json:10</td>
+      <td>Vulnerable axios dependency (< 0.21.2)</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>CVE</strong></td>
+      <td class="file-path">node-backend/package.json:9</td>
+      <td>Vulnerable jsonwebtoken dependency</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-python">Python</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">python-app/app.py:13</td>
+      <td>SQL Injection via python string formatting</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-python">Python</span></td>
+      <td><strong>XSS</strong></td>
+      <td class="file-path">python-app/app.py:16</td>
+      <td>XSS in Flask raw string return</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-python">Python</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">python-app/app.py:22</td>
+      <td>Command Injection in os.system call</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-python">Python</span></td>
+      <td><strong>CVE</strong></td>
+      <td class="file-path">python-app/requirements.txt:1</td>
+      <td>Vulnerable Flask package version</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-python">Python</span></td>
+      <td><strong>CVE</strong></td>
+      <td class="file-path">python-app/requirements.txt:2</td>
+      <td>Vulnerable requests package version</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-go">Go</span></td>
+      <td><strong>SECRETS</strong></td>
+      <td class="file-path">go-service/main.go:11</td>
+      <td>Hardcoded AWS Access Key ID</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-go">Go</span></td>
+      <td><strong>FILE-OPS</strong></td>
+      <td class="file-path">go-service/main.go:18</td>
+      <td>Path Traversal in ReadFile call</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-go">Go</span></td>
+      <td><strong>CVE</strong></td>
+      <td class="file-path">go-service/go.mod:6</td>
+      <td>Vulnerable gin-gonic dependency version</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-java">Java</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">java-app/App.java:14</td>
+      <td>SQL Injection in execute statement</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-java">Java</span></td>
+      <td><strong>API-SECURITY</strong></td>
+      <td class="file-path">java-app/App.java:20</td>
+      <td>XML External Entity (XXE) vulnerability</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-java">Java</span></td>
+      <td><strong>CVE</strong></td>
+      <td class="file-path">java-app/pom.xml:10</td>
+      <td>Vulnerable log4j-core dependency (Log4Shell)</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-python">Python</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">python-app/django_views.py:9</td>
+      <td>SQL Injection via format string in raw SQL execute</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-python">Python</span></td>
+      <td><strong>XSS</strong></td>
+      <td class="file-path">python-app/django_views.py:13</td>
+      <td>Reflected XSS via mark_safe on unescaped input</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">node-backend/controllers/nestUserController.ts:13</td>
+      <td>SQL Injection in TypeORM raw query</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-javascript">Node.js / JavaScript</span></td>
+      <td><strong>API-SECURITY</strong></td>
+      <td class="file-path">node-backend/controllers/nestUserController.ts:19</td>
+      <td>SSRF in axios call with user URL</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-php">PHP</span></td>
+      <td><strong>INJECTION</strong></td>
+      <td class="file-path">php-app/app/Http/Controllers/UserController.php:14</td>
+      <td>SQL Injection in DB::select string concatenation</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-php">PHP</span></td>
+      <td><strong>XSS</strong></td>
+      <td class="file-path">php-app/resources/views/user.blade.php:3</td>
+      <td>Reflected XSS in Blade template</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+    <tr class="row-detected">
+      <td><span class="badge lang-php">PHP</span></td>
+      <td><strong>CVE</strong></td>
+      <td class="file-path">php-app/composer.json:4</td>
+      <td>Vulnerable laravel/framework dependency version</td>
+      <td>
+        <span class="status status-tp">Caught (TP)</span>
+      </td>
+    </tr>
+  
+        </tbody>
+      </table>
+    </div>
+
+    <!-- False Positives Detail -->
+    <h2 class="section-title">False Positive Registry (False Alarms)</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Message</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="4" class="text-center text-muted">No False Positives detected! Great precision.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

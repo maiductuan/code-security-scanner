@@ -1,0 +1,1260 @@
+rules:
+  - id: detect-openai
+    name: detect-openai
+    description: 'Possibly found usage of AI: OpenAI'
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: using OpenAI
+        message: 'Possibly found usage of AI: OpenAI'
+      - pattern: (ChatClient $CLIENT)
+        message: 'Possibly found usage of AI: OpenAI'
+      - pattern: (ChatClient $CLIENT).$FUNC(...)
+        message: 'Possibly found usage of AI: OpenAI'
+    cwe: []
+    owasp: []
+    references:
+      - https://semgrep.dev/blog/2024/detecting-shadow-ai
+    tags:
+      - genAI
+      - LLMs
+  - id: ldap-injection
+    name: ldap-injection
+    description: >-
+      LDAP queries are constructed dynamically on user-controlled input. This vulnerability in code could lead to an
+      arbitrary LDAP query execution.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          LDAP queries are constructed dynamically on user-controlled input. This vulnerability in code could lead to an
+          arbitrary LDAP query execution.
+    cwe:
+      - CWE-90
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection/
+      - https://cwe.mitre.org/data/definitions/90
+      - >-
+        https://cheatsheetseries.owasp.org/cheatsheets/LDAP_Injection_Prevention_Cheat_Sheet.html#safe-c-sharp-net-tba-example
+    tags:
+      - .net
+  - id: mass-assignment
+    name: mass-assignment
+    description: >-
+      Mass assignment or Autobinding vulnerability in code allows an attacker to execute over-posting attacks, which
+      could create a new parameter in the binding request and manipulate the underlying object in the application.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          Mass assignment or Autobinding vulnerability in code allows an attacker to execute over-posting attacks, which
+          could create a new parameter in the binding request and manipulate the underlying object in the application.
+    cwe:
+      - CWE-915
+    owasp:
+      - A08:2021
+      - A08:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/915.html
+      - https://github.com/OWASP/API-Security/blob/master/2019/en/src/0xa6-mass-assignment.md
+    tags:
+      - .net
+  - id: misconfigured-lockout-option
+    name: misconfigured-lockout-option
+    description: >-
+      A misconfigured lockout mechanism allows an attacker to execute brute-force attacks. Account lockout must be
+      correctly configured and enabled to prevent these attacks.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          A misconfigured lockout mechanism allows an attacker to execute brute-force attacks. Account lockout must be
+          correctly configured and enabled to prevent these attacks.
+    cwe:
+      - CWE-307
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures
+      - https://cwe.mitre.org/data/definitions/307.html
+    tags:
+      - dotnet
+  - id: missing-or-broken-authorization
+    name: missing-or-broken-authorization
+    description: >-
+      Anonymous access shouldn't be allowed unless explicit by design. Access control checks are missing and potentially
+      can be bypassed. This finding violates the principle of least privilege or deny by default, where access should
+      only be permitted for a specific set of roles or conforms to a custom policy or users.
+    category: auth
+    severity: low
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: |
+          public class $CLASS : Controller {
+            ...
+          }
+        message: >-
+          Anonymous access shouldn't be allowed unless explicit by design. Access control checks are missing and
+          potentially can be bypassed. This finding violates the principle of least privilege or deny by default, where
+          access should only be permitted for a specific set of roles or conforms to a custom policy or users.
+    cwe:
+      - CWE-862
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control
+      - https://cwe.mitre.org/data/definitions/862.html
+      - https://docs.microsoft.com/en-us/aspnet/core/security/authorization/simple?view=aspnetcore-7.0
+    tags:
+      - .net
+      - mvc
+  - id: open-directory-listing
+    name: open-directory-listing
+    description: An open directory listing is potentially exposed, potentially revealing sensitive information to attackers.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: An open directory listing is potentially exposed, potentially revealing sensitive information to attackers.
+    cwe:
+      - CWE-548
+    owasp:
+      - A06:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/548.html
+      - https://owasp.org/Top10/A05_2021-Security_Misconfiguration/
+      - https://docs.microsoft.com/en-us/aspnet/core/fundamentals/static-files?view=aspnetcore-7.0#directory-browsing
+    tags:
+      - .net
+      - mvc
+  - id: xpath-injection
+    name: xpath-injection
+    description: >-
+      XPath queries are constructed dynamically on user-controlled input. This vulnerability in code could lead to an
+      XPath Injection exploitation.
+    category: file-ops
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          XPath queries are constructed dynamically on user-controlled input. This vulnerability in code could lead to
+          an XPath Injection exploitation.
+    cwe:
+      - CWE-643
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection/
+      - https://cwe.mitre.org/data/definitions/643.html
+    tags:
+      - .net
+  - id: mvc-missing-antiforgery
+    name: mvc-missing-antiforgery
+    description: >-
+      $METHOD is a state-changing MVC method that does not validate the antiforgery token or do strict content-type
+      checking. State-changing controller methods should either enforce antiforgery tokens or do strict content-type
+      checking to prevent simple HTTP request types from bypassing CORS preflight controls.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: |
+          [$HTTPMETHOD]
+          public IActionResult $METHOD(...){
+              ...
+          }
+        message: >-
+          $METHOD is a state-changing MVC method that does not validate the antiforgery token or do strict content-type
+          checking. State-changing controller methods should either enforce antiforgery tokens or do strict content-type
+          checking to prevent simple HTTP request types from bypassing CORS preflight controls.
+    cwe:
+      - CWE-352
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/DotNet_Security_Cheat_Sheet.html#cross-site-request-forgery
+      - https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests
+    tags:
+      - .net
+      - mvc
+  - id: razor-template-injection
+    name: razor-template-injection
+    description: >-
+      User-controllable string passed to Razor.Parse. This leads directly to code execution in the context of the
+      process.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          User-controllable string passed to Razor.Parse. This leads directly to code execution in the context of the
+          process.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://clement.notin.org/blog/2020/04/15/Server-Side-Template-Injection-(SSTI)-in-ASP.NET-Razor/
+    tags:
+      - .net
+      - razor
+      - asp
+  - id: use_deprecated_cipher_algorithm
+    name: use_deprecated_cipher_algorithm
+    description: Usage of deprecated cipher algorithm detected. Use Aes or ChaCha20Poly1305 instead.
+    category: crypto
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: $KEYTYPE.Create(...);
+        message: Usage of deprecated cipher algorithm detected. Use Aes or ChaCha20Poly1305 instead.
+    cwe:
+      - CWE-327
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.des?view=net-6.0#remarks
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.rc2?view=net-6.0#remarks
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.aes?view=net-6.0
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.chacha20poly1305?view=net-6.0
+    tags:
+      - .net
+  - id: use_ecb_mode
+    name: use_ecb_mode
+    description: >-
+      Usage of the insecure ECB mode detected. You should use an authenticated encryption mode instead, which is
+      implemented by the classes AesGcm or ChaCha20Poly1305.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          Usage of the insecure ECB mode detected. You should use an authenticated encryption mode instead, which is
+          implemented by the classes AesGcm or ChaCha20Poly1305.
+    cwe:
+      - CWE-327
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.chacha20poly1305?view=net-6.0
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.aesgcm?view=net-6.0
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.ciphermode?view=net-6.0
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#cipher-modes
+    tags:
+      - .net
+  - id: use_weak_rng_for_keygeneration
+    name: use_weak_rng_for_keygeneration
+    description: >-
+      You are using an insecure random number generator (RNG) to create a cryptographic key. System.Random must never be
+      used for cryptographic purposes. Use System.Security.Cryptography.RandomNumberGenerator instead.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          You are using an insecure random number generator (RNG) to create a cryptographic key. System.Random must
+          never be used for cryptographic purposes. Use System.Security.Cryptography.RandomNumberGenerator instead.
+    cwe:
+      - CWE-338
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://learn.microsoft.com/en-us/dotnet/api/system.random?view=net-6.0#remarks
+      - https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.randomnumbergenerator?view=net-6.0
+      - https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.aesgcm?view=net-6.0#constructors
+      - >-
+        https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.symmetricalgorithm.key?view=net-6.0#system-security-cryptography-symmetricalgorithm-key
+    tags:
+      - .net
+  - id: use_weak_rsa_encryption_padding
+    name: use_weak_rsa_encryption_padding
+    description: You are using the outdated PKCS#1 v1.5 encryption padding for your RSA key. Use the OAEP padding instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: (RSAPKCS1KeyExchangeFormatter $FORMATER).CreateKeyExchange(...);
+        message: You are using the outdated PKCS#1 v1.5 encryption padding for your RSA key. Use the OAEP padding instead.
+      - pattern: (RSAPKCS1KeyExchangeDeformatter $DEFORMATER).DecryptKeyExchange(...);
+        message: You are using the outdated PKCS#1 v1.5 encryption padding for your RSA key. Use the OAEP padding instead.
+    cwe:
+      - CWE-780
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.rsapkcs1keyexchangeformatter
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.rsaoaepkeyexchangeformatter
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.rsapkcs1keyexchangedeformatter
+      - https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.rsaoaepkeyexchangedeformatter
+    tags:
+      - .net
+  - id: structured-logging
+    name: structured-logging
+    description: >-
+      String interpolation in log message obscures the distinction between variables and the log message. Use structured
+      logging instead, where the variables are passed as additional arguments and the interpolation is performed by the
+      logging library. This reduces the possibility of log injection and makes it easier to search through logs.
+    category: security
+    severity: low
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          String interpolation in log message obscures the distinction between variables and the log message. Use
+          structured logging instead, where the variables are passed as additional arguments and the interpolation is
+          performed by the logging library. This reduces the possibility of log injection and makes it easier to search
+          through logs.
+    cwe:
+      - CWE-117
+    owasp:
+      - A09:2021
+      - A09:2025
+    references:
+      - https://github.com/NLog/NLog/wiki/How-to-use-structured-logging
+      - https://softwareengineering.stackexchange.com/questions/312197/benefits-of-structured-logging-vs-basic-logging
+    tags:
+      - .net
+      - serilog
+      - nlog
+  - id: correctness-double-epsilon-equality
+    name: correctness-double-epsilon-equality
+    description: >-
+      Double.Epsilon is defined by .NET as the smallest value that can be added to or subtracted from a zero-value
+      Double. It is unsuitable for equality comparisons of non-zero Double values. Furthermore, the value of
+      Double.Epsilon is framework and processor architecture dependent. Wherever possible, developers should prefer the
+      framework Equals() method over custom equality implementations.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: |
+          $V1 - $V2
+        message: >-
+          Double.Epsilon is defined by .NET as the smallest value that can be added to or subtracted from a zero-value
+          Double. It is unsuitable for equality comparisons of non-zero Double values. Furthermore, the value of
+          Double.Epsilon is framework and processor architecture dependent. Wherever possible, developers should prefer
+          the framework Equals() method over custom equality implementations.
+    cwe: []
+    owasp: []
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/api/system.double?view=net-6.0#testing-for-equality
+      - https://docs.microsoft.com/en-us/dotnet/api/system.double.epsilon?view=net-6.0#platform-notes
+    tags:
+      - .net
+  - id: correctness-regioninfo-interop
+    name: correctness-regioninfo-interop
+    description: >-
+      Potential inter-process write of RegionInfo $RI via $PIPESTREAM $P that was instantiated with a two-character
+      culture code $REGION.  Per .NET documentation, if you want to persist a RegionInfo object or communicate it
+      between processes, you should instantiate it by using a full culture name rather than a two-letter ISO region
+      code.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          Potential inter-process write of RegionInfo $RI via $PIPESTREAM $P that was instantiated with a two-character
+          culture code $REGION.  Per .NET documentation, if you want to persist a RegionInfo object or communicate it
+          between processes, you should instantiate it by using a full culture name rather than a two-letter ISO region
+          code.
+    cwe: []
+    owasp: []
+    references:
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.globalization.regioninfo.twoletterisoregionname?view=net-6.0#remarks
+    tags:
+      - .net
+  - id: correctness-sslcertificatetrust-handshake-no-trust
+    name: correctness-sslcertificatetrust-handshake-no-trust
+    description: >-
+      Sending the trusted CA list increases the size of the handshake request and can leak system configuration
+      information.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          Sending the trusted CA list increases the size of the handshake request and can leak system configuration
+          information.
+    cwe:
+      - CWE-200
+    owasp:
+      - A03:2017
+    references:
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.net.security.sslcertificatetrust.createforx509collection?view=net-6.0#remarks
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.net.security.sslcertificatetrust.createforx509store?view=net-6.0#remarks
+    tags:
+      - .net
+  - id: jwt-tokenvalidationparameters-no-expiry-validation
+    name: jwt-tokenvalidationparameters-no-expiry-validation
+    description: >-
+      The TokenValidationParameters.$LIFETIME is set to $FALSE, this means the JWT tokens lifetime is not validated.
+      This can lead to an JWT token being used after it has expired, which has security implications. It is recommended
+      to validate the JWT lifetime to ensure only valid tokens are used.
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          The TokenValidationParameters.$LIFETIME is set to $FALSE, this means the JWT tokens lifetime is not validated.
+          This can lead to an JWT token being used after it has expired, which has security implications. It is
+          recommended to validate the JWT lifetime to ensure only valid tokens are used.
+    cwe:
+      - CWE-613
+    owasp:
+      - A02:2017
+      - A07:2021
+      - A07:2025
+    references:
+      - https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
+      - https://cwe.mitre.org/data/definitions/613.html
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/microsoft.identitymodel.tokens.tokenvalidationparameters?view=azure-dotnet
+    tags:
+      - csharp
+  - id: unsigned-security-token
+    name: unsigned-security-token
+    description: >-
+      Accepting unsigned security tokens as valid security tokens allows an attacker to remove its signature and
+      potentially forge an identity. As a fix, set RequireSignedTokens to be true.
+    category: secrets
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: RequireSignedTokens = false
+        message: >-
+          Accepting unsigned security tokens as valid security tokens allows an attacker to remove its signature and
+          potentially forge an identity. As a fix, set RequireSignedTokens to be true.
+    cwe:
+      - CWE-347
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - https://owasp.org/Top10/A01_2021-Broken_Access_Control/
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures/
+      - https://cwe.mitre.org/data/definitions/347
+    tags:
+      - csharp
+  - id: X509-subject-name-validation
+    name: X509-subject-name-validation
+    description: Validating certificates based on subject name is bad practice. Use the X509Certificate2.Verify() method instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          Validating certificates based on subject name is bad practice. Use the X509Certificate2.Verify() method
+          instead.
+    cwe:
+      - CWE-295
+    owasp:
+      - A03:2017
+      - A07:2021
+      - A07:2025
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/api/system.identitymodel.tokens.issuernameregistry?view=netframework-4.8
+    tags:
+      - .net
+  - id: X509Certificate2-privkey
+    name: X509Certificate2-privkey
+    description: >-
+      X509Certificate2.PrivateKey is obsolete. Use a method such as GetRSAPrivateKey() or GetECDsaPrivateKey().
+      Alternatively, use the CopyWithPrivateKey() method to create a new instance with a private key. Further, if you
+      set X509Certificate2.PrivateKey to `null` or set it to another key without deleting it first, the private key will
+      be left on disk. 
+    category: secrets
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: $CERT.PrivateKey
+        message: >-
+          X509Certificate2.PrivateKey is obsolete. Use a method such as GetRSAPrivateKey() or GetECDsaPrivateKey().
+          Alternatively, use the CopyWithPrivateKey() method to create a new instance with a private key. Further, if
+          you set X509Certificate2.PrivateKey to `null` or set it to another key without deleting it first, the private
+          key will be left on disk. 
+    cwe:
+      - CWE-310
+    owasp:
+      - A02:2021
+      - A04:2025
+    references:
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.privatekey
+    tags:
+      - .net
+  - id: unsafe-path-combine
+    name: unsafe-path-combine
+    description: >-
+      String argument $A is used to read or write data from a file via Path.Combine without direct sanitization via
+      Path.GetFileName. If the path is user-supplied data this can lead to path traversal.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          String argument $A is used to read or write data from a file via Path.Combine without direct sanitization via
+          Path.GetFileName. If the path is user-supplied data this can lead to path traversal.
+    cwe:
+      - CWE-22
+    owasp:
+      - A05:2017
+      - A01:2021
+      - A01:2025
+    references:
+      - https://www.praetorian.com/blog/pathcombine-security-issues-in-aspnet-applications/
+      - https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-6.0#remarks
+    tags:
+      - .net
+  - id: http-listener-wildcard-bindings
+    name: http-listener-wildcard-bindings
+    description: >-
+      The top level wildcard bindings $PREFIX leaves your application open to security vulnerabilities and give
+      attackers more control over where traffic is routed. If you must use wildcards, consider using subdomain wildcard
+      binding. For example, you can use "*.asdf.gov" if you own all of "asdf.gov".
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: $LISTENER.Prefixes.Add("$PREFIX")
+        message: >-
+          The top level wildcard bindings $PREFIX leaves your application open to security vulnerabilities and give
+          attackers more control over where traffic is routed. If you must use wildcards, consider using subdomain
+          wildcard binding. For example, you can use "*.asdf.gov" if you own all of "asdf.gov".
+    cwe:
+      - CWE-706
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-6.0
+    tags:
+      - .net
+  - id: os-command-injection
+    name: os-command-injection
+    description: >-
+      The software constructs all or part of an OS command using externally-influenced input from an upstream component,
+      but it does not neutralize or incorrectly neutralizes special elements that could modify the intended OS command
+      when it is sent to a downstream component.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          The software constructs all or part of an OS command using externally-influenced input from an upstream
+          component, but it does not neutralize or incorrectly neutralizes special elements that could modify the
+          intended OS command when it is sent to a downstream component.
+    cwe:
+      - CWE-78
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/www-community/attacks/Command_Injection
+    tags:
+      - .net
+  - id: insecure-binaryformatter-deserialization
+    name: insecure-binaryformatter-deserialization
+    description: >-
+      The BinaryFormatter type is dangerous and is not recommended for data processing. Applications should stop using
+      BinaryFormatter as soon as possible, even if they believe the data they're processing to be trustworthy.
+      BinaryFormatter is insecure and can't be made secure
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          new BinaryFormatter();
+        message: >-
+          The BinaryFormatter type is dangerous and is not recommended for data processing. Applications should stop
+          using BinaryFormatter as soon as possible, even if they believe the data they're processing to be trustworthy.
+          BinaryFormatter is insecure and can't be made secure
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/standard/serialization/binaryformatter-security-guide
+    tags:
+      - .net
+  - id: data-contract-resolver
+    name: data-contract-resolver
+    description: >-
+      Only use DataContractResolver if you are completely sure of what information is being serialized. Malicious types
+      can cause unexpected behavior.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          class $MYDCR : DataContractResolver { ... }
+        message: >-
+          Only use DataContractResolver if you are completely sure of what information is being serialized. Malicious
+          types can cause unexpected behavior.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/standard/serialization/binaryformatter-security-guide
+    tags:
+      - .net
+  - id: insecure-fastjson-deserialization
+    name: insecure-fastjson-deserialization
+    description: >-
+      $type extension has the potential to be unsafe, so use it with common sense and known json sources and not public
+      facing ones to be safe
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          new JSONParameters
+          {
+            BadListTypeChecking = false
+          }
+        message: >-
+          $type extension has the potential to be unsafe, so use it with common sense and known json sources and not
+          public facing ones to be safe
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://github.com/mgholam/fastJSON#security- medium-update
+    tags:
+      - .net
+  - id: insecure-fspickler-deserialization
+    name: insecure-fspickler-deserialization
+    description: >-
+      The FsPickler is dangerous and is not recommended for data processing. Default configuration tend to insecure
+      deserialization vulnerability.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          FsPickler.CreateJsonSerializer();
+        message: >-
+          The FsPickler is dangerous and is not recommended for data processing. Default configuration tend to insecure
+          deserialization vulnerability.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://mbraceproject.github.io/FsPickler/tutorial.html#Disabling-Subtype-Resolution
+    tags:
+      - .net
+  - id: insecure-typefilterlevel-full
+    name: insecure-typefilterlevel-full
+    description: >-
+      Using a .NET remoting service can lead to RCE, even if you try to configure TypeFilterLevel. Recommended to switch
+      from .NET Remoting to WCF https://docs.microsoft.com/en-us/dotnet/framework/wcf/migrating-from-net-remoting-to-wcf
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - regex: .*
+        message: >-
+          Using a .NET remoting service can lead to RCE, even if you try to configure TypeFilterLevel. Recommended to
+          switch from .NET Remoting to WCF
+          https://docs.microsoft.com/en-us/dotnet/framework/wcf/migrating-from-net-remoting-to-wcf
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.typefilterlevel?view=net-6.0
+      - https://www.synacktiv.com/en/publications/izi-izi-pwn2own-ics-miami.html
+    tags:
+      - .net
+  - id: insecure-javascriptserializer-deserialization
+    name: insecure-javascriptserializer-deserialization
+    description: >-
+      The SimpleTypeResolver class is insecure and should not be used. Using SimpleTypeResolver to deserialize JSON
+      could allow the remote client to execute malicious code within the app and take control of the web server.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          new JavaScriptSerializer((SimpleTypeResolver $RESOLVER))
+        message: >-
+          The SimpleTypeResolver class is insecure and should not be used. Using SimpleTypeResolver to deserialize JSON
+          could allow the remote client to execute malicious code within the app and take control of the web server.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.web.script.serialization.simpletyperesolver?view=netframework-4.8#remarks
+    tags:
+      - .net
+  - id: insecure-losformatter-deserialization
+    name: insecure-losformatter-deserialization
+    description: >-
+      The LosFormatter type is dangerous and is not recommended for data processing. Applications should stop using
+      LosFormatter as soon as possible, even if they believe the data they're processing to be trustworthy. LosFormatter
+      is insecure and can't be made secure
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          new LosFormatter();
+        message: >-
+          The LosFormatter type is dangerous and is not recommended for data processing. Applications should stop using
+          LosFormatter as soon as possible, even if they believe the data they're processing to be trustworthy.
+          LosFormatter is insecure and can't be made secure
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.losformatter?view=netframework-4.8
+    tags:
+      - .net
+  - id: insecure-netdatacontract-deserialization
+    name: insecure-netdatacontract-deserialization
+    description: >-
+      The NetDataContractSerializer type is dangerous and is not recommended for data processing. Applications should
+      stop using NetDataContractSerializer as soon as possible, even if they believe the data they're processing to be
+      trustworthy. NetDataContractSerializer is insecure and can't be made secure
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          new NetDataContractSerializer();
+        message: >-
+          The NetDataContractSerializer type is dangerous and is not recommended for data processing. Applications
+          should stop using NetDataContractSerializer as soon as possible, even if they believe the data they're
+          processing to be trustworthy. NetDataContractSerializer is insecure and can't be made secure
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.netdatacontractserializer?view=netframework-4.8#security
+    tags:
+      - .net
+  - id: insecure-newtonsoft-deserialization
+    name: insecure-newtonsoft-deserialization
+    description: >-
+      TypeNameHandling $TYPEHANDLER is unsafe and can lead to arbitrary code execution in the context of the process.
+      Use a custom SerializationBinder whenever using a setting other than TypeNameHandling.None.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          TypeNameHandling $TYPEHANDLER is unsafe and can lead to arbitrary code execution in the context of the
+          process. Use a custom SerializationBinder whenever using a setting other than TypeNameHandling.None.
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_TypeNameHandling.htm#remarks
+    tags:
+      - .net
+      - newtonsoft
+      - json
+  - id: insecure-soapformatter-deserialization
+    name: insecure-soapformatter-deserialization
+    description: >-
+      The SoapFormatter type is dangerous and is not recommended for data processing. Applications should stop using
+      SoapFormatter as soon as possible, even if they believe the data they're processing to be trustworthy.
+      SoapFormatter is insecure and can't be made secure
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: |
+          new SoapFormatter();
+        message: >-
+          The SoapFormatter type is dangerous and is not recommended for data processing. Applications should stop using
+          SoapFormatter as soon as possible, even if they believe the data they're processing to be trustworthy.
+          SoapFormatter is insecure and can't be made secure
+    cwe:
+      - CWE-502
+    owasp:
+      - A08:2017
+      - A08:2021
+      - A08:2025
+    references:
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.soap.soapformatter?view=netframework-4.8#remarks
+    tags:
+      - .net
+  - id: memory-marshal-create-span
+    name: memory-marshal-create-span
+    description: >-
+      MemoryMarshal.CreateSpan and MemoryMarshal.CreateReadOnlySpan should be used with caution, as the length argument
+      is not checked.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - pattern: MemoryMarshal.CreateSpan(...)
+        message: >-
+          MemoryMarshal.CreateSpan and MemoryMarshal.CreateReadOnlySpan should be used with caution, as the length
+          argument is not checked.
+      - pattern: MemoryMarshal.CreateReadOnlySpan(...)
+        message: >-
+          MemoryMarshal.CreateSpan and MemoryMarshal.CreateReadOnlySpan should be used with caution, as the length
+          argument is not checked.
+    cwe:
+      - CWE-125
+    owasp:
+      - A04:2021
+      - A06:2025
+    references:
+      - https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.memorymarshal.createspan?view=net-6.0
+      - >-
+        https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.memorymarshal.createreadonlyspan?view=net-6.0
+    tags:
+      - .net
+  - id: missing-hsts-header
+    name: missing-hsts-header
+    description: >-
+      The HSTS HTTP response security header is missing, allowing interaction and communication to be sent over the
+      insecure HTTP protocol.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          The HSTS HTTP response security header is missing, allowing interaction and communication to be sent over the
+          insecure HTTP protocol.
+    cwe:
+      - CWE-346
+    owasp:
+      - A07:2021
+      - A07:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/346.html
+      - https://owasp.org/Top10/A02_2021-Cryptographic_Failures/
+    tags:
+      - dotnet
+  - id: open-redirect
+    name: open-redirect
+    description: >-
+      A query string parameter may contain a URL value that could cause the web application to redirect the request to a
+      malicious website controlled by an attacker. Make sure to sanitize this parameter sufficiently.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          A query string parameter may contain a URL value that could cause the web application to redirect the request
+          to a malicious website controlled by an attacker. Make sure to sanitize this parameter sufficiently.
+    cwe:
+      - CWE-601
+    owasp:
+      - A01:2021
+      - A01:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/601.html
+    tags:
+      - csharp
+  - id: regular-expression-dos-infinite-timeout
+    name: regular-expression-dos-infinite-timeout
+    description: >-
+      Specifying the regex timeout leaves the system vulnerable to a regex-based Denial of Service (DoS) attack.
+      Consider setting the timeout to a short amount of time like 2 or 3 seconds. If you are sure you need an infinite
+      timeout, double check that your context meets the conditions outlined in the "Notes to Callers" section at the
+      bottom of this page:
+      https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex.-ctor?view=net-6.0
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - regex: .*
+        message: >-
+          Specifying the regex timeout leaves the system vulnerable to a regex-based Denial of Service (DoS) attack.
+          Consider setting the timeout to a short amount of time like 2 or 3 seconds. If you are sure you need an
+          infinite timeout, double check that your context meets the conditions outlined in the "Notes to Callers"
+          section at the bottom of this page:
+          https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex.-ctor?view=net-6.0
+    cwe:
+      - CWE-1333
+    owasp:
+      - A01:2017
+    references:
+      - https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS
+      - https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex.infinitematchtimeout
+      - https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex.-ctor?view=net-6.0
+    tags:
+      - .net
+  - id: regular-expression-dos
+    name: regular-expression-dos
+    description: >-
+      When using `System.Text.RegularExpressions` to process untrusted input, pass a timeout.  A malicious user can
+      provide input to `RegularExpressions` that abuses the backtracking behaviour of this regular expression engine.
+      This will lead to excessive CPU usage, causing a Denial-of-Service attack
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - C#
+    patterns:
+      - regex: .*
+        message: >-
+          When using `System.Text.RegularExpressions` to process untrusted input, pass a timeout.  A malicious user can
+          provide input to `RegularExpressions` that abuses the backtracking behaviour of this regular expression
+          engine. This will lead to excessive CPU usage, causing a Denial-of-Service attack
+    cwe:
+      - CWE-1333
+    owasp:
+      - A01:2017
+    references:
+      - https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS
+      - https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expressions#regular-expression-examples
+    tags:
+      - .net
+  - id: csharp-sqli
+    name: csharp-sqli
+    description: >-
+      Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement
+      are not properly sanitized. Use a prepared statements instead. You can obtain a PreparedStatement using
+      'SqlCommand' and 'SqlParameter'.
+    category: injection
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL
+          statement are not properly sanitized. Use a prepared statements instead. You can obtain a PreparedStatement
+          using 'SqlCommand' and 'SqlParameter'.
+    cwe:
+      - CWE-89
+    owasp:
+      - A01:2017
+      - A03:2021
+      - A05:2025
+    references:
+      - https://owasp.org/Top10/A03_2021-Injection
+    tags:
+      - csharp
+  - id: ssrf
+    name: ssrf
+    description: >-
+      SSRF is an attack vector that abuses an application to interact with the internal/external network or the machine
+      itself.
+    category: api-security
+    severity: high
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          SSRF is an attack vector that abuses an application to interact with the internal/external network or the
+          machine itself.
+    cwe:
+      - CWE-918
+    owasp:
+      - A10:2021
+      - A01:2025
+    references:
+      - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+    tags:
+      - .net
+  - id: stacktrace-disclosure
+    name: stacktrace-disclosure
+    description: >-
+      Stacktrace information is displayed in a non-Development environment. Accidentally disclosing sensitive stack
+      trace information in a production environment aids an attacker in reconnaissance and information gathering.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - pattern: $APP.UseDeveloperExceptionPage(...);
+        message: >-
+          Stacktrace information is displayed in a non-Development environment. Accidentally disclosing sensitive stack
+          trace information in a production environment aids an attacker in reconnaissance and information gathering.
+    cwe:
+      - CWE-209
+    owasp:
+      - A06:2017
+      - A04:2021
+      - A06:2025
+    references:
+      - https://cwe.mitre.org/data/definitions/209.html
+      - https://owasp.org/Top10/A04_2021-Insecure_Design/
+    tags:
+      - csharp
+  - id: xmldocument-unsafe-parser-override
+    name: xmldocument-unsafe-parser-override
+    description: >-
+      XmlReaderSettings found with DtdProcessing.Parse on an XmlReader handling a string argument from a public method.
+      Enabling Document Type Definition (DTD) parsing may cause XML External Entity (XXE) injection if supplied with
+      user-controllable data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          XmlReaderSettings found with DtdProcessing.Parse on an XmlReader handling a string argument from a public
+          method. Enabling Document Type Definition (DTD) parsing may cause XML External Entity (XXE) injection if
+          supplied with user-controllable data.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://www.jardinesoftware.net/2016/05/26/xxe-and-net/
+      - https://docs.microsoft.com/en-us/dotnet/api/system.xml.xmldocument.xmlresolver?view=net-6.0#remarks
+    tags:
+      - .net
+      - xml
+  - id: xmlreadersettings-unsafe-parser-override
+    name: xmlreadersettings-unsafe-parser-override
+    description: >-
+      XmlReaderSettings found with DtdProcessing.Parse on an XmlReader handling a string argument from a public method.
+      Enabling Document Type Definition (DTD) parsing may cause XML External Entity (XXE) injection if supplied with
+      user-controllable data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          XmlReaderSettings found with DtdProcessing.Parse on an XmlReader handling a string argument from a public
+          method. Enabling Document Type Definition (DTD) parsing may cause XML External Entity (XXE) injection if
+          supplied with user-controllable data.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://www.jardinesoftware.net/2016/05/26/xxe-and-net/
+      - https://docs.microsoft.com/en-us/dotnet/api/system.xml.xmldocument.xmlresolver?view=net-6.0#remarks
+    tags:
+      - .net
+      - xml
+  - id: xmltextreader-unsafe-defaults
+    name: xmltextreader-unsafe-defaults
+    description: >-
+      XmlReaderSettings found with DtdProcessing.Parse on an XmlReader handling a string argument from a public method.
+      Enabling Document Type Definition (DTD) parsing may cause XML External Entity (XXE) injection if supplied with
+      user-controllable data.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - csharp
+    patterns:
+      - regex: .*
+        message: >-
+          XmlReaderSettings found with DtdProcessing.Parse on an XmlReader handling a string argument from a public
+          method. Enabling Document Type Definition (DTD) parsing may cause XML External Entity (XXE) injection if
+          supplied with user-controllable data.
+    cwe:
+      - CWE-611
+    owasp:
+      - A04:2017
+      - A05:2021
+      - A02:2025
+    references:
+      - https://www.jardinesoftware.net/2016/05/26/xxe-and-net/
+      - https://docs.microsoft.com/en-us/dotnet/api/system.xml.xmldocument.xmlresolver?view=net-6.0#remarks
+    tags:
+      - .net
+      - xml
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode

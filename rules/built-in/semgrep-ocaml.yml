@@ -1,0 +1,773 @@
+rules:
+  - id: contains-bidirectional-characters
+    name: contains-bidirectional-characters
+    description: >-
+      This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left languages
+      such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a manner that is
+      different from how it is displayed in code editing and review tools. If this is not what you were expecting,
+      please review this code in an editor that can reveal hidden Unicode characters.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - bash
+      - c
+      - csharp
+      - go
+      - java
+      - javascript
+      - json
+      - kotlin
+      - lua
+      - ocaml
+      - php
+      - python
+      - ruby
+      - rust
+      - scala
+      - sh
+      - typescript
+      - yaml
+    patterns:
+      - regex: .*
+        message: >-
+          This code contains bidirectional (bidi) characters. While this is useful for support of right-to-left
+          languages such as Arabic or Hebrew, it can also be used to trick language parsers into executing code in a
+          manner that is different from how it is displayed in code editing and review tools. If this is not what you
+          were expecting, please review this code in an editor that can reveal hidden Unicode characters.
+    cwe:
+      - CWE-94
+    owasp:
+      - A03:2021
+      - A05:2025
+    references:
+      - https://trojansource.codes/
+    tags:
+      - unicode
+  - id: ocamllint-bool-true
+    name: ocamllint-bool-true
+    description: Comparison to boolean. Just use `$X`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X = true
+        message: Comparison to boolean. Just use `$X`
+      - pattern: $X == true
+        message: Comparison to boolean. Just use `$X`
+      - pattern: $X != false
+        message: Comparison to boolean. Just use `$X`
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-bool-false
+    name: ocamllint-bool-false
+    description: Comparison to boolean. Just use `not $X`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X = false
+        message: Comparison to boolean. Just use `not $X`
+      - pattern: $X == false
+        message: Comparison to boolean. Just use `not $X`
+      - pattern: $X <> true
+        message: Comparison to boolean. Just use `not $X`
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: bad-reraise
+    name: bad-reraise
+    description: >-
+      You should not re-raise exceptions using 'raise' because it loses track of where the exception was raised
+      originally, leading to a useless and possibly confusing stack trace. Instead, you should obtain a stack backtrace
+      as soon as the exception is caught using 'try ... with exn -> let trace = Printexc.get_raw_backtrace () in ...',
+      and keep it around until you re-raise the exception using 'Printexc.raise_with_backtrace exn trace'. You must
+      collect the stack backtrace before calling another function which might internally raise and catch exceptions. To
+      avoid false positives from Semgrep, write 'raise (Foo args)' instead of 'let e = Foo args in raise e'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: |
+          raise $EXN
+        message: >-
+          You should not re-raise exceptions using 'raise' because it loses track of where the exception was raised
+          originally, leading to a useless and possibly confusing stack trace. Instead, you should obtain a stack
+          backtrace as soon as the exception is caught using 'try ... with exn -> let trace = Printexc.get_raw_backtrace
+          () in ...', and keep it around until you re-raise the exception using 'Printexc.raise_with_backtrace exn
+          trace'. You must collect the stack backtrace before calling another function which might internally raise and
+          catch exceptions. To avoid false positives from Semgrep, write 'raise (Foo args)' instead of 'let e = Foo args
+          in raise e'.
+    cwe: []
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Printexc.html
+    tags:
+      - ocaml
+  - id: hashtbl-find-outside-try
+    name: hashtbl-find-outside-try
+    description: >-
+      'Hashtbl.find' raises the 'Not_found' exception. Handle the exception or use 'Hashtbl.find_opt' instead. If you
+      have proof that the key exists in the table, use 'assert false' as the exception handler to demonstrate awareness
+      of the issue. If your code uses the syntax 'match Hashtbl.find ... with exception Not_found -> ...', it's fine and
+      we apologize for not detecting it. Consider using 'Hashtbl.find_opt' to please Semgrep and stay safe.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: |
+          Hashtbl.find ...
+        message: >-
+          'Hashtbl.find' raises the 'Not_found' exception. Handle the exception or use 'Hashtbl.find_opt' instead. If
+          you have proof that the key exists in the table, use 'assert false' as the exception handler to demonstrate
+          awareness of the issue. If your code uses the syntax 'match Hashtbl.find ... with exception Not_found -> ...',
+          it's fine and we apologize for not detecting it. Consider using 'Hashtbl.find_opt' to please Semgrep and stay
+          safe.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-useless-else
+    name: ocamllint-useless-else
+    description: Useless else. Just remove the else branch;
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: if $E then $E1 else ()
+        message: Useless else. Just remove the else branch;
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-backwards-if
+    name: ocamllint-backwards-if
+    description: Backwards if. Rewrite the code as 'if not $E then $E2'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: if $E then () else $E2
+        message: Backwards if. Rewrite the code as 'if not $E then $E2'.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: list-find-outside-try
+    name: list-find-outside-try
+    description: You should not use List.find outside of a try, or you should use List.find_opt
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: |
+          List.find ...
+        message: You should not use List.find outside of a try, or you should use List.find_opt
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: mutex-lock-exn
+    name: mutex-lock-exn
+    description: >-
+      Raw `Mutex.lock`/`Mutex.unlock` is not exception-safe. If an exception is raised between lock and unlock, the
+      mutex will never be released, causing a deadlock. Replace with `Mutex.protect $MUTEX (fun () -> ...)` which
+      guarantees the mutex is released even when exceptions are raised.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: Mutex.lock $MUTEX
+        message: >-
+          Raw `Mutex.lock`/`Mutex.unlock` is not exception-safe. If an exception is raised between lock and unlock, the
+          mutex will never be released, causing a deadlock. Replace with `Mutex.protect $MUTEX (fun () -> ...)` which
+          guarantees the mutex is released even when exceptions are raised.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-ref-incr
+    name: ocamllint-ref-incr
+    description: You should use `incr`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X := ! $X + 1
+        message: You should use `incr`
+    cwe: []
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Stdlib.html#VALincr
+      - https://v2.ocaml.org/api/Atomic.html#VALincr
+    tags:
+      - ocaml
+  - id: ocamllint-ref-decr
+    name: ocamllint-ref-decr
+    description: You should use `decr`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X := ! $X - 1
+        message: You should use `decr`
+    cwe: []
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Stdlib.html#VALdecr
+      - https://v2.ocaml.org/api/Atomic.html#VALdecr
+    tags:
+      - ocaml
+  - id: ocamllint-str-first-chars
+    name: ocamllint-str-first-chars
+    description: Use instead `Str.first_chars`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: String.sub $S 0 $N
+        message: Use instead `Str.first_chars`
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-str-string-after
+    name: ocamllint-str-string-after
+    description: Use instead `Str.string_after`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: String.sub $S $N (String.length $S - $N)
+        message: Use instead `Str.string_after`
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-str-last-chars
+    name: ocamllint-str-last-chars
+    description: Use instead `Str.last_chars`
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: String.sub $S (String.length $S - $N) $N
+        message: Use instead `Str.last_chars`
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-useless-sprintf
+    name: ocamllint-useless-sprintf
+    description: Useless sprintf
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: Printf.sprintf "..."
+        message: Useless sprintf
+      - pattern: Printf.sprintf "%s" $S
+        message: Useless sprintf
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: deprecated-pervasives
+    name: deprecated-pervasives
+    description: Pervasives is deprecated and will not be available after 4.10. Use Stdlib.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: Pervasives.$X
+        message: Pervasives is deprecated and will not be available after 4.10. Use Stdlib.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: physical-equal
+    name: physical-equal
+    description: You probably want the structural equality operator =
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X == $Y
+        message: You probably want the structural equality operator =
+    cwe: []
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Stdlib.html#1_Comparisons
+    tags:
+      - ocaml
+  - id: physical-not-equal
+    name: physical-not-equal
+    description: You probably want the structural inequality operator <>
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X != $Y
+        message: You probably want the structural inequality operator <>
+    cwe: []
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Stdlib.html#1_Comparisons
+    tags:
+      - ocaml
+  - id: useless-compare
+    name: useless-compare
+    description: >-
+      This comparison is useless because the expressions being compared are identical. This is expected to always return
+      the same result, 0, unless your code is really strange.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - regex: .*
+        message: >-
+          This comparison is useless because the expressions being compared are identical. This is expected to always
+          return the same result, 0, unless your code is really strange.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: useless-equal
+    name: useless-equal
+    description: This is always true. If testing for floating point NaN, use `Float.is_nan` instead.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X = $X
+        message: This is always true. If testing for floating point NaN, use `Float.is_nan` instead.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-useless-if
+    name: ocamllint-useless-if
+    description: Useless if. Both branches are equal.
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: if $X then $E else $E
+        message: Useless if. Both branches are equal.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: useless-let
+    name: useless-let
+    description: Useless let
+    category: security
+    severity: high
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: let $X = $E in $X
+        message: Useless let
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-length-list-zero
+    name: ocamllint-length-list-zero
+    description: You probably want $X = [], which is faster.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: List.length $X = 0
+        message: You probably want $X = [], which is faster.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-length-more-than-zero
+    name: ocamllint-length-more-than-zero
+    description: You probably want $X <> [], which is faster.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: List.length $X > 0
+        message: You probably want $X <> [], which is faster.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: broken-input-line
+    name: broken-input-line
+    description: >-
+      'input_line' leaves a '\r' (CR) character when reading lines from a Windows text file, whose lines end in "\r\n"
+      (CRLF). This is a problem for any Windows file that is being read either on a Unix-like platform or on Windows in
+      binary mode. If the code already takes care of removing any trailing '\r' after reading the line, add a '(*
+      nosemgrep *)' comment to disable this warning.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: |
+          input_line
+        message: >-
+          'input_line' leaves a '\r' (CR) character when reading lines from a Windows text file, whose lines end in
+          "\r\n" (CRLF). This is a problem for any Windows file that is being read either on a Unix-like platform or on
+          Windows in binary mode. If the code already takes care of removing any trailing '\r' after reading the line,
+          add a '(* nosemgrep *)' comment to disable this warning.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: prefer-read-in-binary-mode
+    name: prefer-read-in-binary-mode
+    description: >-
+      'open_in' behaves differently on Windows and on Unix-like systems with respect to line endings. To get the same
+      behavior everywhere, use 'open_in_bin' or 'open_in_gen [Open_binary]'. If you really want CRLF-to-LF translations
+      to take place when running on Windows, use 'open_in_gen [Open_text]'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: open_in
+        message: >-
+          'open_in' behaves differently on Windows and on Unix-like systems with respect to line endings. To get the
+          same behavior everywhere, use 'open_in_bin' or 'open_in_gen [Open_binary]'. If you really want CRLF-to-LF
+          translations to take place when running on Windows, use 'open_in_gen [Open_text]'.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: prefer-write-in-binary-mode
+    name: prefer-write-in-binary-mode
+    description: >-
+      'open_out' behaves differently on Windows and on Unix-like systems with respect to line endings. To get the same
+      behavior everywhere, use 'open_out_bin' or 'open_out_gen [Open_binary]'. If you really want LF-to-CRLF
+      translations to take place when running on Windows, use 'open_out_gen [Open_text]'.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: open_out
+        message: >-
+          'open_out' behaves differently on Windows and on Unix-like systems with respect to line endings. To get the
+          same behavior everywhere, use 'open_out_bin' or 'open_out_gen [Open_binary]'. If you really want LF-to-CRLF
+          translations to take place when running on Windows, use 'open_out_gen [Open_text]'.
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: not-portable-tmp-string
+    name: not-portable-tmp-string
+    description: You should probably use Filename.get_temp_dirname().
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: |
+          "=~/\/tmp/"
+        message: You should probably use Filename.get_temp_dirname().
+    cwe: []
+    owasp: []
+    references: []
+    tags:
+      - ocaml
+  - id: ocamllint-digest
+    name: ocamllint-digest
+    description: Digest uses MD5 and should not be used for security purposes. Consider using SHA256 instead.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: Digest.string
+        message: Digest uses MD5 and should not be used for security purposes. Consider using SHA256 instead.
+      - pattern: Digest.bytes
+        message: Digest uses MD5 and should not be used for security purposes. Consider using SHA256 instead.
+      - pattern: Digest.substring
+        message: Digest uses MD5 and should not be used for security purposes. Consider using SHA256 instead.
+      - pattern: Digest.subbytes
+        message: Digest uses MD5 and should not be used for security purposes. Consider using SHA256 instead.
+      - pattern: Digest.channel
+        message: Digest uses MD5 and should not be used for security purposes. Consider using SHA256 instead.
+      - pattern: Digest.file
+        message: Digest uses MD5 and should not be used for security purposes. Consider using SHA256 instead.
+    cwe:
+      - CWE-328
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Digest.html
+    tags:
+      - ocaml
+  - id: ocamllint-exec
+    name: ocamllint-exec
+    description: Executing external programs might lead to comand or argument injection vulnerabilities.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - regex: .*
+        message: Executing external programs might lead to comand or argument injection vulnerabilities.
+    cwe:
+      - CWE-78
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Unix.html
+    tags:
+      - ocaml
+  - id: ocamllint-filenameconcat
+    name: ocamllint-filenameconcat
+    description: When attacker supplied data is passed to Filename.concat directory traversal attacks might be possible.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: Filename.concat
+        message: When attacker supplied data is passed to Filename.concat directory traversal attacks might be possible.
+    cwe:
+      - CWE-35
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Filename.html
+    tags:
+      - ocaml
+  - id: ocamllint-hashtable-dos
+    name: ocamllint-hashtable-dos
+    description: >-
+      Creating a Hashtbl without the optional random number parameter makes it prone to DoS attacks when attackers are
+      able to fill the table with malicious content. Hashtbl.randomize or the R flag in the OCAMLRUNPARAM are other ways
+      to randomize it.
+    category: crypto
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: Hashtbl.create $Y
+        message: >-
+          Creating a Hashtbl without the optional random number parameter makes it prone to DoS attacks when attackers
+          are able to fill the table with malicious content. Hashtbl.randomize or the R flag in the OCAMLRUNPARAM are
+          other ways to randomize it.
+    cwe:
+      - CWE-399
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Hashtbl.html
+    tags:
+      - ocaml
+  - id: ocamllint-marshal
+    name: ocamllint-marshal
+    description: >-
+      Marshaling is currently not type-safe and can lead to insecure behaviour when untrusted data is marshalled.
+      Marshalling can lead to out-of-bound reads as well.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: input_value
+        message: >-
+          Marshaling is currently not type-safe and can lead to insecure behaviour when untrusted data is marshalled.
+          Marshalling can lead to out-of-bound reads as well.
+      - pattern: Marshal.from_channel
+        message: >-
+          Marshaling is currently not type-safe and can lead to insecure behaviour when untrusted data is marshalled.
+          Marshalling can lead to out-of-bound reads as well.
+      - pattern: Marshal.from_bytes
+        message: >-
+          Marshaling is currently not type-safe and can lead to insecure behaviour when untrusted data is marshalled.
+          Marshalling can lead to out-of-bound reads as well.
+      - pattern: Marshal.from_string
+        message: >-
+          Marshaling is currently not type-safe and can lead to insecure behaviour when untrusted data is marshalled.
+          Marshalling can lead to out-of-bound reads as well.
+    cwe:
+      - CWE-502
+    owasp: []
+    references:
+      - https://eternal.red/2021/secure-ocaml-sandbox/
+    tags:
+      - ocaml
+  - id: ocamllint-tempfile
+    name: ocamllint-tempfile
+    description: >-
+      Filename.temp_file might lead to race conditions, since the file could be altered or replaced by a symlink before
+      being opened.
+    category: file-ops
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: Filename.temp_file
+        message: >-
+          Filename.temp_file might lead to race conditions, since the file could be altered or replaced by a symlink
+          before being opened.
+    cwe:
+      - CWE-367
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Filename.html
+    tags:
+      - ocaml
+  - id: ocamllint-unsafe
+    name: ocamllint-unsafe
+    description: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - ocaml
+    patterns:
+      - pattern: $X.unsafe_get
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_to_string
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_of_string
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_blit
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_blit_string
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_fill
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_to_string
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_getenv
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_environment
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_chr
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_of_int
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_output
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_output_string
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_read
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_recv
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_recvfrom
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_send
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_sendto
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set_int16
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set_int32
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set_int64
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set_int8
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set_uint16_ne
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_set_uint8
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_single_write
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_string
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_sub
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+      - pattern: $X.unsafe_write
+        message: Unsafe functions do not perform boundary checks or have other side effects, use with care.
+    cwe:
+      - CWE-242
+    owasp: []
+    references:
+      - https://v2.ocaml.org/api/Bigarray.Array1.html#VALunsafe_get
+      - https://v2.ocaml.org/api/Bytes.html#VALunsafe_to_string
+    tags:
+      - ocaml
