@@ -9,3 +9,9 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+report.html
+report.json
+evaluation-report.html
+evaluation-summary.txt
+
