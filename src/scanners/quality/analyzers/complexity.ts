@@ -216,7 +216,9 @@ export function analyzeComplexity(context: ScanFileContext): Finding[] {
   for (const func of functions) {
     // Check cyclomatic complexity
     if (func.complexity > thresholds.maxComplexity) {
-      const snippet = extractSnippet(content, func.startLine);
+      const contextLines = 3;
+      const snippet = extractSnippet(content, func.startLine, func.endLine, contextLines);
+      const snippetStartLine = Math.max(1, func.startLine - contextLines);
       findings.push(
         createFinding({
           ruleId: 'QUA-CMPLX-001',
@@ -229,7 +231,9 @@ export function analyzeComplexity(context: ScanFileContext): Finding[] {
           message: `Function '${func.name}' has cyclomatic complexity of ${func.complexity} (threshold: ${thresholds.maxComplexity})`,
           filePath,
           lineNumber: func.startLine,
+          endLine: func.endLine,
           snippet,
+          snippetStartLine,
           tags: ['complexity', 'maintainability'],
           fix: {
             description: 'Refactor the function to reduce complexity. Extract helper functions, use early returns, or simplify conditional logic.',
@@ -241,7 +245,9 @@ export function analyzeComplexity(context: ScanFileContext): Finding[] {
 
     // Check function length
     if (func.lineCount > thresholds.maxFunctionLength) {
-      const snippet = extractSnippet(content, func.startLine);
+      const contextLines = 3;
+      const snippet = extractSnippet(content, func.startLine, func.endLine, contextLines);
+      const snippetStartLine = Math.max(1, func.startLine - contextLines);
       findings.push(
         createFinding({
           ruleId: 'QUA-CMPLX-002',
@@ -254,7 +260,9 @@ export function analyzeComplexity(context: ScanFileContext): Finding[] {
           message: `Function '${func.name}' has ${func.lineCount} lines (threshold: ${thresholds.maxFunctionLength})`,
           filePath,
           lineNumber: func.startLine,
+          endLine: func.endLine,
           snippet,
+          snippetStartLine,
           tags: ['complexity', 'maintainability'],
           fix: {
             description: 'Break the function into smaller, focused functions. Each function should do one thing well.',

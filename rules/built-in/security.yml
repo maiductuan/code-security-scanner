@@ -11,15 +11,15 @@ rules:
     owasp: ["A03:2021"]
     languages: [javascript, typescript, python, java, php, ruby, go, csharp]
     patterns:
-      - regex: "(?:query|execute|exec)\\s*\\(\\s*[`\"']\\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER).*\\$\\{"
+      - regex: "(?:query|execute|exec)\\s*\\(\\s*[`\"']\\s*\\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\\b.*\\$\\{"
         message: SQL query with template literal interpolation
-      - regex: "(?:query|execute|exec)\\s*\\(\\s*[\"']\\s*(?:SELECT|INSERT|UPDATE|DELETE).*[\"']\\s*\\+"
+      - regex: "(?:query|execute|exec)\\s*\\(\\s*[\"']\\s*\\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\\b.*[\"']\\s*\\+"
         message: SQL query with string concatenation
-      - regex: "f[\"']\\s*(?:SELECT|INSERT|UPDATE|DELETE).*\\{"
+      - regex: "f[\"']\\s*\\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\\b.*\\{"
         message: SQL query with f-string interpolation (Python)
       - regex: "\\.raw\\s*\\(\\s*[`\"'\\$]"
         message: Raw SQL query usage
-      - regex: "(?:DB\\s*::\\s*(?:select|statement|insert|update|delete|raw)|whereRaw|havingRaw|orderByRaw)\\s*\\(\\s*[\"'](?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|UNION)\\b[^\"']*[\"']\\s*\\.\\s*\\$\\w+"
+      - regex: "(?:DB\\s*::\\s*(?:select|statement|insert|update|delete|raw)|whereRaw|havingRaw|orderByRaw)\\s*\\(\\s*[\"']\\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|UNION)\\b[^\"']*[\"']\\s*\\.\\s*\\$\\w+"
         message: Laravel raw SQL query built with string concatenation
     fix:
       description: Use parameterized queries or prepared statements instead of string concatenation
@@ -202,8 +202,12 @@ rules:
         message: Session cookie not using secure flag
       - regex: "httpOnly\\s*[:=]\\s*false"
         message: Cookie httpOnly flag disabled
-      - regex: "verify\\s*[:=]\\s*false"
+      - regex: "verify\\s*[:=]\\s*(?:false|False)"
         message: SSL/TLS verification disabled
+      - regex: "check_hostname\\s*[:=]\\s*(?:false|False)"
+        message: SSL/TLS hostname verification disabled
+      - regex: "verify_mode\\s*[:=]\\s*(?:ssl\\.CERT_NONE|CERT_NONE)"
+        message: SSL/TLS certificate verification disabled (CERT_NONE)
       - regex: "password\\s*===?\\s*[\"']"
         message: Direct password comparison (use bcrypt/argon2)
     fix:
@@ -250,15 +254,15 @@ rules:
     owasp: ["A01:2021"]
     languages: ["*"]
     patterns:
-      - regex: "(?:readFile|writeFile|createReadStream|createWriteStream|open)\\s*\\(\\s*(?:req\\.|request\\.|params\\.|query\\.)"
+      - regex: "\\b(?:readFile|writeFile|createReadStream|createWriteStream|open)\\b\\s*\\(\\s*(?:req\\.|request\\.|params\\.|query\\.)"
         message: File operation with user-controlled path
       - regex: "\\.\\.[\\\\/]"
         message: Path traversal sequence detected
-      - regex: "path\\.join\\s*\\([^)]*(?:req\\.|request\\.|params\\.|query\\.)"
+      - regex: "\\bpath\\.join\\b\\s*\\([^)]*(?:req\\.|request\\.|params\\.|query\\.)"
         message: path.join with user input
-      - regex: "(?:ioutil\\.|os\\.)(?:ReadFile|Open|OpenFile|Create|Remove)\\s*\\(\\s*[^'\"`)]*\\b(?:req|request|params|query|body|args|input|user|filename|file|path|uri|url)\\b"
+      - regex: "\\b(?:ioutil\\.|os\\.)(?:ReadFile|Open|OpenFile|Create|Remove)\\b\\s*\\(\\s*[^'\"`)]*\\b(?:req|request|params|query|body|args|input|user|filename|uri|url)\\b"
         message: File read/open with dynamic path (Go/Generic)
-      - regex: "(?:filepath\\.|path\\.|os\\.path\\.)Join\\s*\\(\\s*[^,]+,\\s*\\b(?:req|request|params|query|body|args|input|user|filename|file|path|uri|url)\\b"
+      - regex: "\\b(?:filepath\\.|path\\.|os\\.path\\.)Join\\b\\s*\\(\\s*[^,]+,\\s*\\b(?:req|request|params|query|body|args|input|user|filename|uri|url)\\b"
         message: Path construction with user input/variables
     fix:
       description: Validate and sanitize file paths. Use path.resolve() and verify the result is within allowed directory.

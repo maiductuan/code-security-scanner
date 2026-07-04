@@ -4,7 +4,7 @@
 
 import type { Finding, Severity, Confidence } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext, isInSafeASTContext } from '../../base-scanner.js';
 
 interface APISecPattern {
   regex: RegExp;
@@ -212,6 +212,9 @@ export function analyzeAPISec(context: ScanFileContext): Finding[] {
   for (const pattern of API_SEC_PATTERNS) {
     const matches = matchPattern(content, pattern.regex);
     for (const match of matches) {
+      // Skip matches in safe AST contexts (string literals, comments, imports, type annotations)
+      if (context.tree && isInSafeASTContext(context.tree, match.line, match.column)) continue;
+
       // Skip comments
       const trimmed = match.lineContent.trimStart();
       if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) {

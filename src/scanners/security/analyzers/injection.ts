@@ -3,7 +3,7 @@
 
 import type { Finding } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern, isInCommentOrString, isPatternDefinitionContext } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isInCommentOrString, isPatternDefinitionContext, isInSafeASTContext } from '../../base-scanner.js';
 
 // ─── SQL Injection Detection ───────────────────────────────────────────────
 
@@ -193,7 +193,7 @@ export function analyzeInjection(context: ScanFileContext): Finding[] {
   if (content.length < 10) return findings;
 
   // Run SQL injection detection
-  findings.push(...detectPatterns(content, filePath, SQL_CONCAT_PATTERNS, {
+  findings.push(...detectPatterns(context, SQL_CONCAT_PATTERNS, {
     ruleId: 'SEC-INJ-001',
     category: 'injection',
     subcategory: 'sql-injection',
@@ -209,7 +209,7 @@ export function analyzeInjection(context: ScanFileContext): Finding[] {
     },
   }));
 
-  findings.push(...detectPatterns(content, filePath, SQL_ORM_PATTERNS, {
+  findings.push(...detectPatterns(context, SQL_ORM_PATTERNS, {
     ruleId: 'SEC-INJ-002',
     category: 'injection',
     subcategory: 'sql-injection',
@@ -226,7 +226,7 @@ export function analyzeInjection(context: ScanFileContext): Finding[] {
   }));
 
   // Run command injection detection
-  findings.push(...detectPatterns(content, filePath, COMMAND_INJECTION_PATTERNS, {
+  findings.push(...detectPatterns(context, COMMAND_INJECTION_PATTERNS, {
     ruleId: 'SEC-INJ-003',
     category: 'injection',
     subcategory: 'command-injection',
@@ -243,7 +243,7 @@ export function analyzeInjection(context: ScanFileContext): Finding[] {
   }));
 
   // Run LDAP injection detection
-  findings.push(...detectPatterns(content, filePath, LDAP_INJECTION_PATTERNS, {
+  findings.push(...detectPatterns(context, LDAP_INJECTION_PATTERNS, {
     ruleId: 'SEC-INJ-004',
     category: 'injection',
     subcategory: 'ldap-injection',
@@ -260,7 +260,7 @@ export function analyzeInjection(context: ScanFileContext): Finding[] {
   }));
 
   // Run template injection detection
-  findings.push(...detectPatterns(content, filePath, TEMPLATE_INJECTION_PATTERNS, {
+  findings.push(...detectPatterns(context, TEMPLATE_INJECTION_PATTERNS, {
     ruleId: 'SEC-INJ-005',
     category: 'injection',
     subcategory: 'template-injection',
@@ -295,21 +295,24 @@ interface PatternMeta {
 }
 
 function detectPatterns(
-  source: string,
-  filePath: string,
+  context: ScanFileContext,
   patterns: Array<{ regex: RegExp; message: string }>,
   meta: PatternMeta,
 ): Finding[] {
   const findings: Finding[] = [];
+  const { content, filePath } = context;
 
   for (const { regex, message } of patterns) {
-    const matches = matchPattern(source, regex);
+    const matches = matchPattern(content, regex);
     for (const match of matches) {
+      // Skip matches in safe AST contexts (string literals, comments, imports, type annotations)
+      if (context.tree && isInSafeASTContext(context.tree, match.line, match.column)) continue;
+
       // Skip matches inside comments or pattern/rule definition contexts
       if (isInCommentOrString(match.lineContent, match.column)) continue;
       if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
 
-      const snippet = extractSnippet(source, match.line);
+      const snippet = extractSnippet(content, match.line);
       findings.push(
         createFinding({
           ruleId: meta.ruleId,

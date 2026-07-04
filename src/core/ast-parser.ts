@@ -11,6 +11,7 @@ import { consola } from 'consola';
 const LANGUAGE_GRAMMAR_MAP: Record<string, string> = {
   javascript: 'tree-sitter-javascript',
   typescript: 'tree-sitter-typescript',
+  typescriptreact: 'tree-sitter-typescript',
   python: 'tree-sitter-python',
   java: 'tree-sitter-java',
   go: 'tree-sitter-go',
@@ -55,10 +56,12 @@ export class ASTParser {
    * Parse source code into an AST tree.
    * Returns null if the language grammar is not available.
    */
-  async parse(content: string, language: string): Promise<Tree | null> {
+  async parse(content: string, language: string, filePath?: string): Promise<Tree | null> {
     if (!this.parser) return null;
 
-    const lang = await this.loadLanguage(language);
+    const isTsx = filePath?.endsWith('.tsx') ?? false;
+    const langKey = isTsx ? 'typescriptreact' : language;
+    const lang = await this.loadLanguage(langKey);
     if (!lang) return null;
 
     try {
@@ -171,8 +174,11 @@ export class ASTParser {
       // Comments
       if (type === 'comment' || type === 'line_comment' || type === 'block_comment') return true;
 
-      // String literals (but NOT template literals with interpolation — those may contain unsafe code)
-      if (this.isStringNode(current) && !this.isTemplateWithInterpolation(current)) return true;
+      // Bare string statements (docstrings and directives)
+      if (
+        this.isStringNode(current) &&
+        (current.parent?.type === 'expression_statement' || current.parent?.parent?.type === 'expression_statement')
+      ) return true;
 
       // Import/require statements
       if (
@@ -223,13 +229,17 @@ export class ASTParser {
     try {
       // Try loading from node_modules (if installed as a dependency)
       let wasmPath: string | null = null;
+      let wasmFileName = `${grammarName}.wasm`;
+      if (language === 'typescriptreact') {
+        wasmFileName = 'tree-sitter-tsx.wasm';
+      }
 
       // For TypeScript, the WASM is usually at tree-sitter-typescript/tree-sitter-typescript.wasm
       const possiblePaths = [
-        resolve('node_modules', grammarName, `${grammarName}.wasm`),
+        resolve('node_modules', grammarName, wasmFileName),
         resolve('node_modules', grammarName, `${language}.wasm`),
-        resolve('node_modules', grammarName, 'wasm', `${grammarName}.wasm`),
-        join(GRAMMAR_CACHE_DIR, `${grammarName}.wasm`),
+        resolve('node_modules', grammarName, 'wasm', wasmFileName),
+        join(GRAMMAR_CACHE_DIR, wasmFileName),
       ];
 
       for (const p of possiblePaths) {

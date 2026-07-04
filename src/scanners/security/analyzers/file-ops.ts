@@ -4,7 +4,7 @@
 
 import type { Finding, Severity, Confidence } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext, isInSafeASTContext } from '../../base-scanner.js';
 
 // ─── Pattern Definitions ───────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ interface FileOpsPattern {
 const FILE_OPS_PATTERNS: FileOpsPattern[] = [
   // ── Path Traversal ──
   {
-    regex: /(?:readFile|readFileSync|createReadStream|writeFile|writeFileSync|appendFile|unlink|unlinkSync|stat|statSync|access|accessSync|open|openSync)\s*\(\s*(?:req|request|params|query|body|args|input|user)\b/i,
+    regex: /\b(?:readFile|readFileSync|createReadStream|writeFile|writeFileSync|appendFile|unlink|unlinkSync|stat|statSync|access|accessSync|open|openSync)\b\s*\(\s*(?:req|request|params|query|body|args|input|user)\b/i,
     message: 'File operation with user-controlled path – vulnerable to path traversal',
     severity: 'critical',
     confidence: 'high',
@@ -30,7 +30,7 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
     cwe: ['CWE-22'],
   },
   {
-    regex: /(?:readFile|readFileSync|createReadStream|writeFile|writeFileSync)\s*\(\s*(?:["'`][^"'`]*["'`]\s*\+\s*\w+|\w+\s*\+\s*["'`])/i,
+    regex: /\b(?:readFile|readFileSync|createReadStream|writeFile|writeFileSync)\b\s*\(\s*(?:["'`][^"'`]*["'`]\s*\+\s*\w+|\w+\s*\+\s*["'`])/i,
     message: 'File path built with string concatenation – potential path traversal',
     severity: 'high',
     confidence: 'medium',
@@ -39,7 +39,7 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
     cwe: ['CWE-22'],
   },
   {
-    regex: /(?:readFile|readFileSync|createReadStream|writeFile|writeFileSync)\s*\(\s*`[^`]*\$\{[^}]+\}[^`]*`/i,
+    regex: /\b(?:readFile|readFileSync|createReadStream|writeFile|writeFileSync)\b\s*\(\s*`[^`]*\$\{[^}]+\}[^`]*`/i,
     message: 'File path with template literal interpolation – potential path traversal',
     severity: 'high',
     confidence: 'medium',
@@ -67,7 +67,7 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
   },
   {
     // Python open() with user input
-    regex: /open\s*\(\s*(?:request\.|req\.|params|user_input|filename)\b/i,
+    regex: /\bopen\b\s*\(\s*(?:request\.|req\.|params|user_input)\b/i,
     message: 'Python open() with potentially user-controlled path – path traversal risk',
     severity: 'high',
     confidence: 'medium',
@@ -77,7 +77,7 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
   },
   {
     // Express static file serving with user input
-    regex: /res\.sendFile\s*\(\s*(?:req|request)\b/i,
+    regex: /\bres\.sendFile\b\s*\(\s*(?:req|request)\b/i,
     message: 'res.sendFile with user-controlled path – path traversal risk',
     severity: 'critical',
     confidence: 'high',
@@ -184,7 +184,7 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
   },
   {
     // Go/Generic path traversal with variables in ReadFile/Open/etc.
-    regex: /(?:ioutil\.|os\.)(?:ReadFile|Open|OpenFile|Create|Remove)\s*\(\s*[^'"`)]*\b(?:req|request|params|query|body|args|input|user|filename|file|path|uri|url)\b/i,
+    regex: /\b(?:ioutil\.|os\.)(?:ReadFile|Open|OpenFile|Create|Remove)\b\s*\(\s*[^'"`)]*\b(?:req|request|params|query|body|args|input|user|filename|uri|url)\b/i,
     message: 'File read/open using dynamic path – potential path traversal risk',
     severity: 'high',
     confidence: 'medium',
@@ -194,14 +194,14 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
   },
   {
     // Python/Go/Generic path construction with potentially user-controlled variables
-    regex: /(?:filepath\.|path\.|os\.path\.)Join\s*\(\s*[^,]+,\s*\b(?:req|request|params|query|body|args|input|user|filename|file|path|uri|url)\b/i,
+    regex: /\b(?:filepath\.|path\.|os\.path\.)Join\b\s*\(\s*[^,]+,\s*\b(?:req|request|params|query|body|args|input|user|filename|uri|url)\b/i,
     message: 'Path construction using variables – verify input is sanitized to prevent path traversal',
     severity: 'medium',
     confidence: 'medium',
     subcategory: 'path-traversal',
     ruleId: 'SEC-FILE-001',
     cwe: ['CWE-22'],
-  }
+  },
 ];
 
 // ─── Main Analyzer Function ────────────────────────────────────────────────
@@ -218,6 +218,9 @@ export function analyzeFileOps(context: ScanFileContext): Finding[] {
   for (const pattern of FILE_OPS_PATTERNS) {
     const matches = matchPattern(content, pattern.regex);
     for (const match of matches) {
+      // Skip matches in safe AST contexts (string literals, comments, imports, type annotations)
+      if (context.tree && isInSafeASTContext(context.tree, match.line, match.column)) continue;
+
       // Skip comments and import/export statements
       const trimmed = match.lineContent.trimStart();
       if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) {

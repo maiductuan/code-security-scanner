@@ -130,16 +130,17 @@ export function createScanCommand(): Command {
           config,
           targetPath: absolutePath,
           onProgress: (current, total, file) => {
-            if (config.output.format === 'console' && !options.quiet) {
+            if (!options.quiet) {
               const pct = Math.round((current / total) * 100);
-              process.stdout.write(`\r  Scanning... ${pct}% (${current}/${total}) ${file.slice(-50).padEnd(50)}`);
+              const fileDisplay = file.length > 50 ? '...' + file.slice(-47) : file;
+              process.stderr.write(`\r  Scanning... ${pct}% (${current}/${total}) ${fileDisplay.padEnd(50)}`);
             }
           },
         });
 
         // Clear progress line
-        if (config.output.format === 'console') {
-          process.stdout.write('\r' + ' '.repeat(120) + '\r');
+        if (!options.quiet) {
+          process.stderr.write('\r' + ' '.repeat(120) + '\r');
         }
 
         // Generate report

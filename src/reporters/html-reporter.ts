@@ -456,11 +456,11 @@ function buildDetail(f) {
   // Snippet
   if (f.snippet) {
     const lines = f.snippet.split(/\\r?\\n/);
-    let startLine = Math.max(1, f.line - 3);
+    let startLine = f.snippetStartLine ?? Math.max(1, f.line - 3);
     let snippetHtml = '<div class="snippet-block">';
     lines.forEach((line, idx) => {
       const currentLineNum = startLine + idx;
-      const isTarget = currentLineNum === f.line;
+      const isTarget = currentLineNum >= f.line && currentLineNum <= (f.endLine || f.line);
       const lineClass = isTarget ? 'snippet-line target-line' : 'snippet-line';
       snippetHtml += '<div class="' + lineClass + '">'
         + '<span class="line-number">' + currentLineNum + '</span>'
@@ -628,6 +628,8 @@ renderTable();
       message: f.message,
       file: f.location.file,
       line: f.location.startLine,
+      endLine: f.location.endLine,
+      snippetStartLine: f.location.snippetStartLine ?? Math.max(1, f.location.startLine - 3),
       snippet: f.location.snippet || '',
       fix: f.fix?.description ?? null,
       cwe: f.cwe ?? [],

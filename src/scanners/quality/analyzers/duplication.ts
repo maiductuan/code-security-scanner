@@ -183,7 +183,8 @@ export function analyzeDuplication(context: ScanFileContext): Finding[] {
   const limitedDuplicates = duplicates.slice(0, maxFindings);
 
   for (const dup of limitedDuplicates) {
-    const snippet = extractSnippet(content, dup.blockA.startLine, 1);
+    const snippet = extractSnippet(content, dup.blockA.startLine, dup.blockA.endLine, 1);
+    const snippetStartLine = Math.max(1, dup.blockA.startLine - 1);
     const lineCount = dup.blockA.endLine - dup.blockA.startLine + 1;
 
     findings.push(
@@ -200,6 +201,7 @@ export function analyzeDuplication(context: ScanFileContext): Finding[] {
         lineNumber: dup.blockA.startLine,
         endLine: dup.blockA.endLine,
         snippet,
+        snippetStartLine,
         tags: ['duplication', 'maintainability'],
         fix: {
           description: 'Extract the duplicated code into a shared function or utility. Follow the DRY principle.',

@@ -1,0 +1,1373 @@
+{
+  "$schema": "https://deepscan.dev/schemas/scan-result-v1.json",
+  "version": "1.0.0",
+  "tool": {
+    "name": "DeepScan",
+    "version": "1.0.0"
+  },
+  "target": "D:\\review_code_ai",
+  "config": "1.0",
+  "summary": {
+    "totalFindings": 30,
+    "bySeverity": {
+      "critical": 5,
+      "high": 12,
+      "medium": 12,
+      "low": 1
+    },
+    "byScanner": {
+      "security": 30,
+      "quality": 0,
+      "cve": 0
+    },
+    "byCategory": {
+      "api-security": 1,
+      "secrets": 3,
+      "injection": 1,
+      "crypto": 6,
+      "auth": 2,
+      "xss": 10,
+      "file-ops": 7
+    },
+    "filesScanned": 272,
+    "filesWithFindings": 18,
+    "scanDuration": 10607,
+    "timestamp": "2026-07-04T07:10:24.969Z"
+  },
+  "findings": [
+    {
+      "id": "security-d1f89dc05f98196d",
+      "ruleId": "SEC-SRF-002",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "api-security",
+      "subcategory": "ssrf",
+      "title": "Server-Side Request Forgery (SSRF)",
+      "message": "Python urlopen with potentially user-controlled URL – vulnerable to SSRF",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\redteam_worker\\config.py",
+        "startLine": 43,
+        "startColumn": 26,
+        "endLine": 43,
+        "endColumn": 26,
+        "snippet": "                    ctx.check_hostname = False\r\n                    ctx.verify_mode = ssl.CERT_NONE\r\n                    req = urllib.request.Request(config_url)\r\n                    with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:\r\n                        test_config_str = resp.read().decode('utf-8')\r\n                    logger.info(f\"✅ Fetched test config ({len(test_config_str)} bytes)\")\r\n                except Exception as e:\r",
+        "snippetStartLine": 40
+      },
+      "cwe": [
+        "CWE-918"
+      ],
+      "owasp": [
+        "A02:2021",
+        "A05:2021"
+      ],
+      "fix": {
+        "description": "Configure appropriate server parameters, validate target URLs, enable CSRF protection, and limit API requests.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "d1f89dc05f98196d",
+        "firstSeen": "2026-07-04T07:10:16.043Z",
+        "tags": [
+          "api-security",
+          "ssrf"
+        ]
+      }
+    },
+    {
+      "id": "security-47203ebaea936374",
+      "ruleId": "SEC-SEC-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "subcategory": "hardcoded-password",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded password or secret detected in source code",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 197,
+        "startColumn": 1,
+        "endLine": 197,
+        "endColumn": 1,
+        "snippet": "import subprocess\r\n\r\n# Test code with some issues\r\npassword = \"hardcoded_password\"  # Security issue\r\nunused_var = \"not used\"  # Unused variable\r\n\r\ndef bad_function():\r",
+        "snippetStartLine": 194
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Move secrets to environment variables, a vault service, or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "47203ebaea936374",
+        "firstSeen": "2026-07-04T07:10:15.392Z",
+        "tags": [
+          "secrets",
+          "credentials"
+        ]
+      }
+    },
+    {
+      "id": "security-71825d09b81d47b6",
+      "ruleId": "SEC-SEC-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "subcategory": "hardcoded-password",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded password or secret detected in source code",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 211,
+        "startColumn": 5,
+        "endLine": 211,
+        "endColumn": 5,
+        "snippet": "        # 2. JavaScript test file\r\n        js_file = Path(\"setup/test_scan.js\")\r\n        js_content = '''// Test JavaScript file\r\nvar password = \"hardcoded_password\";  // Security issue\r\nvar unused_var = \"not used\";  // Unused variable\r\n\r\nfunction badFunction() {\r",
+        "snippetStartLine": 208
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Move secrets to environment variables, a vault service, or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "71825d09b81d47b6",
+        "firstSeen": "2026-07-04T07:10:15.393Z",
+        "tags": [
+          "secrets",
+          "credentials"
+        ]
+      }
+    },
+    {
+      "id": "security-7e7eb950d4d61ad7",
+      "ruleId": "SEC-SEC-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "secrets",
+      "subcategory": "hardcoded-password",
+      "title": "Hardcoded Secret",
+      "message": "Hardcoded password or secret detected in source code",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\setup\\check_tools.py",
+        "startLine": 251,
+        "startColumn": 1,
+        "endLine": 251,
+        "endColumn": 1,
+        "snippet": "\r\n```python\r\n# Code block with issues\r\npassword = \"secret\"\r\n```\r\n'''\r\n        with open(md_file, 'w') as f:\r",
+        "snippetStartLine": 248
+      },
+      "cwe": [
+        "CWE-798"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Move secrets to environment variables, a vault service, or a secrets manager. Never commit secrets to source control.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "7e7eb950d4d61ad7",
+        "firstSeen": "2026-07-04T07:10:15.393Z",
+        "tags": [
+          "secrets",
+          "credentials"
+        ]
+      }
+    },
+    {
+      "id": "security-a14a9efb150d4c8b",
+      "ruleId": "SEC-INJ-001",
+      "scanner": "security",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "injection",
+      "subcategory": "sql-injection",
+      "title": "SQL Injection",
+      "message": "Python f-string used in SQL query – vulnerable to SQL injection",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\pages\\LandingPage.tsx",
+        "startLine": 332,
+        "startColumn": 82,
+        "endLine": 332,
+        "endColumn": 82,
+        "snippet": "                                    <div className=\"text-blue-400\">def <span className=\"text-yellow-200\">get_user_data</span>(user_id):</div>\r\n                                    <div className=\"pl-4 text-slate-500\"># Direct string formatting - SQL Injection Risk!</div>\r\n                                    <div className=\"pl-4 text-slate-300\">\r\n                                        query = <span className=\"text-green-300\">f\"SELECT * FROM users WHERE id = {`{user_id}`}\"</span>\r\n                                    </div>\r\n                                    <div className=\"pl-4 text-slate-300\">return db.execute(query)</div>\r\n\r",
+        "snippetStartLine": 329
+      },
+      "cwe": [
+        "CWE-89"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Use parameterized queries or prepared statements instead of string concatenation.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "a14a9efb150d4c8b",
+        "firstSeen": "2026-07-04T07:10:18.414Z",
+        "tags": [
+          "sql",
+          "injection",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-015737b96ed30b50",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\code_graph.py",
+        "startLine": 699,
+        "startColumn": 16,
+        "endLine": 699,
+        "endColumn": 16,
+        "snippet": "    def _compute_hash(self, content: str) -> str:\r\n        \"\"\"Compute hash of file content\"\"\"\r\n        import hashlib\r\n        return hashlib.md5(content.encode()).hexdigest()\r\n    \r\n    def get_file_summary(\r\n        self,\r",
+        "snippetStartLine": 696
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "015737b96ed30b50",
+        "firstSeen": "2026-07-04T07:10:23.578Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-59adf16e483c14d0",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\compliance_service.py",
+        "startLine": 613,
+        "startColumn": 28,
+        "endLine": 613,
+        "endColumn": 28,
+        "snippet": "                return False\r\n            \r\n            # Generate content hash for deduplication\r\n            content_hash = hashlib.md5(doc_content.encode('utf-8')).hexdigest()\r\n            \r\n            # Check if embedding already exists\r\n            existing = self.db.query(DocumentEmbedding).filter(\r",
+        "snippetStartLine": 610
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "59adf16e483c14d0",
+        "firstSeen": "2026-07-04T07:10:23.331Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-e15aec8fc8e128c1",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\context_indexer.py",
+        "startLine": 667,
+        "startColumn": 16,
+        "endLine": 667,
+        "endColumn": 16,
+        "snippet": "    \r\n    def _compute_hash(self, content: str) -> str:\r\n        \"\"\"Compute MD5 hash of content\"\"\"\r\n        return hashlib.md5(content.encode()).hexdigest()\r\n",
+        "snippetStartLine": 664
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "e15aec8fc8e128c1",
+        "firstSeen": "2026-07-04T07:10:23.173Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-9225e85b51131a9c",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\embedding_db_service.py",
+        "startLine": 49,
+        "startColumn": 24,
+        "endLine": 49,
+        "endColumn": 24,
+        "snippet": "            Created Embedding object\r\n        \"\"\"\r\n        # Generate content hash for deduplication\r\n        content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()\r\n        \r\n        # Check if embedding already exists\r\n        existing = self.db.query(Embedding).filter(\r",
+        "snippetStartLine": 46
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "9225e85b51131a9c",
+        "firstSeen": "2026-07-04T07:10:22.944Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-fc7b032b6ce8e822",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\treesitter_parser.py",
+        "startLine": 175,
+        "startColumn": 24,
+        "endLine": 175,
+        "endColumn": 24,
+        "snippet": "            return None\r\n        \r\n        # Check cache first\r\n        content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()\r\n        if content_hash in self.parsed_trees:\r\n            return self.parsed_trees[content_hash]\r\n        \r",
+        "snippetStartLine": 172
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "fc7b032b6ce8e822",
+        "firstSeen": "2026-07-04T07:10:21.644Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-64fff984164a1c44",
+      "ruleId": "SEC-CRYPTO-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "crypto",
+      "subcategory": "weak-hash",
+      "title": "Cryptography Issue",
+      "message": "MD5 hash usage detected – MD5 is cryptographically broken",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\treesitter_parser.py",
+        "startLine": 217,
+        "startColumn": 24,
+        "endLine": 217,
+        "endColumn": 24,
+        "snippet": "            return []\r\n        \r\n        # Check cache\r\n        cache_key = f\"{hashlib.md5(content.encode()).hexdigest()}_{language}_{hash(tuple(changed_lines or []))}\"\r\n        if cache_key in self.function_cache:\r\n            return self.function_cache[cache_key]\r\n        \r",
+        "snippetStartLine": 214
+      },
+      "cwe": [
+        "CWE-328"
+      ],
+      "owasp": [
+        "A02:2021"
+      ],
+      "fix": {
+        "description": "Use strong, modern cryptographic algorithms. SHA-256+ for hashing, AES-256-GCM for encryption, CSPRNG for randomness. Never hardcode keys or disable TLS.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "64fff984164a1c44",
+        "firstSeen": "2026-07-04T07:10:21.644Z",
+        "tags": [
+          "crypto",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-9222453f9e9ca1a0",
+      "ruleId": "security/weak-auth",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "auth",
+      "title": "Weak Authentication Pattern",
+      "message": "SSL/TLS hostname verification disabled",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\redteam_worker\\config.py",
+        "startLine": 40,
+        "startColumn": 25,
+        "endLine": 40,
+        "endColumn": 25,
+        "snippet": "                    import urllib.request\r\n                    import ssl\r\n                    ctx = ssl.create_default_context()\r\n                    ctx.check_hostname = False\r\n                    ctx.verify_mode = ssl.CERT_NONE\r\n                    req = urllib.request.Request(config_url)\r\n                    with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:\r",
+        "snippetStartLine": 37
+      },
+      "cwe": [
+        "CWE-287"
+      ],
+      "owasp": [
+        "A07:2021"
+      ],
+      "fix": {
+        "description": "Use strong secrets, secure cookie flags, and proper password hashing (bcrypt/argon2)",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/287.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/287.html"
+      ],
+      "metadata": {
+        "fingerprint": "9222453f9e9ca1a0",
+        "firstSeen": "2026-07-04T07:10:16.044Z",
+        "tags": [
+          "auth",
+          "a07"
+        ]
+      }
+    },
+    {
+      "id": "security-e22cb5684d524105",
+      "ruleId": "security/weak-auth",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "auth",
+      "title": "Weak Authentication Pattern",
+      "message": "SSL/TLS certificate verification disabled (CERT_NONE)",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\redteam_worker\\config.py",
+        "startLine": 41,
+        "startColumn": 25,
+        "endLine": 41,
+        "endColumn": 25,
+        "snippet": "                    import ssl\r\n                    ctx = ssl.create_default_context()\r\n                    ctx.check_hostname = False\r\n                    ctx.verify_mode = ssl.CERT_NONE\r\n                    req = urllib.request.Request(config_url)\r\n                    with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:\r\n                        test_config_str = resp.read().decode('utf-8')\r",
+        "snippetStartLine": 38
+      },
+      "cwe": [
+        "CWE-287"
+      ],
+      "owasp": [
+        "A07:2021"
+      ],
+      "fix": {
+        "description": "Use strong secrets, secure cookie flags, and proper password hashing (bcrypt/argon2)",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/287.html"
+        ]
+      },
+      "references": [
+        "https://cwe.mitre.org/data/definitions/287.html"
+      ],
+      "metadata": {
+        "fingerprint": "e22cb5684d524105",
+        "firstSeen": "2026-07-04T07:10:16.045Z",
+        "tags": [
+          "auth",
+          "a07"
+        ]
+      }
+    },
+    {
+      "id": "security-a6adce97f9da979d",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 1209,
+        "startColumn": 13,
+        "endLine": 1209,
+        "endColumn": 13,
+        "snippet": "          html += '<button class=\"btn-autofix\" data-fix-idx=\"' + issue._idx + '\">\\u{1F527} Auto Fix</button>';\r\n        }\r\n\r\n        item.innerHTML = html;\r\n        // Click to go to file/line\r\n        item.addEventListener('click', (e) => {\r\n          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { return; }\r",
+        "snippetStartLine": 1206
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "a6adce97f9da979d",
+        "firstSeen": "2026-07-04T07:10:15.013Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-7f6a9d18a98a6a6f",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\dist\\extension.js",
+        "startLine": 1338,
+        "startColumn": 13,
+        "endLine": 1338,
+        "endColumn": 13,
+        "snippet": "\r\n    const listEl = document.getElementById('progressSteps');\r\n    if (listEl) {\r\n      listEl.innerHTML = progressStepsState.map((s, i) => {\r\n        const cls = i < stepIdx ? 'done' : (i === stepIdx ? 'active' : '');\r\n        const icon = i < stepIdx ? '\\u2705' : (i === stepIdx ? '\\u23F3' : '\\u25CB');\r\n        return '<div class=\"progress-step-item ' + cls + '\"><span class=\"step-icon\">' + icon + '</span>' + s.label + '</div>';\r",
+        "snippetStartLine": 1335
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "7f6a9d18a98a6a6f",
+        "firstSeen": "2026-07-04T07:10:15.014Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-f1ccf38c8b7e2142",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\sidebar\\SidebarProvider.ts",
+        "startLine": 1181,
+        "startColumn": 13,
+        "endLine": 1181,
+        "endColumn": 13,
+        "snippet": "          html += '<button class=\"btn-autofix\" data-fix-idx=\"' + issue._idx + '\">🔧 Auto Fix</button>';\r\n        }\r\n\r\n        item.innerHTML = html;\r\n        // Click to go to file/line\r\n        item.addEventListener('click', (e) => {\r\n          if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { return; }\r",
+        "snippetStartLine": 1178
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "f1ccf38c8b7e2142",
+        "firstSeen": "2026-07-04T07:10:16.428Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-f8015006214a1467",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "high",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "dom-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Direct innerHTML assignment – may allow XSS if input is not sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\plugin\\src\\sidebar\\SidebarProvider.ts",
+        "startLine": 1310,
+        "startColumn": 13,
+        "endLine": 1310,
+        "endColumn": 13,
+        "snippet": "\r\n    const listEl = document.getElementById('progressSteps');\r\n    if (listEl) {\r\n      listEl.innerHTML = progressStepsState.map((s, i) => {\r\n        const cls = i < stepIdx ? 'done' : (i === stepIdx ? 'active' : '');\r\n        const icon = i < stepIdx ? '✅' : (i === stepIdx ? '⏳' : '○');\r\n        return '<div class=\"progress-step-item ' + cls + '\"><span class=\"step-icon\">' + icon + '</span>' + s.label + '</div>';\r",
+        "snippetStartLine": 1307
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "f8015006214a1467",
+        "firstSeen": "2026-07-04T07:10:16.429Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-62b1d988885ab626",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\auto_eval_scan_service.py",
+        "startLine": 292,
+        "startColumn": 73,
+        "endLine": 292,
+        "endColumn": 73,
+        "snippet": "- \"is_prompt\": true/false\r\n- \"confidence\": 0.0 to 1.0\r\n- \"extracted_prompt\": the actual prompt text (cleaned, without code syntax)\r\n- \"has_variables\": true if the prompt contains template variables like {{{{var}}}}\r\n\r\n{snippets_text}\r\n\r",
+        "snippetStartLine": 289
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "62b1d988885ab626",
+        "firstSeen": "2026-07-04T07:10:23.626Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-c3c21f832fd66edf",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\auto_eval_scan_service.py",
+        "startLine": 467,
+        "startColumn": 63,
+        "endLine": 467,
+        "endColumn": 63,
+        "snippet": "            # Check if prompt has template variables ({{var}})\r\n            has_variables = bool(re.findall(r'\\{\\{(\\w+)\\}\\}', prompt_text))\r\n            if not has_variables:\r\n                prompt_text = f\"{prompt_text}\\n\\nUser query: {{{{query}}}}\"\r\n\r\n            logger.info(\r\n                f\"📡 [AUTO-EVAL] Calling {self.api_base_url}/api/prompt-evaluation/run \"\r",
+        "snippetStartLine": 464
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "c3c21f832fd66edf",
+        "firstSeen": "2026-07-04T07:10:23.626Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-1e7b9896f6a8e5f9",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\git_service.py",
+        "startLine": 258,
+        "startColumn": 33,
+        "endLine": 258,
+        "endColumn": 33,
+        "snippet": "                            continue\r\n                    \r\n                    # Get relative path\r\n                    full_path = os.path.join(root, filename)\r\n                    rel_path = os.path.relpath(full_path, repo_path)\r\n                    \r\n                    # Normalize path separators for cross-platform\r",
+        "snippetStartLine": 255
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "1e7b9896f6a8e5f9",
+        "firstSeen": "2026-07-04T07:10:22.647Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-7eed93e49a6e028b",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\prompt_evaluation_service.py",
+        "startLine": 738,
+        "startColumn": 63,
+        "endLine": 738,
+        "endColumn": 63,
+        "snippet": "                # Fill prompt with variables\r\n                filled_prompt = prompt\r\n                for var_name, var_value in tc[\"variables\"].items():\r\n                    filled_prompt = filled_prompt.replace(f\"{{{{{var_name}}}}}\", var_value)\r\n                \r\n                # Simulate API call\r\n                time.sleep(0.1)  # Simulate network delay\r",
+        "snippetStartLine": 735
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "7eed93e49a6e028b",
+        "firstSeen": "2026-07-04T07:10:22.265Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-1147a5e9100c7026",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\prompt_evaluation_service.py",
+        "startLine": 1315,
+        "startColumn": 44,
+        "endLine": 1315,
+        "endColumn": 44,
+        "snippet": "## Your Task\r\n1. Analyze WHY the test cases failed based on the outputs and failure reasons\r\n2. Suggest an improved version of the prompt that would address these failures\r\n3. The improved prompt MUST keep the same {{{{variable}}}} placeholders as the original\r\n4. Focus on making the prompt more specific, adding constraints, or clarifying the expected output format\r\n\r\n## Response Format\r",
+        "snippetStartLine": 1312
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "1147a5e9100c7026",
+        "firstSeen": "2026-07-04T07:10:22.265Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-28a6f4d9373af740",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "xss",
+      "subcategory": "template-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "Handlebars triple-stash ({{{ }}}) outputs unescaped HTML – XSS risk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\prompt_evaluation_service.py",
+        "startLine": 1321,
+        "startColumn": 62,
+        "endLine": 1321,
+        "endColumn": 62,
+        "snippet": "## Response Format\r\nReturn ONLY a valid JSON object with these fields:\r\n{{\r\n  \"recommended_prompt\": \"the improved prompt text with same {{{{variables}}}}\",\r\n  \"analysis\": \"brief analysis of why tests failed (2-3 sentences)\",\r\n  \"changes_summary\": \"short summary of what was changed and why (1-2 sentences)\"\r\n}}\r",
+        "snippetStartLine": 1318
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "28a6f4d9373af740",
+        "firstSeen": "2026-07-04T07:10:22.265Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-6765c4897653d7af",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Path construction using variables – verify input is sanitized to prevent path traversal",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\repository_cache.py",
+        "startLine": 276,
+        "startColumn": 32,
+        "endLine": 276,
+        "endColumn": 32,
+        "snippet": "                dirnames[:] = [d for d in dirnames if not d.startswith('.')]\r\n                \r\n                for filename in filenames:\r\n                    filepath = os.path.join(dirpath, filename)\r\n                    if os.path.exists(filepath):\r\n                        total_size += os.path.getsize(filepath)\r\n            return total_size\r",
+        "snippetStartLine": 273
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "6765c4897653d7af",
+        "firstSeen": "2026-07-04T07:10:22.111Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-c519a454a37d7430",
+      "ruleId": "SEC-FILE-003",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "temp-files",
+      "title": "File Operation Issue",
+      "message": "Use of predictable temporary file path – use mkdtemp/mkstemp for secure temp files",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\repository_file_service.py",
+        "startLine": 131,
+        "startColumn": 27,
+        "endLine": 131,
+        "endColumn": 27,
+        "snippet": "        \"\"\"Get files from local repository clone if available\"\"\"\r\n        try:\r\n            # Check if we have a local clone\r\n            repo_path = f\"/tmp/repos/{repo.name}\"  # Adjust path as needed\r\n            \r\n            if not os.path.exists(repo_path):\r\n                logger.debug(f\"No local clone found at {repo_path}\")\r",
+        "snippetStartLine": 128
+      },
+      "cwe": [
+        "CWE-377"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "c519a454a37d7430",
+        "firstSeen": "2026-07-04T07:10:22.070Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-ab62ab7f3b902f0f",
+      "ruleId": "SEC-FILE-003",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "temp-files",
+      "title": "File Operation Issue",
+      "message": "Temporary file not auto-deleted – may leave sensitive data on disk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\tool_config_service.py",
+        "startLine": 368,
+        "startColumn": 22,
+        "endLine": 368,
+        "endColumn": 22,
+        "snippet": "            if config:\r\n                # Write config to temp file\r\n                import tempfile\r\n                with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:\r\n                    f.write(config)\r\n                    cmd.extend([\"--config\", f.name])\r\n            \r",
+        "snippetStartLine": 365
+      },
+      "cwe": [
+        "CWE-459"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "ab62ab7f3b902f0f",
+        "firstSeen": "2026-07-04T07:10:21.735Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-6617182730daeec9",
+      "ruleId": "SEC-FILE-003",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "temp-files",
+      "title": "File Operation Issue",
+      "message": "Temporary file not auto-deleted – may leave sensitive data on disk",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\tool_config_service.py",
+        "startLine": 429,
+        "startColumn": 26,
+        "endLine": 429,
+        "endColumn": 26,
+        "snippet": "                import tempfile\r\n                if YAML_AVAILABLE:\r\n                    import yaml as yaml_lib\r\n                    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:\r\n                        yaml_lib.dump(config, f)\r\n                        cmd.extend([\"-c\", f.name])\r\n                else:\r",
+        "snippetStartLine": 426
+      },
+      "cwe": [
+        "CWE-459"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "6617182730daeec9",
+        "firstSeen": "2026-07-04T07:10:21.735Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-d5561f0402de94cf",
+      "ruleId": "SEC-FILE-004",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "file-ops",
+      "subcategory": "file-upload",
+      "title": "File Operation Issue",
+      "message": "Original filename used directly – sanitize filenames to prevent directory traversal in uploads",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\components\\ContextManagementTab.tsx",
+        "startLine": 620,
+        "startColumn": 65,
+        "endLine": 620,
+        "endColumn": 65,
+        "snippet": "                    </div>\r\n                  </div>\r\n                  <button\r\n                    onClick={() => handleDeleteUploadedFile(file.filename)}\r\n                    className=\"btn btn-danger btn-sm flex items-center gap-1\"\r\n                    title=\"Delete file and its embeddings\"\r\n                  >\r",
+        "snippetStartLine": 617
+      },
+      "cwe": [
+        "CWE-434"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "d5561f0402de94cf",
+        "firstSeen": "2026-07-04T07:10:19.820Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    },
+    {
+      "id": "security-58b2e9647e148c9d",
+      "ruleId": "SEC-XSS-001",
+      "scanner": "security",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "xss",
+      "subcategory": "react-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "message": "dangerouslySetInnerHTML in React component – ensure input is sanitized",
+      "location": {
+        "file": "D:\\review_code_ai\\frontend\\src\\pages\\docs\\DocsPage.tsx",
+        "startLine": 274,
+        "startColumn": 29,
+        "endLine": 274,
+        "endColumn": 29,
+        "snippet": "                                prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:rounded-lg\r\n                                prose-blockquote:border-red-300 prose-blockquote:bg-red-50/50\r\n                                prose-img:rounded-lg prose-img:shadow-md\"\r\n                            dangerouslySetInnerHTML={{ __html: pageData.content }}\r\n                        />\r\n                    ) : (\r\n                        <div className=\"text-center py-12\">\r",
+        "snippetStartLine": 271
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "fix": {
+        "description": "Sanitize and escape all user input before rendering in HTML. Use context-aware encoding.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+        "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html"
+      ],
+      "metadata": {
+        "fingerprint": "58b2e9647e148c9d",
+        "firstSeen": "2026-07-04T07:10:24.807Z",
+        "tags": [
+          "xss",
+          "owasp-top10"
+        ]
+      }
+    },
+    {
+      "id": "security-94d7bb4eece711c3",
+      "ruleId": "SEC-FILE-001",
+      "scanner": "security",
+      "severity": "low",
+      "confidence": "low",
+      "category": "file-ops",
+      "subcategory": "path-traversal",
+      "title": "File Operation Issue",
+      "message": "Relative path traversal pattern (../) detected – verify this is safe",
+      "location": {
+        "file": "D:\\review_code_ai\\backend\\app\\services\\code_graph.py",
+        "startLine": 558,
+        "startColumn": 57,
+        "endLine": 558,
+        "endColumn": 57,
+        "snippet": "        Resolve JavaScript import to file path.\r\n        \r\n        Args:\r\n            import_path: Import path (e.g., \"./utils\", \"../services/api\")\r\n            current_file: Current file path\r\n            repo_path: Repository root path\r\n            \r",
+        "snippetStartLine": 555
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "owasp": [
+        "A01:2021"
+      ],
+      "fix": {
+        "description": "Validate and sanitize file paths. Use path.resolve() and verify the resolved path is within the allowed directory. Set restrictive file permissions.",
+        "references": [
+          "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+          "https://owasp.org/www-community/attacks/Path_Traversal"
+        ]
+      },
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+        "https://owasp.org/www-community/attacks/Path_Traversal"
+      ],
+      "metadata": {
+        "fingerprint": "94d7bb4eece711c3",
+        "firstSeen": "2026-07-04T07:10:23.587Z",
+        "tags": [
+          "file-ops"
+        ]
+      }
+    }
+  ],
+  "generatedAt": "2026-07-04T07:10:24.973Z"
+}

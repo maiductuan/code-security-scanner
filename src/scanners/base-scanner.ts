@@ -26,6 +26,7 @@ export interface CreateFindingOptions {
   endLine?: number;
   endColumn?: number;
   snippet: string;
+  snippetStartLine?: number;
   cwe?: string[];
   owasp?: string[];
   fix?: FixSuggestion;
@@ -46,16 +47,22 @@ export function generateFingerprint(ruleId: string, filePath: string, snippet: s
 }
 
 /**
- * Extract a code snippet around a given line number.
- * Trích xuất đoạn code xung quanh dòng được chỉ định
+ * Extract a code snippet around a given line number or range.
+ * Trích xuất đoạn code xung quanh dòng hoặc đoạn dòng được chỉ định
  * @param source - Full source code
- * @param lineNumber - 1-indexed line number
+ * @param startLine - 1-indexed start line number
+ * @param endLine - 1-indexed end line number (defaults to startLine)
  * @param contextLines - Number of lines above and below to include (default: 3)
  */
-export function extractSnippet(source: string, lineNumber: number, contextLines: number = 3): string {
+export function extractSnippet(
+  source: string,
+  startLine: number,
+  endLine: number = startLine,
+  contextLines: number = 3,
+): string {
   const lines = source.split('\n');
-  const start = Math.max(0, lineNumber - 1 - contextLines);
-  const end = Math.min(lines.length, lineNumber + contextLines);
+  const start = Math.max(0, startLine - 1 - contextLines);
+  const end = Math.min(lines.length, endLine + contextLines);
   return lines.slice(start, end).join('\n');
 }
 
@@ -73,6 +80,7 @@ export function createFinding(options: CreateFindingOptions): Finding {
     endLine: options.endLine ?? options.lineNumber,
     endColumn: options.endColumn ?? (options.column ?? 1),
     snippet: options.snippet,
+    snippetStartLine: options.snippetStartLine ?? Math.max(1, options.lineNumber - 3),
   };
 
   return {
@@ -326,10 +334,11 @@ export function isInSafeASTContext(
       // Comments
       if (type === 'comment' || type === 'line_comment' || type === 'block_comment') return true;
 
-      // String literals (but NOT template literals with substitutions — those may embed code)
+      // Bare string statements (docstrings and directives)
       if (
-        type === 'string' || type === 'string_literal' ||
-        type === 'string_content' || type === 'interpreted_string_literal'
+        (type === 'string' || type === 'string_literal' ||
+         type === 'string_content' || type === 'interpreted_string_literal') &&
+        (current.parent?.type === 'expression_statement' || current.parent?.parent?.type === 'expression_statement')
       ) return true;
 
       // Template strings are only safe if they have no interpolation

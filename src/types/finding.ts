@@ -17,6 +17,7 @@ export interface SourceLocation {
   endLine: number;
   endColumn: number;
   snippet: string;
+  snippetStartLine?: number;
 }
 
 /** Business logic context detected in code */

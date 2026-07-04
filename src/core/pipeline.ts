@@ -127,7 +127,7 @@ export class ScanPipeline {
 
     // Build scan context
     // Parse AST tree for context-aware analysis (degrades gracefully if grammar unavailable)
-    const tree = await this.astParser.parse(content, file.language);
+    const tree = await this.astParser.parse(content, file.language, file.path);
 
     const context: ScanFileContext = {
       filePath: file.path,
