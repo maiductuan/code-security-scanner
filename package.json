@@ -33,6 +33,14 @@
   ],
   "author": "",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maiductuan/deepscan.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maiductuan/deepscan/issues"
+  },
+  "homepage": "https://github.com/maiductuan/deepscan#readme",
   "engines": {
     "node": ">=18.0.0"
   },
