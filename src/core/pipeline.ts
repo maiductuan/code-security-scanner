@@ -7,6 +7,7 @@ import { discoverFiles, readFileContent } from './file-discovery.js';
 import { RuleEngine } from '../rules/rule-engine.js';
 import { getLanguageConfig } from '../languages/registry.js';
 import { AIValidator } from './ai-validator.js';
+import { ASTParser } from './ast-parser.js';
 
 /** DeepScan version */
 const VERSION = '1.0.0';
@@ -18,11 +19,13 @@ export class ScanPipeline {
   private config: DeepScanConfig;
   private scanners: IScanner[] = [];
   private ruleEngine: RuleEngine;
+  private astParser: ASTParser;
   private findings: Finding[] = [];
 
   constructor(config: DeepScanConfig) {
     this.config = config;
     this.ruleEngine = new RuleEngine(config);
+    this.astParser = new ASTParser();
   }
 
   /**
@@ -44,6 +47,9 @@ export class ScanPipeline {
 
     // Step 1: Initialize rule engine
     await this.ruleEngine.initialize();
+
+    // Step 1.5: Initialize AST parser (non-blocking, degrades gracefully)
+    await this.astParser.initialize();
 
     // Step 2: Initialize all scanners
     for (const scanner of this.scanners) {
@@ -97,6 +103,7 @@ export class ScanPipeline {
     for (const scanner of this.scanners) {
       await scanner.destroy();
     }
+    await this.astParser.destroy();
 
     // Step 6: Build and return result
     const result = this.buildResult(targetPath, startTime, files.length);
@@ -119,12 +126,15 @@ export class ScanPipeline {
     const rules = this.ruleEngine.getRulesForLanguage(file.language);
 
     // Build scan context
+    // Parse AST tree for context-aware analysis (degrades gracefully if grammar unavailable)
+    const tree = await this.astParser.parse(content, file.language);
+
     const context: ScanFileContext = {
       filePath: file.path,
       content,
       language: file.language,
-      tree: null,  // Tree-sitter parsing would go here
-      parser: null,
+      tree,
+      parser: this.astParser.getParser(),
       config: this.config,
       rules,
     };
@@ -139,6 +149,12 @@ export class ScanPipeline {
 
         // CVE scanner only processes dependency files
         if (scanner.type === 'cve' && !file.isDependencyFile) continue;
+
+        // Security scanner skips lock files, vendor/bundle files, and minified files
+        // These produce massive false positives with no real security value
+        if (scanner.type === 'security') {
+          if (file.isLockFile || file.isVendorFile || file.isMinified) continue;
+        }
 
         const findings = await scanner.scanFile(context);
 
@@ -163,13 +179,54 @@ export class ScanPipeline {
   private buildResult(targetPath: string, startTime: number, filesScanned: number): ScanResult {
     const duration = Date.now() - startTime;
 
-    // Deduplicate findings by fingerprint
-    const seen = new Set<string>();
+    // Deduplicate findings by fingerprint AND smart line+category grouping for security scanner
+    const seenFingerprints = new Set<string>();
+    const groupedSecurityFindings = new Map<string, Finding[]>();
     const deduped: Finding[] = [];
+
     for (const finding of this.findings) {
-      if (!seen.has(finding.metadata.fingerprint)) {
-        seen.add(finding.metadata.fingerprint);
+      if (seenFingerprints.has(finding.metadata.fingerprint)) {
+        continue;
+      }
+      seenFingerprints.add(finding.metadata.fingerprint);
+
+      if (finding.scanner === 'security') {
+        // Group by file, line, and category to catch rules that overlap
+        const key = `${finding.location.file}:${finding.location.startLine}:${finding.category}`;
+        if (!groupedSecurityFindings.has(key)) {
+          groupedSecurityFindings.set(key, []);
+        }
+        groupedSecurityFindings.get(key)!.push(finding);
+      } else {
         deduped.push(finding);
+      }
+    }
+
+    for (const [_, group] of groupedSecurityFindings.entries()) {
+      if (group.length === 1) {
+        deduped.push(group[0]);
+      } else {
+        // Sort to find the best finding to keep:
+        // 1. Prefer specific rules (e.g. starting with SEC-) over generic ones (starting with security/)
+        // 2. Prefer higher severity (critical > high > medium > low)
+        // 3. Prefer longer/more descriptive message
+        group.sort((a, b) => {
+          const isGenericA = a.ruleId.startsWith('security/');
+          const isGenericB = b.ruleId.startsWith('security/');
+          
+          if (isGenericA && !isGenericB) return 1;
+          if (!isGenericA && isGenericB) return -1;
+          
+          const severityOrder: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+          const aSev = severityOrder[a.severity] ?? 4;
+          const bSev = severityOrder[b.severity] ?? 4;
+          const sevDiff = aSev - bSev;
+          if (sevDiff !== 0) return sevDiff;
+          
+          return b.message.length - a.message.length;
+        });
+        
+        deduped.push(group[0]);
       }
     }
 

@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { resolve } from 'node:path';
+import { existsSync, rmSync, readFileSync } from 'node:fs';
 import { createScanCommand } from '../../src/cli/commands/scan.js';
 
 describe('CLI Scan Command Options', () => {
@@ -19,5 +21,24 @@ describe('CLI Scan Command Options', () => {
     expect(opts.security).toBeUndefined();
     expect(opts.quality).toBe(true);
     expect(opts.cve).toBe(true);
+  });
+
+  it('should automatically write HTML report to report.html when --format html is specified without output option', async () => {
+    const reportPath = resolve(process.cwd(), 'report.html');
+    if (existsSync(reportPath)) {
+      rmSync(reportPath);
+    }
+
+    const cmd = createScanCommand();
+    // Scan a small test directory to run fast
+    await cmd.parseAsync(['node', 'deepscan', 'scan', './tests/fixtures', '--format', 'html', '--scanners', 'security']);
+
+    expect(existsSync(reportPath)).toBe(true);
+    const content = readFileSync(reportPath, 'utf-8');
+    expect(content).toContain('<!DOCTYPE html>');
+    expect(content).toContain('DeepScan Security Report');
+
+    // Clean up
+    rmSync(reportPath);
   });
 });

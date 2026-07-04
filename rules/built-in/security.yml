@@ -50,7 +50,7 @@ rules:
         message: subprocess with dynamic input (Python)
       - regex: "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\("
         message: Runtime.exec() usage (Java)
-      - regex: "system\\s*\\(\\s*(?:\\$|.*\\+|.*\\.)"
+      - regex: "\\bsystem\\s*\\(\\s*(?:\\$|.*\\+|.*\\.)"
         message: system() call with dynamic input
     fix:
       description: Use parameterized APIs (e.g., execFile with array args) or whitelist-validate input

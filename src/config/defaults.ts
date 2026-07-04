@@ -39,10 +39,10 @@ function loadDefaultConfig(): DeepScanConfig {
       scanners: {
         security: { enabled: true, severity: ['critical', 'high', 'medium', 'low'] },
         quality: {
-          enabled: true,
+          enabled: false,
           thresholds: { maxComplexity: 15, maxCognitiveComplexity: 20, maxFileLength: 500, maxFunctionLength: 50, maxNestingDepth: 4, minCommentRatio: 0.1 }
         },
-        cve: { enabled: true, sources: ['osv'], failOnSeverity: 'critical' }
+        cve: { enabled: false, sources: ['osv'], failOnSeverity: 'critical' }
       },
       rules: { include: ['*'], exclude: [], custom: [] },
       languages: ['auto'],

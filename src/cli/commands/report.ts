@@ -32,6 +32,10 @@ export function createReportCommand(): Command {
           const outputPath = resolve(options.output);
           writeFileSync(outputPath, output, 'utf-8');
           consola.success(`Report converted to ${options.to}: ${outputPath}`);
+        } else if (options.to === 'html') {
+          const outputPath = resolve('report.html');
+          writeFileSync(outputPath, output, 'utf-8');
+          consola.success(`Report converted to ${options.to}: ${outputPath}`);
         } else {
           process.stdout.write(output);
         }

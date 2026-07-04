@@ -1,7 +1,7 @@
 import type { Finding, ScanResult, SourceLocation, CodeContext } from './finding.js';
 import type { Rule } from './rule.js';
 import type { DeepScanConfig, OutputFormat } from './config.js';
-import type Parser from 'web-tree-sitter';
+import type { Parser, Tree } from 'web-tree-sitter';
 
 // ─── Scanner Interface ─────────────────────────────────────────────────────
 
@@ -10,7 +10,7 @@ export interface ScanFileContext {
   filePath: string;
   content: string;
   language: string;
-  tree: Parser.Tree | null;
+  tree: Tree | null;
   parser: Parser | null;
   config: DeepScanConfig;
   rules: Rule[];
@@ -99,6 +99,14 @@ export interface DiscoveredFile {
   language: string;
   size: number;
   isDependencyFile: boolean;
+  /** Lock files (pnpm-lock.yaml, yarn.lock, etc.) — skip for security scanning */
+  isLockFile: boolean;
+  /** Vendor/bundled third-party files (jquery.js, vendor/, etc.) */
+  isVendorFile: boolean;
+  /** Minified files (*.min.js, *.min.css) */
+  isMinified: boolean;
+  /** Test files (tests/, *.test.*, *.spec.*) */
+  isTestFile: boolean;
 }
 
 /** Progress callback */

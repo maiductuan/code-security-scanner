@@ -19,7 +19,7 @@ export function createScanCommand(): Command {
   scan
     .description('Scan source code for security vulnerabilities and quality issues')
     .argument('[path]', 'Path to scan (default: current directory)', '.')
-    .option('-s, --scanners <scanners>', 'Scanner engines to use (comma-separated: security,quality,cve)')
+    .option('-s, --scanners <scanners>', 'Scanner engines to use (comma-separated: security,quality,cve) [default: security]')
     .option('--security', 'Run security scanner only')
     .option('--quality', 'Run quality scanner only')
     .option('--cve', 'Run CVE/dependency scanner only')
@@ -150,6 +150,10 @@ export function createScanCommand(): Command {
         if (options.output) {
           await reporter.writeToFile(result, options.output as string);
           consola.success(`Report written to: ${options.output}`);
+        } else if (config.output.format === 'html') {
+          const defaultPath = 'report.html';
+          await reporter.writeToFile(result, defaultPath);
+          consola.success(`Report written to: ${defaultPath}`);
         } else if (config.output.format !== 'console') {
           // For non-console formats, write to stdout
           process.stdout.write(output);

@@ -4,7 +4,7 @@
 
 import type { Finding, Severity, Confidence } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext } from '../../base-scanner.js';
 
 // ─── Pattern Definitions ───────────────────────────────────────────────────
 
@@ -248,6 +248,9 @@ export function analyzeAuth(context: ScanFileContext): Finding[] {
       if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) {
         continue;
       }
+
+      // Skip matches inside pattern/rule definition contexts
+      if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
 
       const snippet = extractSnippet(content, match.line);
       findings.push(

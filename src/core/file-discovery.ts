@@ -19,6 +19,41 @@ const DEPENDENCY_FILES = new Set([
   'packages.config', 'Directory.Packages.props',
 ]);
 
+/** Lock files — should be scanned for CVE but NOT for security patterns */
+const LOCK_FILES = new Set([
+  'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml',
+  'Pipfile.lock', 'poetry.lock', 'composer.lock',
+  'Cargo.lock', 'Gemfile.lock', 'gradle.lockfile',
+  'go.sum',
+]);
+
+/** Vendor/third-party directory patterns */
+const VENDOR_DIR_PATTERN = /(?:^|[\\/])(?:vendor|third[_-]?party|bower_components|externals?)[\\/]/i;
+
+/** Known vendor/bundled files by filename */
+const KNOWN_VENDOR_FILES_PATTERN = /(?:jquery|lodash|underscore|backbone|angular|react\.production|vue\.global|bootstrap|popper|moment(?:\.min)?|d3|select2|sweetalert|highlight|firebug)(?:[\.-][\w.]+)?\.js$/i;
+
+/** Minified file patterns */
+const MINIFIED_PATTERN = /\.min\.(?:js|css)$/i;
+
+/** Test file/directory patterns */
+const TEST_PATH_PATTERN = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration|cypress|playwright)[\\/]/i;
+const TEST_FILE_PATTERN = /\.(?:test|spec|mock|fixture|e2e|cy)\./i;
+
+function classifyFile(relPath: string, name: string): {
+  isLockFile: boolean;
+  isVendorFile: boolean;
+  isMinified: boolean;
+  isTestFile: boolean;
+} {
+  return {
+    isLockFile: LOCK_FILES.has(name),
+    isVendorFile: VENDOR_DIR_PATTERN.test(relPath) || KNOWN_VENDOR_FILES_PATTERN.test(name),
+    isMinified: MINIFIED_PATTERN.test(name),
+    isTestFile: TEST_PATH_PATTERN.test(relPath) || TEST_FILE_PATTERN.test(name),
+  };
+}
+
 /** Binary/generated file extensions to always skip */
 const SKIP_EXTENSIONS = new Set([
   '.exe', '.dll', '.so', '.dylib', '.o', '.obj', '.class',
@@ -74,12 +109,14 @@ export async function discoverFiles(
       }
 
       consola.info(`Discovered 1 file to scan`);
+      const classification = classifyFile(name, name);
       return [{
         path: absoluteTarget,
         relativePath: name,
         language: language || 'unknown',
         size: stat.size,
         isDependencyFile: DEPENDENCY_FILES.has(name),
+        ...classification,
       }];
     }
   } catch {
@@ -146,12 +183,14 @@ export async function discoverFiles(
       continue;
     }
 
+    const classification = classifyFile(relPath, name);
     discovered.push({
       path: absPath,
       relativePath: relPath,
       language: language || 'unknown',
       size,
       isDependencyFile: DEPENDENCY_FILES.has(name),
+      ...classification,
     });
   }
 

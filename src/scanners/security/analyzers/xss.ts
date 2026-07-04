@@ -3,7 +3,7 @@
 
 import type { Finding, Severity, Confidence } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext } from '../../base-scanner.js';
 
 // ─── Pattern Definitions ───────────────────────────────────────────────────
 
@@ -259,6 +259,9 @@ export function analyzeXSS(context: ScanFileContext): Finding[] {
         continue;
       }
 
+      // Skip matches inside pattern/rule definition contexts
+      if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
+
       // Skip if the line contains a known sanitization/escaping function to avoid false positives
       if (trimmed.includes('escapeHtml') || trimmed.includes('escapeHTML') || trimmed.includes('DOMPurify') || trimmed.includes('sanitizeHtml')) {
         continue;
@@ -282,6 +285,21 @@ export function analyzeXSS(context: ScanFileContext): Finding[] {
           if (isStaticString) {
             continue;
           }
+        }
+
+        // Skip innerHTML in report/template generator files – these generate HTML output
+        // for file-based reports, not user-facing DOM manipulation
+        if (
+          filePath.includes('reporter') ||
+          filePath.includes('template') ||
+          filePath.includes('report-generator')
+        ) {
+          continue;
+        }
+
+        // Skip innerHTML where a custom escaping function (esc(), escapeHtml()) is applied to interpolated values
+        if (innerHtmlMatch && /\besc\s*\(/.test(match.lineContent)) {
+          continue;
         }
       }
 

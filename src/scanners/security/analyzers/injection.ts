@@ -3,7 +3,7 @@
 
 import type { Finding } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isInCommentOrString, isPatternDefinitionContext } from '../../base-scanner.js';
 
 // ─── SQL Injection Detection ───────────────────────────────────────────────
 
@@ -305,6 +305,10 @@ function detectPatterns(
   for (const { regex, message } of patterns) {
     const matches = matchPattern(source, regex);
     for (const match of matches) {
+      // Skip matches inside comments or pattern/rule definition contexts
+      if (isInCommentOrString(match.lineContent, match.column)) continue;
+      if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
+
       const snippet = extractSnippet(source, match.line);
       findings.push(
         createFinding({

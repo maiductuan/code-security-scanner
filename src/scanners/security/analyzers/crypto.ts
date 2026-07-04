@@ -4,7 +4,7 @@
 
 import type { Finding, Severity, Confidence } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext } from '../../base-scanner.js';
 
 // ─── Pattern Definitions ───────────────────────────────────────────────────
 
@@ -284,6 +284,9 @@ export function analyzeCrypto(context: ScanFileContext): Finding[] {
       if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) {
         continue;
       }
+
+      // Skip matches inside pattern/rule definition contexts
+      if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
 
       // Skip Math.random() in non-cryptographic/non-security contexts (e.g. UI key/ID generation)
       if (pattern.subcategory === 'insecure-random' && pattern.regex.source.includes('Math\\.random')) {

@@ -56,8 +56,8 @@ describe('DeepScan Integration Test', () => {
     expect(cmdInjections.length).toBeGreaterThan(0);
     expect(cmdInjections[0].location.file).toContain('vulnerable-app.js');
 
-    // Verify secrets
-    const secrets = findings.filter(f => f.ruleId === 'SEC-SEC-001' || f.ruleId === 'security/hardcoded-secret');
+    // Verify secrets (API keys still fire in test files; password patterns are intentionally skipped)
+    const secrets = findings.filter(f => f.ruleId === 'SEC-SEC-010' || f.ruleId === 'SEC-SEC-011' || f.ruleId === 'SEC-SEC-001' || f.ruleId === 'security/hardcoded-secret');
     expect(secrets.length).toBeGreaterThan(0);
 
     // Verify weak crypto

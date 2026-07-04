@@ -142,6 +142,228 @@ export function isInCommentOrString(line: string, column: number): boolean {
   return false;
 }
 
+/**
+ * Check if a regex match falls inside a pattern/rule definition context,
+ * indicating a likely false positive when scanning static analysis tool
+ * source code or similar data-definition files.
+ *
+ * Detects:
+ * 1. Match inside a regex literal: /somePattern/flags
+ * 2. Line is a property in a pattern/rule definition object
+ *    (e.g., `regex: /.../, pattern: '...', message: '...'`)
+ * 3. Line defines a taint sink/source pattern string
+ *    (e.g., `{ pattern: 'eval($TAINTED)', ... }`)
+ * 4. Match inside a string literal that is being assigned to a data property
+ */
+export function isPatternDefinitionContext(lineContent: string, column: number): boolean {
+  const trimmed = lineContent.trimStart();
+
+  // 1. Line is a property in a pattern definition object
+  //    (regex:, pattern:, message:, description:)
+  if (/^\s*(?:regex|pattern|message|description)\s*[:=]\s/.test(lineContent)) {
+    return true;
+  }
+
+  // 2. Check if match is inside a regex literal on this line
+  //    Look for the pattern: / ... <match> ... /flags
+  //    We scan for regex literal boundaries (unescaped `/` not preceded by `\`)
+  const regexLiteralRanges = findRegexLiteralRanges(lineContent);
+  const colIdx = column - 1; // Convert to 0-indexed
+  for (const [start, end] of regexLiteralRanges) {
+    if (colIdx >= start && colIdx <= end) {
+      return true;
+    }
+  }
+
+  // 3. Taint sink/source definition strings
+  //    e.g., { pattern: 'eval($TAINTED)', type: 'code_injection', description: '...' }
+  if (/\bpattern\s*:\s*['"]/.test(trimmed) && /\$TAINTED|\$BUF|\$X/.test(trimmed)) {
+    return true;
+  }
+
+  // 4. Line is inside a taint sink/source array entry
+  //    e.g., { pattern: 'system($TAINTED)', type: 'command_injection', ... }
+  if (/\btype\s*:\s*'(?:code_injection|command_injection|sql_injection|xss|path_traversal|buffer_overflow|format_string|file_inclusion|deserialization|network)'/.test(trimmed)) {
+    return true;
+  }
+
+  // 5. Line contains a string that defines a detection pattern with meta-references
+  //    e.g., cwe: ['CWE-...'], or severity: '...' as part of rule definition objects
+  if (/\bcwe\s*:\s*\[/.test(trimmed) && /\bseverity\s*:\s*['"]/.test(lineContent)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Find ranges (start, end) of regex literals in a line of JavaScript/TypeScript code.
+ * Returns an array of [startIndex, endIndex] pairs (0-indexed, inclusive).
+ * Handles escaped characters inside regex literals.
+ */
+function findRegexLiteralRanges(line: string): Array<[number, number]> {
+  const ranges: Array<[number, number]> = [];
+  const len = line.length;
+  let i = 0;
+
+  while (i < len) {
+    const ch = line[i];
+
+    // Skip string literals (single, double, backtick)
+    if (ch === "'" || ch === '"' || ch === '`') {
+      i = skipStringLiteral(line, i);
+      continue;
+    }
+
+    // Skip single-line comments
+    if (ch === '/' && i + 1 < len && line[i + 1] === '/') {
+      break; // Rest of line is a comment
+    }
+
+    // Detect regex literal start
+    // A `/` is a regex start if preceded by certain tokens (heuristic)
+    if (ch === '/' && i + 1 < len && line[i + 1] !== '/' && line[i + 1] !== '*') {
+      if (isRegexStart(line, i)) {
+        const start = i;
+        i++; // skip opening /
+        // Find closing /
+        while (i < len) {
+          if (line[i] === '\\' && i + 1 < len) {
+            i += 2; // skip escaped character
+            continue;
+          }
+          if (line[i] === '/') {
+            // Skip flags after closing /
+            const end = i;
+            i++;
+            while (i < len && /[gimsuy]/.test(line[i])) i++;
+            ranges.push([start, end]);
+            break;
+          }
+          i++;
+        }
+        continue;
+      }
+    }
+
+    i++;
+  }
+
+  return ranges;
+}
+
+/**
+ * Heuristic: check if a `/` at position `pos` in `line` is the start of a regex literal.
+ * A `/` starts a regex if the preceding non-whitespace token is one of:
+ *   = ( [ ! & | ? : ; , { } ~ ^ % + - * return typeof void delete case in instanceof
+ * or the line starts with `/` (beginning of statement).
+ */
+function isRegexStart(line: string, pos: number): boolean {
+  if (pos === 0) return true;
+
+  // Look backwards for the previous non-whitespace character
+  let j = pos - 1;
+  while (j >= 0 && (line[j] === ' ' || line[j] === '\t')) j--;
+  if (j < 0) return true;
+
+  const prevChar = line[j];
+  // These characters can precede a regex literal
+  if ('=([!&|?:;,{}~^%+-*<>'.includes(prevChar)) return true;
+
+  // Check for keyword predecessors (return, typeof, etc.)
+  const before = line.substring(0, j + 1).trimEnd();
+  if (/(?:return|typeof|void|delete|case|in|instanceof|new|throw|of)\s*$/.test(before)) return true;
+
+  return false;
+}
+
+/**
+ * Skip a string literal starting at position `pos` in `line`.
+ * Returns the index after the closing quote.
+ */
+function skipStringLiteral(line: string, pos: number): number {
+  const quote = line[pos];
+  let i = pos + 1;
+  while (i < line.length) {
+    if (line[i] === '\\' && i + 1 < line.length) {
+      i += 2; // skip escaped character
+      continue;
+    }
+    if (line[i] === quote) {
+      return i + 1;
+    }
+    i++;
+  }
+  return i;
+}
+
+/**
+ * Check if a match at (line, column) is in a "safe" AST context:
+ * string literal, comment, import statement, or type annotation.
+ * Uses tree-sitter AST if available, otherwise returns false (falls back to regex heuristics).
+ * 
+ * @param tree - Tree from web-tree-sitter (or null)
+ * @param line - 1-indexed line number
+ * @param column - 1-indexed column number
+ */
+export function isInSafeASTContext(
+  tree: import('web-tree-sitter').Tree | null,
+  line: number,
+  column: number,
+): boolean {
+  if (!tree) return false;
+
+  try {
+    // Get the AST node at the match position (tree-sitter uses 0-indexed)
+    const node = tree.rootNode.descendantForPosition({ row: line - 1, column: column - 1 });
+    if (!node) return false;
+
+    // Walk up ancestors to check context
+    let current: import('web-tree-sitter').Node | null = node;
+    while (current) {
+      const type = current.type;
+
+      // Comments
+      if (type === 'comment' || type === 'line_comment' || type === 'block_comment') return true;
+
+      // String literals (but NOT template literals with substitutions — those may embed code)
+      if (
+        type === 'string' || type === 'string_literal' ||
+        type === 'string_content' || type === 'interpreted_string_literal'
+      ) return true;
+
+      // Template strings are only safe if they have no interpolation
+      if (type === 'template_string') {
+        let hasInterpolation = false;
+        for (let i = 0; i < current.childCount; i++) {
+          if (current.child(i)?.type === 'template_substitution') {
+            hasInterpolation = true;
+            break;
+          }
+        }
+        if (!hasInterpolation) return true;
+      }
+
+      // Import/require statements
+      if (
+        type === 'import_statement' || type === 'import_declaration' ||
+        type === 'import_from_statement'
+      ) return true;
+
+      // Type annotations (TypeScript)
+      if (
+        type === 'type_annotation' || type === 'type_alias_declaration' ||
+        type === 'interface_declaration'
+      ) return true;
+
+      current = current.parent;
+    }
+  } catch {
+    // Tree-sitter errors — fall back gracefully
+  }
+  return false;
+}
+
 // ─── Abstract Base Scanner ─────────────────────────────────────────────────
 
 /**
@@ -194,6 +416,12 @@ export abstract class BaseScanner implements IScanner {
             // Skip matches inside comments
             if (isInCommentOrString(match.lineContent, match.column)) continue;
 
+            // Skip matches inside pattern/rule definition contexts (regex literals, data objects)
+            if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
+
+            // AST-based context check: skip matches in string literals, comments, imports, type annotations
+            if (context.tree && isInSafeASTContext(context.tree, match.line, match.column)) continue;
+
             // Skip secrets rules matching environment variables or template strings
             if (
               rule.category === 'secrets' ||
@@ -201,6 +429,16 @@ export abstract class BaseScanner implements IScanner {
               rule.id.includes('secret') ||
               rule.id.includes('password')
             ) {
+              // Skip password/secret rules in test files (dummy credentials are expected)
+              // But NOT API key/token rules — those are real leaks even in tests
+              const isPasswordRule = rule.id.includes('password') || rule.id.includes('secret') || rule.id === 'security/hardcoded-secret';
+              if (isPasswordRule) {
+                const TEST_PATH = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration)[\\/]/i;
+                const TEST_FILE = /\.(?:test|spec|mock|fixture)\./i;
+                if (TEST_PATH.test(context.filePath) || TEST_FILE.test(context.filePath)) {
+                  continue;
+                }
+              }
               const line = match.lineContent;
               const val = match.match;
               // Skip lines that reference environment variables
@@ -249,6 +487,20 @@ export abstract class BaseScanner implements IScanner {
                 if (isStaticString) {
                   continue;
                 }
+              }
+
+              // Skip innerHTML in report/template generator files
+              if (
+                context.filePath.includes('reporter') ||
+                context.filePath.includes('template') ||
+                context.filePath.includes('report-generator')
+              ) {
+                continue;
+              }
+
+              // Skip innerHTML where a custom escaping function is used
+              if (innerHtmlMatch && /\besc\s*\(/.test(line)) {
+                continue;
               }
             }
 

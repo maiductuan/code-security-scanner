@@ -98,7 +98,7 @@ export class SecurityScanner extends BaseScanner implements IScanner {
     // Run taint flow analysis if deep analysis is enabled
     if (context.config?.deep) {
       try {
-        const taintResults = analyzeTaintFlow(context.content, context.filePath, context.language);
+        const taintResults = analyzeTaintFlow(context.content, context.filePath, context.language, context.tree);
         for (const res of taintResults) {
           if (!res.hasTaintedSink || res.flow.length === 0) continue;
           const sinkStep = res.flow[res.flow.length - 1];

@@ -392,6 +392,19 @@ const ENTROPY_FALSE_POSITIVES = new Set([
   '0123456789', '1234567890',
 ]);
 
+// ── Test file/directory detection ──
+const TEST_PATH_PATTERN = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration|cypress|playwright)[\\/]/i;
+const TEST_FILE_PATTERN = /\.(?:test|spec|mock|fixture|e2e|cy)\./i;
+const TEST_FILE_NAMES = /(?:^|[\\/])(?:conftest\.py|test_helper\.rb|setup_test\.go|jest\.setup\.|vitest\.setup\.)$/i;
+
+function isTestFile(filePath: string): boolean {
+  return TEST_PATH_PATTERN.test(filePath) || TEST_FILE_PATTERN.test(filePath) || TEST_FILE_NAMES.test(filePath);
+}
+
+// ── ORM/Schema/Model definition detection ──
+const SCHEMA_DEFINITION_PATTERN = /(?:type|Type)\s*:\s*(?:String|Number|Boolean|Date|Object|Array|Mixed|mongoose\.Schema|DataTypes|Sequelize)/i;
+const TS_TYPE_DECLARATION = /^\s*(?:password|passwd|secret|token|key|apiKey|api_key|credential)\s*[?:]?\s*:\s*(?:string|number|boolean|any)\b/i;
+
 // ─── Main Analyzer Function ────────────────────────────────────────────────
 
 /**
@@ -409,23 +422,29 @@ export function analyzeSecrets(context: ScanFileContext): Finding[] {
     if (ext.endsWith(skipExt)) return findings;
   }
 
-  // Run password patterns
-  for (const pattern of PASSWORD_PATTERNS) {
-    findings.push(...detectSecretPattern(content, filePath, pattern));
+  const inTestFile = isTestFile(filePath);
+
+  // Run password patterns — skip in test files (dummy credentials are expected)
+  if (!inTestFile) {
+    for (const pattern of PASSWORD_PATTERNS) {
+      findings.push(...detectSecretPattern(content, filePath, pattern));
+    }
   }
 
-  // Run API key patterns
+  // Run API key patterns — ALWAYS run (API keys in tests = real leaks)
   for (const pattern of API_KEY_PATTERNS) {
     findings.push(...detectSecretPattern(content, filePath, pattern));
   }
 
-  // Run private key patterns
+  // Run private key patterns — ALWAYS run (private keys in tests = real leaks)
   for (const pattern of PRIVATE_KEY_PATTERNS) {
     findings.push(...detectSecretPattern(content, filePath, pattern));
   }
 
-  // Detect high-entropy strings
-  findings.push(...detectHighEntropyStrings(content, filePath));
+  // Detect high-entropy strings — skip in test files
+  if (!inTestFile) {
+    findings.push(...detectHighEntropyStrings(content, filePath));
+  }
 
   return findings;
 }
@@ -452,6 +471,26 @@ function detectSecretPattern(source: string, filePath: string, pattern: SecretPa
       /(?:example|placeholder|your[_-]|changeme|xxxx|TODO|FIXME)/i.test(match.match)
     ) {
       continue;
+    }
+
+    // Skip ORM/schema/model field definitions (password: { type: String })
+    if (SCHEMA_DEFINITION_PATTERN.test(match.lineContent)) {
+      continue;
+    }
+    // Skip TypeScript/interface type declarations (password?: string)
+    if (TS_TYPE_DECLARATION.test(trimmed)) {
+      continue;
+    }
+
+    // For password patterns, skip trivially low-entropy values ('test', 'admin', 'password')
+    if (pattern.subcategory === 'hardcoded-password') {
+      const secretValueMatch = match.match.match(/[=:]\s*['"]([^'"]+)['"]/);
+      if (secretValueMatch) {
+        const secretValue = secretValueMatch[1];
+        if (shannonEntropy(secretValue) < 2.0) {
+          continue;
+        }
+      }
     }
 
     const snippet = extractSnippet(source, match.line);

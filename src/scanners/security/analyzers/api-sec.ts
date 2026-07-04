@@ -4,7 +4,7 @@
 
 import type { Finding, Severity, Confidence } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext } from '../../base-scanner.js';
 
 interface APISecPattern {
   regex: RegExp;
@@ -217,6 +217,9 @@ export function analyzeAPISec(context: ScanFileContext): Finding[] {
       if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) {
         continue;
       }
+
+      // Skip matches inside pattern/rule definition contexts
+      if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
 
       // Skip Java DocumentBuilderFactory / XMLInputFactory if safe features are explicitly configured
       if (pattern.subcategory === 'xxe' && pattern.ruleId === 'SEC-XXE-001') {

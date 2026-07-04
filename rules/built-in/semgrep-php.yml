@@ -654,6 +654,37 @@ rules:
       - https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
     tags:
       - php
+  - id: trigger-error
+    name: trigger-error
+    description: >-
+      The `$message` parameter to `trigger_error` is not HTML-encoded. If the error is displayed in a browser, this
+      risks a cross-site scripting vulnerability. Escape the message with `htmlentities()` or disable `display_errors`.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - php
+    patterns:
+      - regex: .*
+        message: >-
+          The `$message` parameter to `trigger_error` is not HTML-encoded. If the error is displayed in a browser, this
+          risks a cross-site scripting vulnerability. Escape the message with `htmlentities()` or disable
+          `display_errors`.
+    cwe:
+      - CWE-79
+    owasp:
+      - A07:2017
+      - A03:2021
+    references:
+      - https://www.php.net/trigger_error
+      - https://bugs.php.net/bug.php?id=77074
+      - https://www.php.net/manual/en/function.htmlentities.php
+      - https://www.php.net/manual/en/reserved.variables.request.php
+      - https://www.php.net/manual/en/reserved.variables.post.php
+      - https://www.php.net/manual/en/reserved.variables.get.php
+      - https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+    tags:
+      - php
   - id: ldap-bind-without-password
     name: ldap-bind-without-password
     description: >-

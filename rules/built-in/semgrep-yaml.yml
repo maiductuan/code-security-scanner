@@ -553,6 +553,37 @@ rules:
       - https://github.com/actions/toolkit/blob/main/docs/commands.md#environment-files
     tags:
       - github-actions
+  - id: third-party-action-not-pinned-to-commit-sha
+    name: third-party-action-not-pinned-to-commit-sha
+    description: >-
+      An action sourced from a third-party repository on GitHub is not pinned to a full length commit SHA. Pinning an
+      action to a full length commit SHA is currently the only way to use an action as an immutable release. Pinning to
+      a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's repository, as they
+      would need to generate a SHA-1 collision for a valid Git object payload.
+    category: security
+    severity: medium
+    confidence: medium
+    languages:
+      - yaml
+    patterns:
+      - pattern: |
+          uses: "$USES"
+        message: >-
+          An action sourced from a third-party repository on GitHub is not pinned to a full length commit SHA. Pinning
+          an action to a full length commit SHA is currently the only way to use an action as an immutable release.
+          Pinning to a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's
+          repository, as they would need to generate a SHA-1 collision for a valid Git object payload.
+    cwe:
+      - CWE-1357
+      - CWE-353
+    owasp:
+      - A06:2021
+    references:
+      - https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components
+      - >-
+        https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+    tags:
+      - github-actions
   - id: unsafe-add-mask-workflow-command
     name: unsafe-add-mask-workflow-command
     description: >-
@@ -880,37 +911,6 @@ rules:
         https://docs.github.com/en/actions/sharing-automations/reusing-workflows#passing-inputs-and-secrets-to-a-reusable-workflow
       - >-
         https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
-    tags:
-      - github-actions
-  - id: third-party-action-not-pinned-to-commit-sha
-    name: third-party-action-not-pinned-to-commit-sha
-    description: >-
-      An action sourced from a third-party repository on GitHub is not pinned to a full length commit SHA. Pinning an
-      action to a full length commit SHA is currently the only way to use an action as an immutable release. Pinning to
-      a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's repository, as they
-      would need to generate a SHA-1 collision for a valid Git object payload.
-    category: security
-    severity: medium
-    confidence: medium
-    languages:
-      - yaml
-    patterns:
-      - pattern: |
-          uses: "$USES"
-        message: >-
-          An action sourced from a third-party repository on GitHub is not pinned to a full length commit SHA. Pinning
-          an action to a full length commit SHA is currently the only way to use an action as an immutable release.
-          Pinning to a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's
-          repository, as they would need to generate a SHA-1 collision for a valid Git object payload.
-    cwe:
-      - CWE-1357
-      - CWE-353
-    owasp:
-      - A06:2021
-    references:
-      - https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components
-      - >-
-        https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
     tags:
       - github-actions
   - id: workflow-run-target-code-checkout

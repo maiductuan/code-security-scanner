@@ -8,7 +8,7 @@ scanners:
       - medium
       - low
   quality:
-    enabled: true
+    enabled: false
     thresholds:
       maxComplexity: 15
       maxCognitiveComplexity: 20
@@ -17,7 +17,7 @@ scanners:
       maxNestingDepth: 4
       minCommentRatio: 0.1
   cve:
-    enabled: true
+    enabled: false
     sources:
       - osv
     failOnSeverity: critical

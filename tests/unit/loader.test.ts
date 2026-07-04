@@ -49,7 +49,7 @@ describe('Config Loader', () => {
     });
     expect(config.version).toBe('1.0');
     expect(config.scanners.security.enabled).toBe(true);
-    expect(config.scanners.quality.enabled).toBe(true);
+    expect(config.scanners.quality.enabled).toBe(false);
   });
 
   it('should apply presets', async () => {
