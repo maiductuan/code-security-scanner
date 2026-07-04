@@ -5,6 +5,7 @@
 **The 100% Free, Lightning-Fast Alternative to Commercial SAST Tools.**  
 *Zero False Positives Architecture • AST-Powered Context • AI Auto-Remediation*
 
+[![npm version](https://img.shields.io/npm/v/deepscan-cli.svg)](https://www.npmjs.com/package/deepscan-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
@@ -49,6 +50,8 @@ Scan your entire monorepo without installing 10 different tools:
 ## 🚀 Quick Start
 
 ### Installation
+
+Install globally from [npm](https://www.npmjs.com/package/deepscan-cli):
 
 ```bash
 npm install -g deepscan-cli
