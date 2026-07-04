@@ -1,8 +1,0 @@
---- EVALUATION SUMMARY ---
-Expected Vulnerabilities: 29
-Successfully Caught (TP): 29
-Missed (FN):              0
-False Positives (FP):     0
-Recall (Detection Rate):  100.0%
-Precision:                100.0%
-F1 Score:                 100.0%
