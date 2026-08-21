@@ -87,4 +87,9 @@ export interface DeepScanConfig {
   parallel: number;
   incremental: boolean;
   deep: boolean;
+  cache?: boolean;
+  cacheLocation?: string;
+  failOn?: Severity[];
+  watch?: boolean;
 }
+

@@ -8,9 +8,11 @@ import { RuleEngine } from '../rules/rule-engine.js';
 import { getLanguageConfig } from '../languages/registry.js';
 import { AIValidator } from './ai-validator.js';
 import { ASTParser } from './ast-parser.js';
+import { filterSuppressedFindings } from './suppression.js';
+import { ScanCache } from './cache.js';
 
 /** DeepScan version */
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 /**
  * Main scanning pipeline orchestrator
@@ -20,6 +22,7 @@ export class ScanPipeline {
   private scanners: IScanner[] = [];
   private ruleEngine: RuleEngine;
   private astParser: ASTParser;
+  private cache: ScanCache | null = null;
   private findings: Finding[] = [];
 
   constructor(config: DeepScanConfig) {
@@ -48,6 +51,15 @@ export class ScanPipeline {
     // Step 1: Initialize rule engine
     await this.ruleEngine.initialize();
 
+    // Step 1.2: Initialize local scan cache
+    this.cache = new ScanCache(
+      targetPath,
+      this.config.cache !== false,
+      this.config.cacheLocation,
+      this.ruleEngine.getRulesHash(),
+    );
+    this.cache.load();
+
     // Step 1.5: Initialize AST parser (non-blocking, degrades gracefully)
     await this.astParser.initialize();
 
@@ -61,6 +73,7 @@ export class ScanPipeline {
       targetPath,
       this.config.paths,
       this.config.languages,
+      this.config.incremental,
     );
 
     if (files.length === 0) {
@@ -68,22 +81,30 @@ export class ScanPipeline {
       return this.buildResult(targetPath, startTime, files.length);
     }
 
-    // Step 4: Scan each file
+    // Step 4: Scan files concurrently with configured worker limit
     let processed = 0;
     const totalFiles = files.length;
+    const concurrency = Math.max(1, Math.min(32, this.config.parallel || 4));
+    let nextIndex = 0;
 
-    for (const file of files) {
-      try {
-        await this.scanFile(file);
-      } catch (error) {
-        consola.debug(`Error scanning ${file.relativePath}:`, error);
-      }
+    const workers = Array.from({ length: Math.min(concurrency, files.length) }, async () => {
+      while (nextIndex < files.length) {
+        const currentIndex = nextIndex++;
+        const file = files[currentIndex];
+        try {
+          await this.scanFile(file);
+        } catch (error) {
+          consola.debug(`Error scanning ${file.relativePath}:`, error);
+        }
 
-      processed++;
-      if (onProgress) {
-        onProgress(processed, totalFiles, file.relativePath);
+        processed++;
+        if (onProgress) {
+          onProgress(processed, totalFiles, file.relativePath);
+        }
       }
-    }
+    });
+
+    await Promise.all(workers);
 
     // Step 4.5: AI Validation (if enabled)
     if (this.config.ai?.enabled) {
@@ -99,7 +120,9 @@ export class ScanPipeline {
       }
     }
 
-    // Step 5: Cleanup
+    // Step 5: Save cache & Cleanup
+    this.cache.save();
+
     for (const scanner of this.scanners) {
       await scanner.destroy();
     }
@@ -122,6 +145,14 @@ export class ScanPipeline {
     const content = readFileContent(file.path);
     if (!content) return;
 
+    // Check cache hit
+    const contentHash = ScanCache.hashContent(content);
+    const cached = this.cache?.get(file.relativePath, contentHash);
+    if (cached) {
+      this.findings.push(...cached);
+      return;
+    }
+
     // Get language-specific rules
     const rules = this.ruleEngine.getRulesForLanguage(file.language);
 
@@ -138,6 +169,8 @@ export class ScanPipeline {
       config: this.config,
       rules,
     };
+
+    const fileFindings: Finding[] = [];
 
     // Run each scanner
     for (const scanner of this.scanners) {
@@ -166,11 +199,18 @@ export class ScanPipeline {
           return true;
         });
 
-        this.findings.push(...filteredFindings);
+        fileFindings.push(...filteredFindings);
       } catch (error) {
         consola.debug(`Scanner ${scanner.name} failed on ${file.relativePath}:`, error);
       }
     }
+
+    // Filter inline suppressions
+    const unsuppressed = filterSuppressedFindings(fileFindings, content);
+    this.findings.push(...unsuppressed);
+
+    // Cache the result for this file
+    this.cache?.set(file.relativePath, contentHash, unsuppressed);
   }
 
   /**

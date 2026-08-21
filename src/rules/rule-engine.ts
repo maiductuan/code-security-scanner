@@ -73,6 +73,14 @@ export class RuleEngine {
   }
 
   /**
+   * Get a deterministic hash representing the current loaded rules
+   */
+  getRulesHash(): string {
+    const keys = Array.from(this.rules.keys()).sort().join(',');
+    return `${this.rules.size}:${keys.length}`;
+  }
+
+  /**
    * Load built-in rules from the rules directory
    */
   private async loadBuiltInRules(): Promise<void> {

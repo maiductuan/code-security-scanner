@@ -87,6 +87,10 @@ export const DeepScanConfigSchema = z.object({
   parallel: z.number().min(1).max(32).default(4),
   incremental: z.boolean().default(false),
   deep: z.boolean().default(false),
+  cache: z.boolean().default(true),
+  cacheLocation: z.string().optional(),
+  failOn: z.array(SeveritySchema).optional(),
+  watch: z.boolean().default(false),
 });
 
 /** Rule YAML schema validation */

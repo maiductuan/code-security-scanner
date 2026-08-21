@@ -4,7 +4,7 @@ import { createInitCommand } from './commands/init.js';
 import { createRulesCommand } from './commands/rules.js';
 import { createReportCommand } from './commands/report.js';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 /**
  * Create the DeepScan CLI application

@@ -1,11 +1,60 @@
 import { readFileSync, statSync } from 'node:fs';
 import { resolve, relative, extname, basename } from 'node:path';
+import { execSync } from 'node:child_process';
 import { glob } from 'glob';
 import ignore, { type Ignore } from 'ignore';
 import { consola } from 'consola';
 import type { DiscoveredFile } from '../types/scanner.js';
 import type { PathsConfig } from '../types/config.js';
 import { getLanguageByExtension } from '../languages/registry.js';
+
+/**
+ * Get changed files using git status and git diff
+ */
+export function getGitChangedFiles(targetDir: string): Set<string> | null {
+  try {
+    const changedFiles = new Set<string>();
+
+    // Get uncommitted / unstaged / untracked changes
+    const statusOutput = execSync('git status --porcelain -uall', {
+      cwd: targetDir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+
+    for (const line of statusOutput.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      // Porcelain format: XY PATH or XY "PATH" or XY ORIG -> NEW
+      const filePath = trimmed.substring(3).trim().replace(/^"|"$/g, '').split(' -> ').pop();
+      if (filePath) {
+        changedFiles.add(filePath.replace(/\\/g, '/'));
+      }
+    }
+
+    // Get changes compared to HEAD (staged or committed locally)
+    try {
+      const diffOutput = execSync('git diff --name-only HEAD', {
+        cwd: targetDir,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'ignore'],
+      });
+      for (const line of diffOutput.split('\n')) {
+        const filePath = line.trim();
+        if (filePath) {
+          changedFiles.add(filePath.replace(/\\/g, '/'));
+        }
+      }
+    } catch {
+      // HEAD may not exist on empty git repos, ignore
+    }
+
+    return changedFiles;
+  } catch {
+    consola.debug('Target is not a git repository or git is not installed; skipping incremental git filter.');
+    return null;
+  }
+}
 
 /** Dependency manifest files that trigger CVE scanning */
 const DEPENDENCY_FILES = new Set([
@@ -72,8 +121,18 @@ export async function discoverFiles(
   targetPath: string,
   paths: PathsConfig,
   languages: string[],
+  incremental: boolean = false,
 ): Promise<DiscoveredFile[]> {
   const absoluteTarget = resolve(targetPath);
+
+  // If incremental mode is enabled, discover which files were changed in Git
+  let gitChangedFiles: Set<string> | null = null;
+  if (incremental) {
+    gitChangedFiles = getGitChangedFiles(absoluteTarget);
+    if (gitChangedFiles) {
+      consola.info(`Git incremental scan active: ${gitChangedFiles.size} changed/staged files detected`);
+    }
+  }
 
   // If targetPath is a file, return it directly if it matches language and size limits
   try {
@@ -144,8 +203,15 @@ export async function discoverFiles(
   const discovered: DiscoveredFile[] = [];
 
   for (const relPath of files) {
+    const normalizedRelPath = relPath.replace(/\\/g, '/');
+
     // Check ignore patterns
     if (ig.ignores(relPath)) continue;
+
+    // Check git incremental filter if active
+    if (gitChangedFiles && !gitChangedFiles.has(normalizedRelPath)) {
+      continue;
+    }
 
     const ext = extname(relPath).toLowerCase();
     const name = basename(relPath);
