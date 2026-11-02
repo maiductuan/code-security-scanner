@@ -51,12 +51,21 @@ export class ScanPipeline {
     // Step 1: Initialize rule engine
     await this.ruleEngine.initialize();
 
-    // Step 1.2: Initialize local scan cache
+    // Step 1.2: Initialize local scan cache (include active scanners & scanner config in hash)
+    const cacheConfigHash = ScanCache.hashContent(
+      JSON.stringify({
+        version: VERSION,
+        rulesHash: this.ruleEngine.getRulesHash(),
+        scanners: this.scanners.map(s => s.type).sort(),
+        scannerConfig: this.config.scanners,
+        deep: this.config.deep,
+      }),
+    );
     this.cache = new ScanCache(
       targetPath,
       this.config.cache !== false,
       this.config.cacheLocation,
-      this.ruleEngine.getRulesHash(),
+      cacheConfigHash,
     );
     this.cache.load();
 
@@ -149,7 +158,7 @@ export class ScanPipeline {
     const contentHash = ScanCache.hashContent(content);
     const cached = this.cache?.get(file.relativePath, contentHash);
     if (cached) {
-      this.findings.push(...cached);
+      for (const f of cached) this.findings.push(f);
       return;
     }
 
@@ -199,7 +208,7 @@ export class ScanPipeline {
           return true;
         });
 
-        fileFindings.push(...filteredFindings);
+        for (const f of filteredFindings) fileFindings.push(f);
       } catch (error) {
         consola.debug(`Scanner ${scanner.name} failed on ${file.relativePath}:`, error);
       }
@@ -207,7 +216,7 @@ export class ScanPipeline {
 
     // Filter inline suppressions
     const unsuppressed = filterSuppressedFindings(fileFindings, content);
-    this.findings.push(...unsuppressed);
+    for (const f of unsuppressed) this.findings.push(f);
 
     // Cache the result for this file
     this.cache?.set(file.relativePath, contentHash, unsuppressed);

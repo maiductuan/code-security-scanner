@@ -266,11 +266,50 @@ export function analyzeXSS(context: ScanFileContext): Finding[] {
       if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
 
       // Skip if the line contains a known sanitization/escaping function to avoid false positives
-      if (trimmed.includes('escapeHtml') || trimmed.includes('escapeHTML') || trimmed.includes('DOMPurify') || trimmed.includes('sanitizeHtml')) {
+      if (
+        trimmed.includes('escapeHtml') ||
+        trimmed.includes('escapeHTML') ||
+        trimmed.includes('DOMPurify') ||
+        trimmed.includes('sanitizeHtml') ||
+        trimmed.includes('ensureHtmlContent') ||
+        trimmed.includes('buildHtmlAndToc') ||
+        trimmed.includes('sanitize(') ||
+        trimmed.includes('purify(') ||
+        trimmed.includes('htmlspecialchars') ||
+        trimmed.includes('htmlentities')
+      ) {
         continue;
       }
 
-      // Skip static assignments to innerHTML / outerHTML to avoid false positives
+      // Check if preceding lines in scope sanitize the variable (Sanitizer context awareness)
+      const lineIdx = match.line - 1;
+      const startContext = Math.max(0, lineIdx - 8);
+      const precedingLines = content.split('\n').slice(startContext, lineIdx).join('\n');
+      const hasPrecedingSanitization = /(?:sanitizeHtml|DOMPurify|escapeHtml|escapeHTML|ensureHtmlContent|buildHtmlAndToc|sanitize|purify|htmlspecialchars|htmlentities)\s*\(/i.test(precedingLines);
+      const fileHasSanitizerImportOrDef = /(?:import\s+[^;]*\b(?:sanitizeHtml|DOMPurify|ensureHtmlContent|buildHtmlAndToc)\b|function\s+sanitizeHtml\b)/i.test(content);
+
+      // Skip sanitized dangerouslySetInnerHTML or insertAdjacentHTML when sanitizer helper is used in scope
+      if (
+        (pattern.subcategory === 'react-xss' && pattern.severity === 'medium') ||
+        (pattern.subcategory === 'dom-xss' && pattern.regex.source.includes('insertAdjacentHTML'))
+      ) {
+        if (hasPrecedingSanitization) {
+          continue;
+        }
+        // Check if variable passed to dangerouslySetInnerHTML={{ __html: varName }} was produced by a sanitizer in the file
+        const reactHtmlVar = match.lineContent.match(/__html\s*:\s*([a-zA-Z_$][\w$]*)/);
+        if (reactHtmlVar && fileHasSanitizerImportOrDef) {
+          const varName = reactHtmlVar[1];
+          const memoPrefix = '(?:(?:React\\.)?useMemo\\s*\\(\\s*(?:\\(\\s*\\)\\s*=>\\s*(?:\\{\\s*return\\s+)?)?)?';
+          const varDefRegex = new RegExp(`\\b${varName}\\b[^;=]*=\\s*${memoPrefix}(?:sanitizeHtml|DOMPurify\\.sanitize|ensureHtmlContent|buildHtmlAndToc)\\s*\\(`, 'i');
+          const destructuredDefRegex = new RegExp(`\\{[^}]*\\b${varName}\\b[^}]*\\}\\s*=\\s*${memoPrefix}(?:buildHtmlAndToc|ensureHtmlContent|sanitizeHtml)\\s*\\(`, 'i');
+          if (varDefRegex.test(content) || destructuredDefRegex.test(content)) {
+            continue;
+          }
+        }
+      }
+
+      // Skip static assignments or sanitized variables to innerHTML / outerHTML
       if (pattern.subcategory === 'dom-xss' && (pattern.regex.source.includes('innerHTML') || pattern.regex.source.includes('outerHTML'))) {
         const innerHtmlMatch = match.lineContent.match(/\.(?:inner|outer)HTML\s*\+?=\s*(.*)/i);
         if (innerHtmlMatch) {
@@ -278,6 +317,12 @@ export function analyzeXSS(context: ScanFileContext): Finding[] {
           if (rhs.endsWith(';')) {
             rhs = rhs.slice(0, -1).trim();
           }
+
+          // If assigned variable was sanitized in preceding lines or has a sanitized naming pattern
+          if (hasPrecedingSanitization || /^(?:safe|clean|sanitized|purified|escaped)[A-Z0-9_]/i.test(rhs) || /^(?:safe|clean|sanitized|purified|escaped)$/i.test(rhs)) {
+            continue;
+          }
+
           const singleQuoted = /^'[^'\\]*(?:\\.[^'\\]*)*'$/;
           const doubleQuoted = /^"[^"\\]*(?:\\.[^"\\]*)*"$/;
           const backtickQuoted = /^`[^`\\]*(?:\\.[^`\\]*)*`$/;
@@ -330,7 +375,7 @@ export function analyzeXSS(context: ScanFileContext): Finding[] {
           trimmed.includes('window.location.href=') ||
           trimmed.endsWith(']);') ||
           trimmed.endsWith('],') ||
-          /^(?:const|let|var)\s+\w+\s*=\s*(?:url\s*\|\|\s*)?window\.location\.(?:href|origin)/.test(trimmed);
+          /^(?:const|let|var)\s+\w+\s*=\s*(?:[\w.?]+\s*(?:\|\||\?\?)\s*)?(?:window\.)?location\.(?:href|origin|pathname)/.test(trimmed);
 
         if (hasSafeWords) {
           continue;

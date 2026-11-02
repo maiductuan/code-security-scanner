@@ -1,0 +1,157 @@
+name: Release & Publish Package
+
+on:
+  # 1. Tự động chạy khi bạn bấm "Publish release" trên giao diện GitHub
+  release:
+    types: [published]
+  # 2. Tự động chạy khi bạn push tag dạng v1.1.0 (sẽ tự tạo GitHub Release + publish Package)
+  push:
+    tags:
+      - 'v*.*.*'
+  # 3. Cho phép bấm chạy thủ công trong tab Actions -> Release & Publish Package -> Run workflow
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty to use package.json version)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release-and-publish:
+    name: Build, Release & Publish Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck & Run Tests
+        run: |
+          npm run typecheck
+          npm test
+          npm run evaluate
+
+      - name: Determine release version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            RAW_VER="${{ github.event.inputs.version }}"
+            RAW_VER="${RAW_VER#v}"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            RAW_VER="${GITHUB_REF#refs/tags/v}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            RAW_VER="${{ github.event.release.tag_name }}"
+            RAW_VER="${RAW_VER#v}"
+          else
+            RAW_VER=$(node -p "require('./package.json').version")
+          fi
+          echo "version=${RAW_VER}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${RAW_VER}" >> "$GITHUB_OUTPUT"
+          npm version "${RAW_VER}" --no-git-tag-version --allow-same-version
+
+      - name: Build CLI bundle
+        run: npm run build
+
+      - name: Create tarball (.tgz) for GitHub Release
+        id: pack
+        run: |
+          TGZ_FILE=$(npm pack)
+          echo "tgz=${TGZ_FILE}" >> "$GITHUB_OUTPUT"
+
+      - name: Create or Update GitHub Release & Upload Asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          TGZ="${{ steps.pack.outputs.tgz }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$TGZ" --clobber
+          else
+            gh release create "$TAG" "$TGZ" \
+              --title "DeepScan $TAG" \
+              --generate-notes
+          fi
+
+      - name: Configure npm for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@${{ github.repository_owner }}'
+
+      - name: Publish to GitHub Packages (@maiductuan/deepscan-cli)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          VER="${{ steps.version.outputs.version }}"
+          PKG_NAME="@${OWNER}/deepscan-cli"
+
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            const owner = process.env.GITHUB_REPOSITORY_OWNER.toLowerCase();
+            const repo = process.env.GITHUB_REPOSITORY;
+            pkg.name = `@${owner}/deepscan-cli`;
+            pkg.repository = {
+              type: "git",
+              url: `git+https://github.com/${repo}.git`
+            };
+            pkg.publishConfig = {
+              registry: "https://npm.pkg.github.com",
+              access: "public"
+            };
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+          '
+
+          if npm view "${PKG_NAME}@${VER}" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "Package ${PKG_NAME}@${VER} is already published on GitHub Packages. Skipping."
+          else
+            npm publish --ignore-scripts
+          fi
+
+      - name: Configure npm for npmjs.com (Optional)
+        if: ${{ env.NPM_TOKEN != '' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npmjs.com (deepscan-cli) if NPM_TOKEN is set
+        if: ${{ env.NPM_TOKEN != '' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VER="${{ steps.version.outputs.version }}"
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.name = "deepscan-cli";
+            delete pkg.publishConfig;
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+          '
+          if npm view "deepscan-cli@${VER}" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then
+            echo "Package deepscan-cli@${VER} is already published on npmjs.com. Skipping."
+          else
+            npm publish --access public --ignore-scripts
+          fi

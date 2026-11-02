@@ -19,6 +19,7 @@ export function createScanCommand(): Command {
   scan
     .description('Scan source code for security vulnerabilities and quality issues')
     .argument('[path]', 'Path to scan (default: current directory)', '.')
+    .allowExcessArguments(true)
     .option('-s, --scanners <scanners>', 'Scanner engines to use (comma-separated: security,quality,cve) [default: security]')
     .option('--security', 'Run security scanner only')
     .option('--quality', 'Run quality scanner only')
@@ -41,9 +42,24 @@ export function createScanCommand(): Command {
     .option('--cache-dir <dir>', 'Path to cache directory')
     .option('--fail-on <severities>', 'Fail scan (exit code 1) on matching severities (comma-separated: critical,high,medium,low)')
     .option('-w, --watch', 'Watch files and automatically re-scan on change')
-    .action(async (targetPath: string, options: Record<string, string | boolean | undefined>) => {
+    .action(async (targetPath: string, options: Record<string, string | boolean | undefined>, command: Command) => {
       try {
-        const absolutePath = resolve(targetPath);
+        const validScanners = new Set(['security', 'quality', 'cve']);
+        const extraArgs = (command?.args ?? []).slice(1);
+        let resolvedTargetPath = targetPath;
+        const extraScannerArgs: string[] = [];
+
+        if (options.scanners && validScanners.has(targetPath)) {
+          extraScannerArgs.push(targetPath);
+          resolvedTargetPath = extraArgs.find(arg => !validScanners.has(arg)) ?? '.';
+        }
+        for (const arg of extraArgs) {
+          if (validScanners.has(arg)) {
+            extraScannerArgs.push(arg);
+          }
+        }
+
+        const absolutePath = resolve(resolvedTargetPath);
 
         // Build CLI overrides from options
         const cliOverrides: Record<string, unknown> = {};
@@ -56,12 +72,30 @@ export function createScanCommand(): Command {
             cve: { enabled: !!options.cve },
           };
         } else if (options.scanners) {
-          const scannerList = (options.scanners as string).split(',');
-          cliOverrides.scanners = {
-            security: { enabled: scannerList.includes('security') },
-            quality: { enabled: scannerList.includes('quality') },
-            cve: { enabled: scannerList.includes('cve') },
-          };
+          const rawScanners = String(options.scanners);
+          // Windows PowerShell .ps1 shim converts unquoted comma lists (e.g. -s security,quality,cve) into "System.Object[]"
+          if (rawScanners.includes('System.Object[]')) {
+            cliOverrides.scanners = {
+              security: { enabled: true },
+              quality: { enabled: true },
+              cve: { enabled: true },
+            };
+          } else {
+            const scannerList = [
+              ...rawScanners.split(/[\s,]+/).map(s => s.trim().toLowerCase()).filter(Boolean),
+              ...extraScannerArgs,
+            ];
+            const hasValidScanner = scannerList.some(s => validScanners.has(s));
+            if (!hasValidScanner) {
+              consola.warn(`No valid scanner found in "${rawScanners}". Falling back to default (security).`);
+            } else {
+              cliOverrides.scanners = {
+                security: { enabled: scannerList.includes('security') },
+                quality: { enabled: scannerList.includes('quality') },
+                cve: { enabled: scannerList.includes('cve') },
+              };
+            }
+          }
         }
 
         if (options.format) {
@@ -69,9 +103,10 @@ export function createScanCommand(): Command {
         }
 
         if (options.severity) {
-          const severities = (options.severity as string).split(',');
+          const severities = (options.severity as string).split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
           if (!cliOverrides.scanners) cliOverrides.scanners = {};
-          (cliOverrides.scanners as Record<string, unknown>).security = { severity: severities };
+          const existingSec = ((cliOverrides.scanners as Record<string, unknown>).security as Record<string, unknown>) || {};
+          (cliOverrides.scanners as Record<string, unknown>).security = { ...existingSec, severity: severities };
         }
 
         if (options.include) {

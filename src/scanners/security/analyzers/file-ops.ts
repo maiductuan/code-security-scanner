@@ -57,7 +57,7 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
     cwe: ['CWE-22'],
   },
   {
-    regex: /\.\.(?:\/|\\)/,
+    regex: /(?<!\.)\.\.(?:\/|\\(?![nrt"'0\\]))/,
     message: 'Relative path traversal pattern (../) detected – verify this is safe',
     severity: 'low',
     confidence: 'low',

@@ -136,12 +136,9 @@ function convertSemgrepRule(semgrepRule: any, defaultCategory?: string): any {
     }
   }
 
-  // Default pattern if none resolved
+  // Skip rules that have no usable patterns instead of inserting catch-all '.*'
   if (patterns.length === 0) {
-    patterns.push({
-      regex: '.*', // dummy matching all
-      message: semgrepRule.message,
-    });
+    return null;
   }
 
   return {
@@ -168,7 +165,9 @@ export function convertSemgrepRules(inputPath: string, defaultCategory?: string)
     throw new Error('Invalid Semgrep rule file: rules array not found');
   }
 
-  const convertedRules = doc.rules.map((r: any) => convertSemgrepRule(r, defaultCategory));
+  const convertedRules = doc.rules
+    .map((r: any) => convertSemgrepRule(r, defaultCategory))
+    .filter((r: any) => r !== null);
 
   return { rules: convertedRules };
 }

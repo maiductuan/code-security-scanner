@@ -59,7 +59,7 @@ export class RuleEngine {
     return this.getAllRules().filter(r => {
       const category = r.category;
       if (scannerType === 'security') {
-        return ['injection', 'xss', 'secrets', 'auth', 'crypto', 'file-ops'].includes(category);
+        return ['injection', 'xss', 'secrets', 'auth', 'crypto', 'file-ops', 'api-security'].includes(category);
       }
       return ['complexity', 'duplication', 'code-smells', 'naming', 'metrics'].includes(category);
     });
@@ -110,6 +110,9 @@ export class RuleEngine {
       if (stat.isDirectory()) {
         const files = readdirSync(rulesPath);
         for (const file of files) {
+          if (file === 'default-config.yml' || file === '.deepscan.yml' || file === '.deepscan.yaml') {
+            continue;
+          }
           if (file.endsWith('.yml') || file.endsWith('.yaml')) {
             await this.loadRuleFile(join(rulesPath, file));
           }
@@ -129,6 +132,10 @@ export class RuleEngine {
     try {
       const content = readFileSync(filePath, 'utf-8');
       const raw = yaml.load(content) as Record<string, unknown>;
+      if (!raw || typeof raw !== 'object' || !Array.isArray(raw.rules)) {
+        consola.debug(`Skipping non-rule YAML file: ${filePath}`);
+        return;
+      }
       const validated = RuleFileSchema.parse(raw);
 
       for (const rule of validated.rules) {

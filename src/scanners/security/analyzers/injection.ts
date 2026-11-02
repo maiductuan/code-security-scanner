@@ -75,8 +75,18 @@ const SQL_ORM_PATTERNS: Array<{ regex: RegExp; message: string }> = [
   },
   {
     // PHP/Laravel DB raw queries with string concatenation using dot (.)
-    regex: /(?:DB\s*::\s*(?:select|statement|insert|update|delete|raw)|whereRaw|havingRaw|orderByRaw)\s*\(\s*["'](?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|UNION)\b[^"']*["']\s*\.\s*\$\w+/i,
+    regex: /(?:DB\s*::\s*(?:select|statement|insert|update|delete|raw)|whereRaw|havingRaw|orderByRaw|selectRaw|groupByRaw)\s*\(\s*["'][^"']*["']\s*\.\s*\$\w+/i,
     message: 'Laravel raw SQL query built with string concatenation – vulnerable to SQL injection',
+  },
+  {
+    // PHP/Laravel DB raw queries with double-quoted variable interpolation: orderByRaw("... $var ...") or DB::raw("... {$var} ...")
+    regex: /(?:DB\s*::\s*(?:select|statement|insert|update|delete|raw)|whereRaw|havingRaw|orderByRaw|selectRaw|groupByRaw)\s*\(\s*"[^"]*(?:\$[a-zA-Z_]\w*|\{\$[a-zA-Z_]\w*\})[^"]*"/i,
+    message: 'Laravel raw SQL query with variable interpolation – vulnerable to SQL injection. Use parameterized bindings [?].',
+  },
+  {
+    // General PHP SQL query with variable interpolation
+    regex: /(?:mysql_query|mysqli_query|pg_query|sqlite_query|\$pdo->query|\$db->query)\s*\(\s*"[^"]*(?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^"]*(?:\$[a-zA-Z_]\w*|\{\$[a-zA-Z_]\w*\})[^"]*"/i,
+    message: 'SQL query with PHP variable interpolation – vulnerable to SQL injection. Use prepared statements.',
   },
 ];
 

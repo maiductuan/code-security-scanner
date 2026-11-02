@@ -54,7 +54,7 @@ export function analyzeCodeSmells(context: ScanFileContext): Finding[] {
 function detectLongFile(lines: string[], filePath: string, content: string, maxFileLength: number): Finding[] {
   if (lines.length <= maxFileLength) return [];
 
-  const severity: Severity = lines.length > maxFileLength * 2 ? 'high' : 'medium';
+  const severity: Severity = lines.length > maxFileLength * 3 ? 'medium' : 'low';
 
   return [
     createFinding({
@@ -175,10 +175,20 @@ function detectUnusedImports(lines: string[], filePath: string, content: string)
 
 /** Numbers that are commonly used and not considered "magic" */
 const ALLOWED_NUMBERS = new Set([
-  '0', '1', '2', '-1', '0.0', '1.0', '100', '0.5',
-  '1000', '60', '24', '3600', '86400', // time-related
-  '200', '201', '204', '301', '302', '400', '401', '403', '404', '500', // HTTP status codes
-  '1024', '2048', '4096', '8192', // powers of 2
+  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-1', '0.0', '1.0', '100', '0.5',
+  '12', '14', '18', '22', '28', '36', '72', // font & border radius sizes
+  '50', '100', '150', '200', '250', '300', '350', '400', '450', '500', '550', '600', '650', '700', '750', '800', '850', '900', '950', // UI dimensions & steps
+  '99', '999', '9999', // z-indexes
+  '1000', '2000', '3000', '4000', '5000', '10000', '30000', '60000', // timeouts / delays (ms)
+  '60', '24', '3600', '86400', // time units (s/min/hr/day)
+  '200', '201', '204', '301', '302', '304', '400', '401', '403', '404', '409', '422', '429', '500', '502', '503', '504', // HTTP status codes
+  '1024', '2048', '4096', '8192', '16384', '32768', '65536', // powers of 2
+  '80', '443', '3000', '5000', '8000', '8080', // common ports
+  '16', '24', '32', '48', '64', '96', '128', '256', '320', '480', '640', '720', '750', '800', '1080', '1200', '1280', '1440', '1600', '1920', '2560', '3840', // standard image/screen sizes
+  '70', '75', '80', '85', '90', '95', // image quality / compression levels
+  '0755', '0775', '0644', '0600', '0700', '0777', // chmod permissions
+  '15', '20', '25', '30', '50', // pagination limits
+  '90', '180', '270', '360', // angles / degrees
 ]);
 
 /**
@@ -187,25 +197,36 @@ const ALLOWED_NUMBERS = new Set([
  */
 function detectMagicNumbers(lines: string[], filePath: string, content: string): Finding[] {
   const findings: Finding[] = [];
+  const seenNumbersInFile = new Set<string>();
   const magicNumberRegex = /(?<!\w)(-?\d+\.?\d*)\b/g;
+
+  // Skip seeders, migrations, factories, and config files where literal numbers are expected schema/seed data
+  if (/(?:seeder|migration|factory|database[\\/]seeders|database[\\/]migrations|database[\\/]factories|config[\\/])/i.test(filePath)) {
+    return findings;
+  }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
 
     // Skip comments, imports, const declarations (defining the constant), and enum values
-    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#')) continue;
-    if (/^\s*(?:import|from|require)\b/.test(line)) continue;
-    if (/^\s*(?:const|final|static)\s+\w+\s*[:=]/.test(line)) continue;
+    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) continue;
+    if (/^\s*(?:import|from|require|use)\b/.test(line)) continue;
+    if (/^\s*(?:const|final|static|readonly)\s+\w+\s*[:=]/.test(line)) continue;
     if (/^\s*(?:export\s+)?(?:const|enum)\b/.test(line)) continue;
-    // Skip array indices, common patterns
+    // Skip array indices, common patterns, SVG paths/coordinates, and CSS/Tailwind values
     if (/\[\s*\d+\s*\]/.test(trimmed)) continue;
+    if (/<(?:svg|path|circle|rect|line|polygon|polyline|ellipse|g)\b/i.test(trimmed)) continue;
+    if (/\b(?:viewBox|strokeWidth|width|height|cx|cy|r|rx|ry|x1|y1|x2|y2|rgba?|hsla?)\b/i.test(trimmed)) continue;
+    // Skip common string/pagination/cookie/timeout helper calls where numbers are self-documenting arguments
+    if (/\b(?:limit|substr|mb_substr|slice|take|chunk|timeout|cookie|rand|random|round|max|min|padStart|padEnd|setTimeout|setInterval)\s*\(/i.test(trimmed)) continue;
 
     const regex = new RegExp(magicNumberRegex.source, magicNumberRegex.flags);
     let m: RegExpExecArray | null;
     while ((m = regex.exec(line)) !== null) {
       const num = m[1];
-      if (ALLOWED_NUMBERS.has(num)) continue;
+      if (seenNumbersInFile.has(num)) continue;
+      if (ALLOWED_NUMBERS.has(num) || ALLOWED_NUMBERS.has(num.replace(/^0+/, '')) || ALLOWED_NUMBERS.has('0' + num)) continue;
       // Skip if it's part of a string literal
       const before = line.substring(0, m.index);
       const singleQuotes = (before.match(/'/g) || []).length;
@@ -215,10 +236,11 @@ function detectMagicNumbers(lines: string[], filePath: string, content: string):
       // Skip version numbers (e.g., "1.2.3")
       if (/\d+\.\d+\.\d+/.test(line.substring(Math.max(0, m.index - 5), m.index + num.length + 5))) continue;
 
-      // Skip numbers that are small integers
+      // Skip numbers that are small integers (-2 to 10)
       const numVal = parseFloat(num);
       if (Number.isNaN(numVal) || (numVal >= -2 && numVal <= 10)) continue;
 
+      seenNumbersInFile.add(num);
       const snippet = extractSnippet(content, i + 1);
       findings.push(
         createFinding({
@@ -265,7 +287,7 @@ function detectConsoleLogs(lines: string[], filePath: string, content: string): 
     const trimmed = line.trim();
 
     // Skip comments
-    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#')) continue;
+    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) continue;
 
     let match = consolePattern.exec(trimmed);
     if (!match) match = printPattern.exec(trimmed);
@@ -303,19 +325,26 @@ function detectConsoleLogs(lines: string[], filePath: string, content: string): 
 
 /**
  * Detect TODO, FIXME, HACK, XXX, BUG comments.
- * Phát hiện các comment TODO/FIXME/HACK
+ * Chỉ quét trên các dòng comment thực sự (tránh bắt nhầm biến $tempId, temporary).
  */
 function detectTodoComments(lines: string[], filePath: string, content: string): Finding[] {
   const findings: Finding[] = [];
-  const todoPattern = /\b(TODO|FIXME|HACK|XXX|BUG|TEMP|WORKAROUND)\b[:\s]*(.*)/i;
+  const todoPattern = /(?:\/\/|\/\*|\*|#|<!--|{{--)\s*\b(TODO|FIXME|HACK|XXX|BUG|TEMP|WORKAROUND)\b[:\s-]*(.*)/i;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    const trimmed = line.trim();
+
+    // Must contain a comment token
+    if (!/(?:\/\/|\/\*|\*|#|<!--|{{--)/.test(line)) continue;
+
     const match = todoPattern.exec(line);
 
     if (match) {
       const tag = match[1].toUpperCase();
-      const description = match[2]?.trim() || '';
+      let description = match[2]?.trim() || '';
+      // Clean trailing comment closures
+      description = description.replace(/\s*(?:\*\/|-->|--\}\})\s*$/, '').trim();
       const severity: Severity = tag === 'FIXME' || tag === 'BUG' ? 'medium' : 'low';
 
       const snippet = extractSnippet(content, i + 1);

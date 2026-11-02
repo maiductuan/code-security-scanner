@@ -17,7 +17,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src/",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release:patch": "npm version patch && git push --follow-tags",
+    "release:minor": "npm version minor && git push --follow-tags",
+    "release:major": "npm version major && git push --follow-tags"
   },
   "keywords": [
     "security",
@@ -31,16 +34,16 @@
     "deepscan",
     "sonarqube-alternative"
   ],
-  "author": "",
+  "author": "Mai Đức Tuấn",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maiductuan/deepscan.git"
+    "url": "git+https://github.com/maiductuan/code-security-scanner.git"
   },
   "bugs": {
-    "url": "https://github.com/maiductuan/deepscan/issues"
+    "url": "https://github.com/maiductuan/code-security-scanner/issues"
   },
-  "homepage": "https://github.com/maiductuan/deepscan#readme",
+  "homepage": "https://github.com/maiductuan/code-security-scanner#readme",
   "engines": {
     "node": ">=18.0.0"
   },

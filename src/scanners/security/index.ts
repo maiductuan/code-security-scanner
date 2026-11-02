@@ -87,7 +87,7 @@ export class SecurityScanner extends BaseScanner implements IScanner {
     for (const analyzer of ANALYZERS) {
       try {
         const findings = analyzer.analyze(context);
-        allFindings.push(...findings);
+        for (const f of findings) allFindings.push(f);
       } catch (error) {
         // Log error but don't stop scanning
         // Ghi lỗi nhưng không dừng quét
@@ -146,7 +146,7 @@ export class SecurityScanner extends BaseScanner implements IScanner {
       if (securityRules.length > 0) {
         try {
           const ruleFindings = this.matchRulePatterns(context, securityRules);
-          allFindings.push(...ruleFindings);
+          for (const f of ruleFindings) allFindings.push(f);
         } catch (error) {
           console.error('[SecurityScanner] Error in rule matching:', error);
         }

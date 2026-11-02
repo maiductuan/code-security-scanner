@@ -1,4 +1,5 @@
-import { basename } from 'node:path';
+import { basename, dirname, join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
 
 /**
  * Dependency information extracted from a manifest file
@@ -19,7 +20,7 @@ export function parseDependencies(content: string, filePath: string): Dependency
 
   switch (fileName) {
     case 'package.json':
-      return parsePackageJson(content);
+      return parsePackageJson(content, filePath);
     case 'package-lock.json':
       return parsePackageLockJson(content);
     case 'requirements.txt':
@@ -41,7 +42,7 @@ export function parseDependencies(content: string, filePath: string): Dependency
       return parseGemfile(content, fileName);
     case 'composer.json':
     case 'composer.lock':
-      return parseComposerJson(content, fileName);
+      return parseComposerJson(content, fileName, filePath);
     case 'pyproject.toml':
       return parsePyprojectToml(content);
     default:
@@ -50,10 +51,28 @@ export function parseDependencies(content: string, filePath: string): Dependency
 }
 
 /**
- * Parse package.json (npm/yarn)
+ * Parse package.json (npm/yarn), resolving exact locked versions from sibling package-lock.json when available
  */
-function parsePackageJson(content: string): DependencyInfo[] {
+function parsePackageJson(content: string, filePath?: string): DependencyInfo[] {
   const deps: DependencyInfo[] = [];
+  const lockedVersions = new Map<string, string>();
+
+  if (filePath) {
+    try {
+      const lockPath = join(dirname(filePath), 'package-lock.json');
+      if (existsSync(lockPath)) {
+        const lockDeps = parsePackageLockJson(readFileSync(lockPath, 'utf-8'));
+        for (const d of lockDeps) {
+          if (!lockedVersions.has(d.name)) {
+            lockedVersions.set(d.name, d.version);
+          }
+        }
+      }
+    } catch {
+      // Ignore lockfile read error
+    }
+  }
+
   try {
     const pkg = JSON.parse(content);
 
@@ -61,7 +80,7 @@ function parsePackageJson(content: string): DependencyInfo[] {
       for (const [name, version] of Object.entries(pkg.dependencies)) {
         deps.push({
           name,
-          version: cleanVersion(version as string),
+          version: lockedVersions.get(name) || cleanVersion(version as string),
           ecosystem: 'npm',
           isDev: false,
         });
@@ -72,7 +91,7 @@ function parsePackageJson(content: string): DependencyInfo[] {
       for (const [name, version] of Object.entries(pkg.devDependencies)) {
         deps.push({
           name,
-          version: cleanVersion(version as string),
+          version: lockedVersions.get(name) || cleanVersion(version as string),
           ecosystem: 'npm',
           isDev: true,
         });
@@ -359,15 +378,15 @@ function parseGemfile(content: string, fileName: string): DependencyInfo[] {
 }
 
 /**
- * Parse composer.json/composer.lock (PHP)
+ * Parse composer.json/composer.lock (PHP), resolving exact locked versions from sibling composer.lock when available
  */
-function parseComposerJson(content: string, fileName: string): DependencyInfo[] {
+function parseComposerJson(content: string, fileName: string, filePath?: string): DependencyInfo[] {
   const deps: DependencyInfo[] = [];
   try {
     const pkg = JSON.parse(content);
 
     if (fileName === 'composer.lock') {
-      for (const p of pkg.packages || []) {
+      for (const p of [...(pkg.packages || []), ...(pkg['packages-dev'] || [])]) {
         deps.push({
           name: p.name,
           version: cleanVersion(p.version || '*'),
@@ -375,13 +394,30 @@ function parseComposerJson(content: string, fileName: string): DependencyInfo[] 
         });
       }
     } else {
+      const lockedVersions = new Map<string, string>();
+      if (filePath) {
+        try {
+          const lockPath = join(dirname(filePath), 'composer.lock');
+          if (existsSync(lockPath)) {
+            const lockData = JSON.parse(readFileSync(lockPath, 'utf-8'));
+            for (const p of [...(lockData.packages || []), ...(lockData['packages-dev'] || [])]) {
+              if (p.name && p.version) {
+                lockedVersions.set(p.name, cleanVersion(p.version));
+              }
+            }
+          }
+        } catch {
+          // Ignore lockfile read error
+        }
+      }
+
       for (const section of ['require', 'require-dev']) {
         const packages = pkg[section] || {};
         for (const [name, version] of Object.entries(packages)) {
           if (name === 'php' || name.startsWith('ext-')) continue;
           deps.push({
             name,
-            version: cleanVersion(version as string),
+            version: lockedVersions.get(name) || cleanVersion(version as string),
             ecosystem: 'Packagist',
             isDev: section === 'require-dev',
           });
@@ -421,8 +457,8 @@ function parsePyprojectToml(content: string): DependencyInfo[] {
 }
 
 /**
- * Clean version string by removing prefixes like ^, ~, >=, etc.
+ * Clean version string by removing prefixes like ^, ~, >=, v, etc.
  */
 function cleanVersion(version: string): string {
-  return version.replace(/^[~^>=<!\s]+/, '').trim();
+  return version.replace(/^[~^>=<!\s]+/, '').replace(/^[vV](?=\d)/, '').trim();
 }

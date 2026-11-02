@@ -291,18 +291,28 @@ export function analyzeCrypto(context: ScanFileContext): Finding[] {
       // Skip matches inside pattern/rule definition contexts
       if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
 
-      // Skip Math.random() in non-cryptographic/non-security contexts (e.g. UI key/ID generation)
+      // Skip Math.random() in non-cryptographic/non-security contexts (e.g. UI key/ID generation, canvas/animation/visuals)
       if (pattern.subcategory === 'insecure-random' && pattern.regex.source.includes('Math\\.random')) {
-        const isSafeContext = 
-          trimmed.includes('id:') ||
-          trimmed.includes('id =') ||
-          trimmed.includes('key:') ||
-          trimmed.includes('key =') ||
-          trimmed.includes('reactKey') ||
-          trimmed.includes('index') ||
-          trimmed.includes('assert') ||
-          trimmed.includes('tc.') ||
-          /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index)\w*\s*=/i.test(trimmed);
+        const hasSecurityKeyword = /\b(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|hash|sign|verify|api_key|private_key)\b/i.test(trimmed);
+        const isVisualFile = /(?:canvas|animation|effect|particle|visual|confetti|chart|graph|avatar|icon|theme|ui)\b/i.test(filePath);
+        const isSafeContext =
+          !hasSecurityKeyword && (
+            isVisualFile ||
+            trimmed.includes('id:') ||
+            trimmed.includes('id =') ||
+            trimmed.includes('key:') ||
+            trimmed.includes('key =') ||
+            trimmed.includes('reactKey') ||
+            trimmed.includes('index') ||
+            trimmed.includes('assert') ||
+            trimmed.includes('tc.') ||
+            trimmed.includes('Math.PI') ||
+            trimmed.includes('Math.floor') ||
+            trimmed.includes('width') ||
+            trimmed.includes('height') ||
+            /\b(?:x|y|z|vx|vy|dx|dy|radius|angle|speed|velocity|opacity|alpha|scale|rotate|color|hue|delay|duration|jitter|offset|pulse\w*|particle\w*)\s*[:=]/.test(trimmed) ||
+            /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index|color|delay|jitter|offset|angle|radius|x|y)\w*\s*=/i.test(trimmed)
+          );
         if (isSafeContext) {
           continue;
         }

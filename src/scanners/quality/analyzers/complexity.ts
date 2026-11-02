@@ -25,16 +25,23 @@ const DECISION_POINT_PATTERNS: RegExp[] = [
   /\bif\s*\(/,                      // if statements
   /\belse\s+if\s*\(/,              // else if
   /\bfor\s*\(/,                     // for loops
+  /\bforeach\s*\(/,                 // PHP foreach loops
   /\bwhile\s*\(/,                   // while loops
   /\bdo\s*\{/,                      // do-while
   /\bcase\s+[^:]+:/,               // switch case
   /\bcatch\s*\(/,                   // catch blocks
-  /\?\s*[^:]+\s*:/,                // ternary operator
-  /\?\./,                           // optional chaining (counts as potential branch)
+  /\?\s*[^:?]+\s*:/,               // ternary operator
   /&&(?!=)/,                         // logical AND
   /\|\|(?!=)/,                       // logical OR
   /\?\?/,                           // nullish coalescing
 ];
+
+/** Keywords that look like `keyword(...) {` but are control-flow statements, not function declarations */
+const NON_FUNCTION_KEYWORDS = new Set([
+  'if', 'else', 'elseif', 'for', 'foreach', 'while', 'switch', 'catch', 'match',
+  'try', 'do', 'return', 'throw', 'new', 'array', 'fn', 'isset', 'empty', 'unset',
+  'list', 'use', 'declare', 'synchronized', 'with', 'using',
+]);
 
 /** Function declaration/expression patterns */
 const FUNCTION_PATTERNS: RegExp[] = [
@@ -55,15 +62,17 @@ interface NestingInfo {
 
 /**
  * Track nesting depth throughout the file.
- * Theo dõi độ sâu lồng nhau trong tệp
+ * Theo dõi độ sâu lồng nhau trong tệp, loại bỏ nhiễu từ JSX, Template literals và Object literals
  */
-function calculateNestingDepths(lines: string[]): NestingInfo[] {
+function calculateNestingDepths(lines: string[], filePath?: string): NestingInfo[] {
   const results: NestingInfo[] = [];
   let currentDepth = 0;
   let inMultiLineComment = false;
 
+  const isMarkupFile = filePath && /\.(?:jsx|tsx|vue|svelte|blade\.php|html)$/i.test(filePath);
+
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    let line = lines[i].trim();
 
     // Track multi-line comments
     if (line.includes('/*') && !line.includes('*/')) {
@@ -71,16 +80,40 @@ function calculateNestingDepths(lines: string[]): NestingInfo[] {
     }
     if (line.includes('*/')) {
       inMultiLineComment = false;
+      results.push({ line: i + 1, depth: currentDepth });
       continue;
     }
-    if (inMultiLineComment || line.startsWith('//') || line.startsWith('#') || line.startsWith('*')) {
+    if (inMultiLineComment || line.startsWith('//') || line.startsWith('#') || line.startsWith('*') || line.startsWith('<!--')) {
       results.push({ line: i + 1, depth: currentDepth });
       continue;
     }
 
-    // Count braces to track depth
-    const openBraces = (line.match(/\{/g) || []).length;
-    const closeBraces = (line.match(/\}/g) || []).length;
+    // Clean string literals to avoid counting braces inside strings
+    let cleanLine = line
+      .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+      .replace(/'(?:[^'\\]|\\.)*'/g, "''")
+      .replace(/`(?:\\[\s\S]|[^`\\])*`/g, '``')
+      .replace(/\{\{--[\s\S]*?--\}\}/g, '') // Blade comments
+      .replace(/\{\{\s*[\s\S]*?\s*\}\}/g, '') // Blade echoes {{ ... }}
+      .replace(/\{!\s*[\s\S]*?\s*!\}/g, '') // Blade raw echoes {!! ... !!}
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '') // JSX comments {/* ... */}
+      .replace(/\$\{[^}]*\}/g, ''); // Template literal variables ${...}
+
+    // In markup files (JSX/TSX/Blade), remove inline single-line JSX prop bindings like className={...} or style={{...}}
+    if (isMarkupFile) {
+      cleanLine = cleanLine
+        .replace(/style=\{\{[^}]*\}\}/g, '')
+        .replace(/=\s*\{[^}]*\}/g, '=val')
+        .replace(/<[A-Za-z0-9_.-]+[^>]*>/g, '') // strip opening JSX/HTML tags
+        .replace(/<\/[A-Za-z0-9_.-]+>/g, ''); // strip closing JSX/HTML tags
+    }
+
+    // Strip single-line object literals { a: 1, b: 2 } to avoid false block depth
+    cleanLine = cleanLine.replace(/\{[^{}]*\}/g, '');
+
+    // Count remaining braces
+    const openBraces = (cleanLine.match(/\{/g) || []).length;
+    const closeBraces = (cleanLine.match(/\}/g) || []).length;
 
     // Depth before processing this line (for accurate reporting)
     results.push({ line: i + 1, depth: currentDepth + openBraces });
@@ -130,7 +163,7 @@ function extractFunctions(lines: string[]): FunctionInfo[] {
       }
     }
 
-    if (!funcName) continue;
+    if (!funcName || NON_FUNCTION_KEYWORDS.has(funcName)) continue;
 
     // Find the end of the function by tracking braces
     let braceCount = 0;
@@ -219,11 +252,12 @@ export function analyzeComplexity(context: ScanFileContext): Finding[] {
       const contextLines = 3;
       const snippet = extractSnippet(content, func.startLine, func.endLine, contextLines);
       const snippetStartLine = Math.max(1, func.startLine - contextLines);
+      const severity = func.complexity > thresholds.maxComplexity * 4 ? 'high' : (func.complexity > thresholds.maxComplexity * 2 ? 'medium' : 'low');
       findings.push(
         createFinding({
           ruleId: 'QUA-CMPLX-001',
           scanner: 'quality',
-          severity: func.complexity > thresholds.maxComplexity * 2 ? 'high' : 'medium',
+          severity,
           confidence: 'high',
           category: 'complexity',
           subcategory: 'cyclomatic',
@@ -248,11 +282,12 @@ export function analyzeComplexity(context: ScanFileContext): Finding[] {
       const contextLines = 3;
       const snippet = extractSnippet(content, func.startLine, func.endLine, contextLines);
       const snippetStartLine = Math.max(1, func.startLine - contextLines);
+      const severity = func.lineCount > thresholds.maxFunctionLength * 3 ? 'medium' : 'low';
       findings.push(
         createFinding({
           ruleId: 'QUA-CMPLX-002',
           scanner: 'quality',
-          severity: func.lineCount > thresholds.maxFunctionLength * 2 ? 'high' : 'medium',
+          severity,
           confidence: 'high',
           category: 'complexity',
           subcategory: 'function-length',
@@ -273,21 +308,27 @@ export function analyzeComplexity(context: ScanFileContext): Finding[] {
     }
   }
 
-  // Check nesting depth
-  const nestingInfos = calculateNestingDepths(lines);
+  // Check nesting depth with file path awareness
+  const nestingInfos = calculateNestingDepths(lines, filePath);
   let lastReportedLine = -1;
 
   for (const info of nestingInfos) {
     if (info.depth > thresholds.maxNestingDepth && info.line - lastReportedLine > 5) {
       const lineContent = lines[info.line - 1]?.trim();
-      // Only report on lines that actually introduce nesting
-      if (lineContent && (lineContent.includes('{') || /^\s*(?:if|for|while|switch|try)\b/.test(lineContent))) {
+      // Only report on lines that actually introduce control-flow nesting
+      const isControlStatement = lineContent && (
+        /^\s*(?:if|for|while|switch|catch|try|do)\b/.test(lineContent) ||
+        /\b(?:function|\w+\s*\([^)]*\)\s*=>)\b/.test(lineContent)
+      );
+
+      if (isControlStatement) {
         const snippet = extractSnippet(content, info.line);
+        const severity = info.depth > thresholds.maxNestingDepth + 3 ? 'medium' : 'low';
         findings.push(
           createFinding({
             ruleId: 'QUA-CMPLX-003',
             scanner: 'quality',
-            severity: info.depth > thresholds.maxNestingDepth + 2 ? 'high' : 'medium',
+            severity,
             confidence: 'high',
             category: 'complexity',
             subcategory: 'nesting-depth',

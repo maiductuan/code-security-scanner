@@ -171,24 +171,6 @@ export function analyzeMetrics(context: ScanFileContext): Finding[] {
 
   const metrics = calculateMetrics(content, language);
 
-  // Generate info finding with metrics summary
-  findings.push(
-    createFinding({
-      ruleId: 'QUA-METRICS-001',
-      scanner: 'quality',
-      severity: 'low',
-      confidence: 'high',
-      category: 'metrics',
-      subcategory: 'code-metrics',
-      title: 'Code Metrics',
-      message: `Lines: ${metrics.totalLines} total, ${metrics.codeLines} code, ${metrics.commentLines} comments, ${metrics.blankLines} blank. Comment ratio: ${(metrics.commentRatio * 100).toFixed(1)}%`,
-      filePath,
-      lineNumber: 1,
-      snippet: '',
-      tags: ['metrics'],
-    }),
-  );
-
   // Warn if comment ratio is below threshold (only for files with enough code)
   if (metrics.codeLines > 50 && metrics.commentRatio < minCommentRatio) {
     findings.push(

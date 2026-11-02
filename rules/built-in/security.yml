@@ -256,7 +256,7 @@ rules:
     patterns:
       - regex: "\\b(?:readFile|writeFile|createReadStream|createWriteStream|open)\\b\\s*\\(\\s*(?:req\\.|request\\.|params\\.|query\\.)"
         message: File operation with user-controlled path
-      - regex: "\\.\\.[\\\\/]"
+      - regex: "(?<!\\.)\\.\\.(?:\\/|\\\\(?![nrt\"'0\\\\]))"
         message: Path traversal sequence detected
       - regex: "\\bpath\\.join\\b\\s*\\([^)]*(?:req\\.|request\\.|params\\.|query\\.)"
         message: path.join with user input

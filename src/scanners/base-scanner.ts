@@ -412,9 +412,13 @@ export abstract class BaseScanner implements IScanner {
       }
 
       for (const rulePattern of rule.patterns) {
-        // Use regex pattern if available
+        // Use regex pattern if available; skip raw Semgrep AST patterns or catch-all dummy patterns
         const regexStr = rulePattern.regex ?? rulePattern.pattern;
         if (!regexStr) continue;
+        const trimmedRegex = regexStr.trim();
+        if (trimmedRegex === '.*' || trimmedRegex === '.+' || trimmedRegex === '^.*$' || (!rulePattern.regex && /\$(?:[A-Z_][A-Z0-9_]*|\.\.\.)/.test(trimmedRegex))) {
+          continue;
+        }
 
         try {
           const flags = rulePattern.regexFlags ?? 'gi';
@@ -477,15 +481,51 @@ export abstract class BaseScanner implements IScanner {
             // Skip static assignments to innerHTML in rule-based matchers to avoid false positives
             if (rule.id === 'security/xss-innerhtml' || rule.id === 'insecure-innerhtml') {
               const line = match.lineContent;
-              if (line.includes('escapeHtml') || line.includes('escapeHTML') || line.includes('DOMPurify') || line.includes('sanitizeHtml')) {
+              if (
+                line.includes('escapeHtml') ||
+                line.includes('escapeHTML') ||
+                line.includes('DOMPurify') ||
+                line.includes('sanitizeHtml') ||
+                line.includes('ensureHtmlContent') ||
+                line.includes('buildHtmlAndToc') ||
+                line.includes('sanitize(') ||
+                line.includes('purify(') ||
+                line.includes('htmlspecialchars') ||
+                line.includes('htmlentities')
+              ) {
                 continue;
               }
+
+              const lineIdx = match.line - 1;
+              const startContext = Math.max(0, lineIdx - 8);
+              const precedingLines = (context.content || '').split('\n').slice(startContext, lineIdx).join('\n');
+              if (/(?:sanitizeHtml|DOMPurify|escapeHtml|escapeHTML|ensureHtmlContent|buildHtmlAndToc|sanitize|purify|htmlspecialchars|htmlentities)\s*\(/i.test(precedingLines)) {
+                continue;
+              }
+
+              // Check if dangerouslySetInnerHTML variable was sanitized in the file
+              const reactHtmlVar = line.match(/__html\s*:\s*([a-zA-Z_$][\w$]*)/);
+              if (reactHtmlVar) {
+                const varName = reactHtmlVar[1];
+                const memoPrefix = '(?:(?:React\\.)?useMemo\\s*\\(\\s*(?:\\(\\s*\\)\\s*=>\\s*(?:\\{\\s*return\\s+)?)?)?';
+                const varDefRegex = new RegExp(`\\b${varName}\\b[^;=]*=\\s*${memoPrefix}(?:sanitizeHtml|DOMPurify\\.sanitize|ensureHtmlContent|buildHtmlAndToc)\\s*\\(`, 'i');
+                const destructuredDefRegex = new RegExp(`\\{[^}]*\\b${varName}\\b[^}]*\\}\\s*=\\s*${memoPrefix}(?:buildHtmlAndToc|ensureHtmlContent|sanitizeHtml)\\s*\\(`, 'i');
+                if (varDefRegex.test(context.content) || destructuredDefRegex.test(context.content)) {
+                  continue;
+                }
+              }
+
               const innerHtmlMatch = line.match(/\.(?:inner|outer)HTML\s*\+?=\s*(.*)/i);
               if (innerHtmlMatch) {
                 let rhs = innerHtmlMatch[1].trim();
                 if (rhs.endsWith(';')) {
                   rhs = rhs.slice(0, -1).trim();
                 }
+
+                if (/^(?:safe|clean|sanitized|purified|escaped)[A-Z0-9_]/i.test(rhs) || /^(?:safe|clean|sanitized|purified|escaped)$/i.test(rhs)) {
+                  continue;
+                }
+
                 const singleQuoted = /^'[^'\\]*(?:\\.[^'\\]*)*'$/;
                 const doubleQuoted = /^"[^"\\]*(?:\\.[^"\\]*)*"$/;
                 const backtickQuoted = /^`[^`\\]*(?:\\.[^`\\]*)*`$/;
@@ -516,18 +556,30 @@ export abstract class BaseScanner implements IScanner {
             // Skip Math.random() in non-cryptographic/non-security contexts
             if (rule.id === 'SEC-CRYPTO-003' || rule.id === 'security/weak-crypto') {
               const trimmed = match.lineContent.trim();
-              const isSafeContext = 
-                trimmed.includes('id:') ||
-                trimmed.includes('id =') ||
-                trimmed.includes('key:') ||
-                trimmed.includes('key =') ||
-                trimmed.includes('reactKey') ||
-                trimmed.includes('index') ||
-                trimmed.includes('assert') ||
-                trimmed.includes('tc.') ||
-                /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index)\w*\s*=/i.test(trimmed);
-              if (isSafeContext) {
-                continue;
+              if (match.match.includes('Math.random')) {
+                const hasSecurityKeyword = /\b(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|hash|sign|verify|api_key|private_key)\b/i.test(trimmed);
+                const isVisualFile = /(?:canvas|animation|effect|particle|visual|confetti|chart|graph|avatar|icon|theme|ui)\b/i.test(context.filePath);
+                const isSafeContext =
+                  !hasSecurityKeyword && (
+                    isVisualFile ||
+                    trimmed.includes('id:') ||
+                    trimmed.includes('id =') ||
+                    trimmed.includes('key:') ||
+                    trimmed.includes('key =') ||
+                    trimmed.includes('reactKey') ||
+                    trimmed.includes('index') ||
+                    trimmed.includes('assert') ||
+                    trimmed.includes('tc.') ||
+                    trimmed.includes('Math.PI') ||
+                    trimmed.includes('Math.floor') ||
+                    trimmed.includes('width') ||
+                    trimmed.includes('height') ||
+                    /\b(?:x|y|z|vx|vy|dx|dy|radius|angle|speed|velocity|opacity|alpha|scale|rotate|color|hue|delay|duration|jitter|offset|pulse\w*|particle\w*)\s*[:=]/.test(trimmed) ||
+                    /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index|color|delay|jitter|offset|angle|radius|x|y)\w*\s*=/i.test(trimmed)
+                  );
+                if (isSafeContext) {
+                  continue;
+                }
               }
             }
 
@@ -554,6 +606,13 @@ export abstract class BaseScanner implements IScanner {
                 isConfigFile
               ) {
                 continue;
+              }
+
+              // For generic ../ or ..\ matches, only flag if in a file/path operation or user input context
+              if (/^\.\.[\\/]/.test(match.match)) {
+                if (!/(?:read|write|open|include|require|send|path|fs|file|stream|load|unlink|stat|chmod|copy|move|storage|disk|download|upload|req|request|params|query|body|args|input|GET|POST|REQUEST)\b/i.test(line)) {
+                  continue;
+                }
               }
 
               // Skip static path constants starting points

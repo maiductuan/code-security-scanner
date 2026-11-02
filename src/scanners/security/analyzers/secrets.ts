@@ -532,24 +532,39 @@ function detectHighEntropyStrings(source: string, filePath: string): Finding[] {
   const lines = source.split('\n');
 
   // Regex to match string assignments that might contain secrets
-  const stringAssignmentRegex = /(?:=|:)\s*["']([A-Za-z0-9+/=_\-]{20,})["']/g;
+  const stringAssignmentRegex = /(?:([A-Za-z0-9_$-]+)\s*[:=]\s*)?["']([A-Za-z0-9+/=_\-]{20,})["']/g;
+
+  // Attributes / variable names that are known public HTML metadata, not secrets
+  const PUBLIC_IDENTIFIERS = new Set([
+    'google-site-verification', 'facebook-domain-verification', 'yandex-verification',
+    'msvalidate', 'csrf-token', 'csrf_token', 'charset', 'viewport', 'content', 'name',
+    'classname', 'class', 'style', 'id', 'src', 'href', 'rel', 'type', 'd', 'alt', 'title',
+    'font', 'format', 'xmlns', 'color', 'background', 'theme-color', 'generator',
+  ]);
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trimStart();
 
     // Skip comments
-    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#')) continue;
+    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('<!--') || trimmed.startsWith('{{--')) continue;
     // Skip imports/requires
     if (/^\s*(?:import|require|from|use)\b/.test(line)) continue;
     // Skip lines referencing env vars
     if (/process\.env|os\.environ|System\.getenv/i.test(line)) continue;
 
+    // Skip HTML/Blade/JSX meta tags and verification headers
+    if (/<meta\s+[^>]*name=["'](?:google-site-verification|facebook-domain-verification|yandex-verification|msvalidate|csrf-token|viewport|robots|description|keywords|theme-color)[^>]*>/i.test(line)) continue;
+    if (/<(?:link|script|svg|path)\b/i.test(line)) continue;
+
     let m: RegExpExecArray | null;
     const regex = new RegExp(stringAssignmentRegex.source, stringAssignmentRegex.flags);
     while ((m = regex.exec(line)) !== null) {
-      const value = m[1];
+      const identifier = (m[1] || '').toLowerCase();
+      const value = m[2];
 
+      // Skip public metadata / HTML attribute names
+      if (identifier && PUBLIC_IDENTIFIERS.has(identifier)) continue;
       // Skip known false positives
       if (ENTROPY_FALSE_POSITIVES.has(value)) continue;
       // Skip short strings or very long strings (likely not secrets)
@@ -561,7 +576,7 @@ function detectHighEntropyStrings(source: string, filePath: string): Finding[] {
 
       const entropy = shannonEntropy(value);
       // High entropy threshold: base64 charset ~= 4.5, hex charset ~= 3.7
-      if (entropy >= 4.2) {
+      if (entropy >= 4.3) {
         const snippet = extractSnippet(source, i + 1);
         findings.push(
           createFinding({
