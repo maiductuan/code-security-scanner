@@ -174,7 +174,7 @@ const FILE_OPS_PATTERNS: FileOpsPattern[] = [
     cwe: ['CWE-434'],
   },
   {
-    regex: /\.(?:originalname|filename)\s*(?:;|\))/i,
+    regex: /\b(?:req\.files?|file|upload\w*)\.originalname\s*(?:;|\)|,)/i,
     message: 'Original filename used directly – sanitize filenames to prevent directory traversal in uploads',
     severity: 'medium',
     confidence: 'medium',
@@ -263,10 +263,39 @@ export function analyzeFileOps(context: ScanFileContext): Finding[] {
         }
       }
 
-      // For the generic ../ pattern, reduce noise – only flag if in a file ops context
+      // For the generic ../ pattern, reduce noise – only flag if in a file ops context with user input
       if (pattern.ruleId === 'SEC-FILE-001' && pattern.confidence === 'low') {
-        if (!/(?:read|write|open|include|require|send|path|fs|file)\b/i.test(match.lineContent)) {
+        if (
+          !/(?:read|write|open|include|require|send|path|fs|file)\b/i.test(match.lineContent) ||
+          /\b(?:base_path|storage_path|resource_path|app_path|config_path|database_path|public_path|envFilePath|dotenv|process\.cwd)\b/i.test(match.lineContent) ||
+          /\.env\b/.test(match.lineContent) ||
+          !/(?:req|request|params|query|body|args|input|user|GET|POST|REQUEST)\b/i.test(match.lineContent)
+        ) {
           continue;
+        }
+      }
+
+      // Skip multer low-severity warning if fileFilter or limits are configured in the file
+      if (pattern.ruleId === 'SEC-FILE-004' && pattern.confidence === 'low') {
+        if (/\b(?:fileFilter|limits)\s*:/.test(content)) {
+          continue;
+        }
+      }
+
+      // For medium/high path-traversal patterns that match generic variables (not explicit req./request./$_GET),
+      // skip if path confinement (.startsWith / path.basename) is used nearby or if the file has no HTTP request input
+      if (pattern.ruleId === 'SEC-FILE-001' && pattern.confidence !== 'low') {
+        const hasExplicitReqSource = /\b(?:req\.|request\.|params\.|query\.|body\.|\$_(?:GET|POST|REQUEST)|r\.URL)/i.test(match.lineContent);
+        if (!hasExplicitReqSource) {
+          const lines = content.split('\n');
+          const nearby = lines.slice(Math.max(0, match.line - 5), Math.min(lines.length, match.line + 5)).join('\n');
+          if (/\b(?:basename\s*\(|\.startsWith\s*\()/i.test(nearby)) {
+            continue;
+          }
+          const fileHasHttpSources = /\b(?:req\b|request\b|r\.URL|http\.Request|\$_(?:GET|POST|REQUEST)|@Query|@Param|@Body|express|fastify|flask|fastapi)\b/i.test(content);
+          if (!fileHasHttpSources) {
+            continue;
+          }
         }
       }
 

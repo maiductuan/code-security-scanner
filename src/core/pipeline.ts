@@ -12,7 +12,7 @@ import { filterSuppressedFindings } from './suppression.js';
 import { ScanCache } from './cache.js';
 
 /** DeepScan version */
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 
 /**
  * Main scanning pipeline orchestrator
@@ -189,12 +189,14 @@ export class ScanPipeline {
         if (scanner.type === 'quality' && !this.config.scanners.quality.enabled) continue;
         if (scanner.type === 'cve' && !this.config.scanners.cve.enabled) continue;
 
-        // CVE scanner only processes dependency files
-        if (scanner.type === 'cve' && !file.isDependencyFile) continue;
+        // CVE scanner only processes non-vendor dependency files
+        if (scanner.type === 'cve') {
+          if (!file.isDependencyFile || file.isVendorFile) continue;
+        }
 
-        // Security scanner skips lock files, vendor/bundle files, and minified files
-        // These produce massive false positives with no real security value
-        if (scanner.type === 'security') {
+        // Security and Quality scanners skip lock files, vendor/bundle files, and minified files
+        // These produce massive false positives with no real security or code quality value
+        if (scanner.type === 'security' || scanner.type === 'quality') {
           if (file.isLockFile || file.isVendorFile || file.isMinified) continue;
         }
 

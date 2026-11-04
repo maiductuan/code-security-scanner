@@ -291,29 +291,21 @@ export function analyzeCrypto(context: ScanFileContext): Finding[] {
       // Skip matches inside pattern/rule definition contexts
       if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
 
-      // Skip Math.random() in non-cryptographic/non-security contexts (e.g. UI key/ID generation, canvas/animation/visuals)
-      if (pattern.subcategory === 'insecure-random' && pattern.regex.source.includes('Math\\.random')) {
-        const hasSecurityKeyword = /\b(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|hash|sign|verify|api_key|private_key)\b/i.test(trimmed);
-        const isVisualFile = /(?:canvas|animation|effect|particle|visual|confetti|chart|graph|avatar|icon|theme|ui)\b/i.test(filePath);
-        const isSafeContext =
-          !hasSecurityKeyword && (
-            isVisualFile ||
-            trimmed.includes('id:') ||
-            trimmed.includes('id =') ||
-            trimmed.includes('key:') ||
-            trimmed.includes('key =') ||
-            trimmed.includes('reactKey') ||
-            trimmed.includes('index') ||
-            trimmed.includes('assert') ||
-            trimmed.includes('tc.') ||
-            trimmed.includes('Math.PI') ||
-            trimmed.includes('Math.floor') ||
-            trimmed.includes('width') ||
-            trimmed.includes('height') ||
-            /\b(?:x|y|z|vx|vy|dx|dy|radius|angle|speed|velocity|opacity|alpha|scale|rotate|color|hue|delay|duration|jitter|offset|pulse\w*|particle\w*)\s*[:=]/.test(trimmed) ||
-            /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index|color|delay|jitter|offset|angle|radius|x|y)\w*\s*=/i.test(trimmed)
+      // Skip Math.random() / random.random() / rand() in non-cryptographic/non-security contexts
+      if (pattern.subcategory === 'insecure-random') {
+        const lines = content.split('\n');
+        const startCtx = Math.max(0, match.line - 4);
+        const endCtx = Math.min(lines.length, match.line + 2);
+        const surroundingContext = lines.slice(startCtx, endCtx).join('\n');
+        const securityContextRegex = /(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|hash|sign|verify|api[_-]?key|private[_-]?key|crypto|credential|jwt|cookie|reset|verification|pin|challenge|bearer|access[_-]?key|lock)/i;
+        const hasSecurityContext = securityContextRegex.test(surroundingContext) || securityContextRegex.test(filePath);
+        const isVisualOrMathLine =
+          !/\b(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|key|lock)\b/i.test(trimmed) && (
+            /(?:canvas|animation|effect|particle|visual|confetti|chart|graph|avatar|icon|theme|ui|game|audio|sound|music| physics)\b/i.test(filePath) ||
+            /\b(?:x|y|z|vx|vy|dx|dy|radius|angle|speed|velocity|opacity|alpha|scale|rotate|color|hue|delay|duration|jitter|offset|pulse\w*|particle\w*|width|height)\b/i.test(trimmed) ||
+            trimmed.includes('Math.PI')
           );
-        if (isSafeContext) {
+        if (!hasSecurityContext || isVisualOrMathLine) {
           continue;
         }
       }

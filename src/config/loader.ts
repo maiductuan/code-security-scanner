@@ -51,7 +51,12 @@ export async function loadConfig(options: {
   // Step 3: Load project config file
   const projectConfig = await loadProjectConfig(configPath, targetPath);
   if (projectConfig) {
+    const baseExcludes = ((config.paths as Record<string, unknown> | undefined)?.exclude as string[] | undefined) || [];
     config = deepMerge(config, projectConfig);
+    const mergedPaths = config.paths as Record<string, unknown> | undefined;
+    if (mergedPaths && Array.isArray(mergedPaths.exclude)) {
+      mergedPaths.exclude = [...new Set([...baseExcludes, ...(mergedPaths.exclude as string[])])];
+    }
     consola.debug(`Loaded config from file`);
   }
 

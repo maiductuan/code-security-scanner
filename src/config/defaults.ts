@@ -49,9 +49,9 @@ function loadDefaultConfig(): DeepScanConfig {
       paths: {
         include: ['**/*'],
         exclude: [
-          'node_modules/', '.git/',
-          '**/node_modules/**', '**/.git/**',
-          '**/*.min.js', '**/*.min.css', '**/*.map', '**/*.lock', '**/package-lock.json',
+          'node_modules/', '.git/', 'vendor/', 'dist/', 'build/', '.venv/', 'venv/', '.next/', '.nuxt/', '.output/', 'target/',
+          '**/node_modules/**', '**/.git/**', '**/vendor/**', '**/dist/**', '**/build/**', '**/.venv/**', '**/venv/**', '**/.next/**', '**/.nuxt/**', '**/.output/**', '**/target/**',
+          '**/*.min.js', '**/*.min.css', '**/*.bundle.js', '**/*.chunk.js', '**/*.map', '**/*.lock', '**/package-lock.json',
         ]
       },
       output: { format: 'console', verbose: false, colors: true },

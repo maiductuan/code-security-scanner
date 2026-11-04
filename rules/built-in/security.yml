@@ -15,7 +15,7 @@ rules:
         message: SQL query with template literal interpolation
       - regex: "(?:query|execute|exec)\\s*\\(\\s*[\"']\\s*\\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\\b.*[\"']\\s*\\+"
         message: SQL query with string concatenation
-      - regex: "f[\"']\\s*\\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\\b.*\\{"
+      - regex: "f[\"']\\s*\\b(?:SELECT\\b[\\s\\S]*?\\bFROM|INSERT\\s+INTO|UPDATE\\s+\\w+\\s+SET|DELETE\\s+FROM|DROP\\s+(?:TABLE|DATABASE)|CREATE\\s+(?:TABLE|DATABASE)|ALTER\\s+TABLE)\\b.*\\{"
         message: SQL query with f-string interpolation (Python)
       - regex: "\\.raw\\s*\\(\\s*[`\"'\\$]"
         message: Raw SQL query usage
@@ -46,11 +46,11 @@ rules:
         message: child_process usage detected - verify input sanitization
       - regex: "os\\.system\\s*\\(\\s*(?:f[\"']|[\"'].*%|.*\\+)"
         message: os.system() with dynamic input (Python)
-      - regex: "subprocess\\.(?:call|run|Popen)\\s*\\(\\s*(?:f[\"']|.*\\+|.*%)"
+      - regex: "subprocess\\.(?:call|run|Popen)\\s*\\(\\s*(?!\\[)(?:f[\"']|[\"'][^\"']*[\"']\\s*(?:\\+|%))"
         message: subprocess with dynamic input (Python)
       - regex: "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\("
         message: Runtime.exec() usage (Java)
-      - regex: "\\bsystem\\s*\\(\\s*(?:\\$|.*\\+|.*\\.)"
+      - regex: "(?<!\\.)\\bsystem\\s*\\(\\s*(?:\\$\\w+|[\"'][^\"']*[\"']\\s*[\\+.])"
         message: system() call with dynamic input
     fix:
       description: Use parameterized APIs (e.g., execFile with array args) or whitelist-validate input
@@ -70,7 +70,7 @@ rules:
     owasp: ["A03:2021"]
     languages: [javascript, typescript, python, php, ruby]
     patterns:
-      - regex: "\\beval\\s*\\("
+      - regex: "(?<!\\.|\\w)\\beval\\s*\\(|(?:window|globalThis|global)\\s*\\.\\s*eval\\s*\\("
         message: eval() usage detected
       - regex: "new\\s+Function\\s*\\("
         message: new Function() is equivalent to eval()
@@ -155,6 +155,10 @@ rules:
     patterns:
       - regex: "(?:password|passwd|pwd|secret|api_key|apikey|api_secret|access_key|access_token|auth_token|private_key)\\s*[:=]\\s*[\"'][^\"']{8,}[\"']"
         message: Hardcoded secret value detected
+      - regex: "(?:process\\.env\\.[A-Z0-9_]*(?:PASSWORD|PASSWD|PWD|SECRET|TOKEN|PRIVATE_KEY)[A-Z0-9_]*)\\s*(?:\\|\\||\\?\\?)\\s*[\"'][^\"']{4,}[\"']"
+        message: Hardcoded fallback secret in environment variable expression
+      - regex: "GOCSPX-[0-9A-Za-z\\-_]{28}"
+        message: Google OAuth Client Secret detected
       - regex: "AKIA[0-9A-Z]{16}"
         message: AWS Access Key ID detected
       - regex: "ghp_[a-zA-Z0-9]{36}"
@@ -235,7 +239,7 @@ rules:
         message: Math.random() is not cryptographically secure - use crypto.getRandomValues()
       - regex: "random\\.random\\s*\\("
         message: random.random() is not cryptographically secure (Python) - use secrets module
-      - regex: "(?:createCipher(?:iv)?|new.*Cipher)\\s*\\([^)]*[\"'][^\"']{1,32}[\"']"
+      - regex: "(?:createCipher(?:iv)?\\s*\\(\\s*[\"'][^\"']+[\"']\\s*,\\s*[\"'][^\"']{1,64}[\"']|new\\s+\\w*Cipher\\s*\\(\\s*[\"'][^\"']{1,32}[\"'])"
         message: Possible hardcoded encryption key
     fix:
       description: Use SHA-256+ for hashing, AES-256-GCM for encryption, and crypto.getRandomValues/secrets for randomness

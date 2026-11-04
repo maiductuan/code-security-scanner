@@ -373,6 +373,95 @@ export function isInSafeASTContext(
   return false;
 }
 
+/**
+ * Determine whether an innerHTML / outerHTML assignment at `lineNumber` (1-indexed)
+ * only assigns static HTML or properly escaped/numeric interpolations.
+ */
+export function isSafeInnerHtmlAssignment(content: string, lineNumber: number): boolean {
+  const lines = content.split('\n');
+  const startIdx = lineNumber - 1;
+  if (startIdx < 0 || startIdx >= lines.length) return false;
+
+  const windowText = lines.slice(startIdx, Math.min(lines.length, startIdx + 30)).join('\n');
+  const assignMatch = windowText.match(/\.(?:inner|outer)HTML\s*\+?=\s*([\s\S]*)/i);
+  if (!assignMatch) return false;
+
+  const rhsStart = assignMatch[1].trimStart();
+
+  let statement = '';
+  let inSingle = false;
+  let inDouble = false;
+  let inBacktick = 0;
+  let braceDepth = 0;
+  let parenDepth = 0;
+
+  for (let i = 0; i < rhsStart.length; i++) {
+    const ch = rhsStart[i];
+    const prev = i > 0 ? rhsStart[i - 1] : '';
+    if (prev === '\\') {
+      statement += ch;
+      continue;
+    }
+    if (!inSingle && !inDouble) {
+      if (ch === '`') {
+        inBacktick = inBacktick > 0 ? inBacktick - 1 : inBacktick + 1;
+      } else if (inBacktick === 0) {
+        if (ch === "'") inSingle = true;
+        else if (ch === '"') inDouble = true;
+        else if (ch === '(') parenDepth++;
+        else if (ch === ')') parenDepth = Math.max(0, parenDepth - 1);
+        else if (ch === '{') braceDepth++;
+        else if (ch === '}') braceDepth = Math.max(0, braceDepth - 1);
+        else if (ch === ';' && parenDepth === 0 && braceDepth === 0) {
+          break;
+        }
+      }
+    } else if (inSingle && ch === "'") {
+      inSingle = false;
+    } else if (inDouble && ch === '"') {
+      inDouble = false;
+    }
+    statement += ch;
+  }
+
+  const rhs = statement.trim();
+  if (!rhs) return false;
+
+  if (/(?:escapeHtml|escapeHTML|DOMPurify|sanitizeHtml|ensureHtmlContent|buildHtmlAndToc|sanitize|purify|htmlspecialchars|htmlentities|\besc)\s*\(/i.test(rhs)) {
+    return true;
+  }
+
+  if (
+    (/^'[^'\\]*(?:\\.[^'\\]*)*'$/.test(rhs)) ||
+    (/^"[^"\\]*(?:\\.[^"\\]*)*"$/.test(rhs)) ||
+    (rhs.startsWith('`') && rhs.endsWith('`') && !rhs.includes('${'))
+  ) {
+    return true;
+  }
+
+  if (rhs.startsWith('`') && rhs.endsWith('`') && rhs.includes('${')) {
+    const interpolations: string[] = [];
+    const interpRegex = /\$\{([^}]+)\}/g;
+    let m: RegExpExecArray | null;
+    while ((m = interpRegex.exec(rhs)) !== null) {
+      interpolations.push(m[1].trim());
+    }
+    if (interpolations.length > 0) {
+      const allSafe = interpolations.every(expr =>
+        /^(?:escapeHtml|escapeHTML|esc|sanitize|DOMPurify\.sanitize|encodeURIComponent|Number|parseInt|parseFloat|Math\.\w+|JSON\.stringify)\s*\(/.test(expr) ||
+        /\.(?:toFixed|toLocaleString)\s*\([^)]*\)$/.test(expr) ||
+        /\.length$/.test(expr) ||
+        /^(?:ICONS|ICON_\w+|SVG_\w+)\b/.test(expr) ||
+        /^(?:i|idx|index|count|total|step|page|limit|offset|percent|pct|score|level|rank|width|height|size|min|max)\b(?:\s*[+\-*/%]\s*\d+)?$/i.test(expr) ||
+        /\?\s*(?:['"][^'"]*['"]|\d+)\s*:\s*(?:['"][^'"]*['"]|\d+)$/.test(expr)
+      );
+      if (allSafe) return true;
+    }
+  }
+
+  return false;
+}
+
 // ─── Abstract Base Scanner ─────────────────────────────────────────────────
 
 /**
@@ -446,19 +535,23 @@ export abstract class BaseScanner implements IScanner {
               // But NOT API key/token rules — those are real leaks even in tests
               const isPasswordRule = rule.id.includes('password') || rule.id.includes('secret') || rule.id === 'security/hardcoded-secret';
               if (isPasswordRule) {
-                const TEST_PATH = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration)[\\/]/i;
-                const TEST_FILE = /\.(?:test|spec|mock|fixture)\./i;
+                const TEST_PATH = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration|cypress|playwright|scratch|benchmarks?|seeds?|seeders?)[\\/]/i;
+                const TEST_FILE = /(?:\.(?:test|spec|mock|fixture|e2e|cy)\.|(?:^|[\\/])(?:test[_-][\w.-]+|[\w.-]+[_-](?:test|spec)|generate[_-][\w.-]*users[\w.-]*|[\w.-]*seed[\w.-]*)\.(?:[cm]?[jt]sx?|py|go|rb|php|java)$)/i;
                 if (TEST_PATH.test(context.filePath) || TEST_FILE.test(context.filePath)) {
                   continue;
                 }
               }
               const line = match.lineContent;
               const val = match.match;
-              // Skip lines that reference environment variables
+              // Skip lines that reference environment variables unless they contain a hardcoded secret fallback or token prefix
               if (
                 /process\.env\b|os\.environ|os\.getenv|System\.getenv|System\.getProperty|ENV\[|getenv\s*\(/i.test(line)
               ) {
-                continue;
+                const hasSecretEnvFallback = /(?:process\.env\.[A-Z0-9_]*(?:PASSWORD|PASSWD|PWD|SECRET|TOKEN|PRIVATE_KEY)[A-Z0-9_]*)\s*(?:\|\||\?\?)\s*["'][^"']{4,}["']/i.test(line);
+                const isHardcodedTokenPrefix = /^(?:AKIA|ABIA|ACCA|ASIA|ghp_|gho_|ghu_|ghs_|ghr_|xox[bpors]-|sk_live_|rk_live_|AIza|GOCSPX-|SG\.|sq0atp-|npm_|dapi|dop_v1_|shpat_)/.test(val);
+                if (!hasSecretEnvFallback && !isHardcodedTokenPrefix) {
+                  continue;
+                }
               }
               // Skip template/bracket placeholders or dynamic interpolation (e.g. {DB_PASSWORD}, $DB_PASSWORD, ${DB_PASSWORD})
               if (
@@ -472,14 +565,47 @@ export abstract class BaseScanner implements IScanner {
               // Skip example/placeholder values (excluding high-fidelity test keys like AWS keys containing EXAMPLE)
               if (
                 !/^(?:AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}$/i.test(val) &&
-                /(?:example|placeholder|your[_-]|changeme|xxxx|TODO|FIXME)/i.test(val)
+                /(?:example|placeholder|your[_-]|changeme|change[_-]me|xxxx|TODO|FIXME|replace[_-]me|dummy)/i.test(val)
               ) {
+                continue;
+              }
+            }
+
+            // Skip SQL injection template literals when all ${...} interpolations are safe SQL structural/index variables
+            if (rule.id === 'security/sql-injection') {
+              const lines = context.content.split('\n');
+              const queryWindow = lines.slice(match.line - 1, Math.min(lines.length, match.line + 6)).join('\n');
+              if (queryWindow.includes('${')) {
+                const interpMatches = [...queryWindow.matchAll(/\$\{([^}]+)\}/g)].map(m => m[1].trim());
+                const allSafeSqlInterp = interpMatches.length > 0 && interpMatches.every(expr =>
+                  /^(?:whereSql|whereClause|where|orderSql|orderBy|limitSql|joinSql|groupSql|havingSql|limIdx|offIdx|pIdx|paramIdx|idx|placeholder\w*|table|tableName|columns|fields|selectFields)$/i.test(expr)
+                );
+                if (allSafeSqlInterp) continue;
+              }
+            }
+
+            // Skip Command Injection false positives in local CLI/build scripts or string literals
+            if (rule.id === 'security/command-injection') {
+              const line = match.lineContent.trim();
+              if (/^(?:const|let|var|import)\b.*require\s*\(\s*['"](?:node:)?child_process['"]\s*\)/.test(line)) {
+                continue;
+              }
+              // Skip string literal test assertions like `'os.system(': 'os.system() disallowed'`
+              if (/^['"][^'"]*['"]\s*:/.test(line)) {
+                continue;
+              }
+              const isLocalScript = /(?:^|[\\/])(?:scripts?|tools?|bin|dev)[\\/]/i.test(context.filePath);
+              const hasNetworkInput = /\b(?:req\b|request\b|app\.(?:get|post|put|delete|use)|router\.|http\.createServer|WebSocket|socket\.on|@Controller|@Get|@Post|flask|fastapi)\b/i.test(context.content);
+              if (isLocalScript && !hasNetworkInput) {
                 continue;
               }
             }
 
             // Skip static assignments to innerHTML in rule-based matchers to avoid false positives
             if (rule.id === 'security/xss-innerhtml' || rule.id === 'insecure-innerhtml') {
+              if (isSafeInnerHtmlAssignment(context.content, match.line)) {
+                continue;
+              }
               const line = match.lineContent;
               if (
                 line.includes('escapeHtml') ||
@@ -553,31 +679,23 @@ export abstract class BaseScanner implements IScanner {
               }
             }
 
-            // Skip Math.random() in non-cryptographic/non-security contexts
+            // Skip Math.random() / random.random() in non-cryptographic/non-security contexts
             if (rule.id === 'SEC-CRYPTO-003' || rule.id === 'security/weak-crypto') {
               const trimmed = match.lineContent.trim();
-              if (match.match.includes('Math.random')) {
-                const hasSecurityKeyword = /\b(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|hash|sign|verify|api_key|private_key)\b/i.test(trimmed);
-                const isVisualFile = /(?:canvas|animation|effect|particle|visual|confetti|chart|graph|avatar|icon|theme|ui)\b/i.test(context.filePath);
-                const isSafeContext =
-                  !hasSecurityKeyword && (
-                    isVisualFile ||
-                    trimmed.includes('id:') ||
-                    trimmed.includes('id =') ||
-                    trimmed.includes('key:') ||
-                    trimmed.includes('key =') ||
-                    trimmed.includes('reactKey') ||
-                    trimmed.includes('index') ||
-                    trimmed.includes('assert') ||
-                    trimmed.includes('tc.') ||
-                    trimmed.includes('Math.PI') ||
-                    trimmed.includes('Math.floor') ||
-                    trimmed.includes('width') ||
-                    trimmed.includes('height') ||
-                    /\b(?:x|y|z|vx|vy|dx|dy|radius|angle|speed|velocity|opacity|alpha|scale|rotate|color|hue|delay|duration|jitter|offset|pulse\w*|particle\w*)\s*[:=]/.test(trimmed) ||
-                    /^(?:const|let|var)\s+\w*(?:id|key|uuid|idx|index|color|delay|jitter|offset|angle|radius|x|y)\w*\s*=/i.test(trimmed)
+              if (match.match.includes('Math.random') || match.match.includes('random.random')) {
+                const lines = context.content.split('\n');
+                const startCtx = Math.max(0, match.line - 4);
+                const endCtx = Math.min(lines.length, match.line + 2);
+                const surroundingContext = lines.slice(startCtx, endCtx).join('\n');
+                const securityContextRegex = /(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|hash|sign|verify|api[_-]?key|private[_-]?key|crypto|credential|jwt|cookie|reset|verification|pin|challenge|bearer|access[_-]?key|lock)/i;
+                const hasSecurityContext = securityContextRegex.test(surroundingContext) || securityContextRegex.test(context.filePath);
+                const isVisualOrMathLine =
+                  !/\b(?:token|secret|password|passwd|pwd|nonce|salt|iv|cipher|auth|session|otp|csrf|key|lock)\b/i.test(trimmed) && (
+                    /(?:canvas|animation|effect|particle|visual|confetti|chart|graph|avatar|icon|theme|ui|game|audio|sound|music|physics)\b/i.test(context.filePath) ||
+                    /\b(?:x|y|z|vx|vy|dx|dy|radius|angle|speed|velocity|opacity|alpha|scale|rotate|color|hue|delay|duration|jitter|offset|pulse\w*|particle\w*|width|height)\b/i.test(trimmed) ||
+                    trimmed.includes('Math.PI')
                   );
-                if (isSafeContext) {
+                if (!hasSecurityContext || isVisualOrMathLine) {
                   continue;
                 }
               }
@@ -608,9 +726,14 @@ export abstract class BaseScanner implements IScanner {
                 continue;
               }
 
-              // For generic ../ or ..\ matches, only flag if in a file/path operation or user input context
+              // For generic ../ or ..\ matches, only flag if in a file/path operation with user input context
               if (/^\.\.[\\/]/.test(match.match)) {
-                if (!/(?:read|write|open|include|require|send|path|fs|file|stream|load|unlink|stat|chmod|copy|move|storage|disk|download|upload|req|request|params|query|body|args|input|GET|POST|REQUEST)\b/i.test(line)) {
+                if (
+                  !/(?:read|write|open|include|require|send|path|fs|file|stream|load|unlink|stat|chmod|copy|move|storage|disk|download|upload)\b/i.test(line) ||
+                  /\b(?:base_path|storage_path|resource_path|app_path|config_path|database_path|public_path|envFilePath|dotenv|process\.cwd)\b/i.test(line) ||
+                  /\.env\b/.test(line) ||
+                  !/(?:req|request|params|query|body|args|input|user|GET|POST|REQUEST)\b/i.test(line)
+                ) {
                   continue;
                 }
               }
@@ -624,6 +747,20 @@ export abstract class BaseScanner implements IScanner {
                 line.includes('import.meta.url')
               ) {
                 if (!/(?:req|request|params|query|body|args|input|user|GET|POST|REQUEST)\b/i.test(line)) {
+                  continue;
+                }
+              }
+
+              // If matched on generic variable (filename, uri, url) rather than explicit req./request., verify HTTP context and no confinement check
+              const hasExplicitReqSource = /\b(?:req\.|request\.|params\.|query\.|body\.|\$_(?:GET|POST|REQUEST)|r\.URL)/i.test(line);
+              if (!hasExplicitReqSource) {
+                const lines = context.content.split('\n');
+                const nearby = lines.slice(Math.max(0, match.line - 5), Math.min(lines.length, match.line + 5)).join('\n');
+                if (/\b(?:basename\s*\(|\.startsWith\s*\()/i.test(nearby)) {
+                  continue;
+                }
+                const fileHasHttpSources = /\b(?:req\b|request\b|r\.URL|http\.Request|\$_(?:GET|POST|REQUEST)|@Query|@Param|@Body|express|fastify|flask|fastapi)\b/i.test(context.content);
+                if (!fileHasHttpSources) {
                   continue;
                 }
               }
@@ -641,7 +778,7 @@ export abstract class BaseScanner implements IScanner {
               }
             }
 
-            // Skip SSRF warnings if the URL is validated in the file
+            // Skip SSRF warnings if the URL is validated in the file or not user-controlled server-side SSRF
             if (rule.id === 'security/ssrf' || rule.id === 'SEC-SRF-001' || rule.id === 'SEC-SRF-002') {
               if (
                 context.content.includes('startsWith') ||
@@ -649,6 +786,31 @@ export abstract class BaseScanner implements IScanner {
                 context.content.includes('whitelist') ||
                 context.content.includes('trusted')
               ) {
+                continue;
+              }
+              const trimmed = match.lineContent.trim();
+              if (/(?:function\s+\w*|def\s+\w*|async\s+function\s+\w*)\s*\(\s*url\b/i.test(trimmed)) {
+                continue;
+              }
+              if (/(?:^|[\\/])(?:public|frontend|client|admin_views|extension|src[\\/](?:components|pages|views|hooks|store|assets))[\\/]/i.test(context.filePath)) {
+                continue;
+              }
+              if (/\(\s*url\b/i.test(match.match)) {
+                const lines = context.content.split('\n');
+                const preceding = lines.slice(Math.max(0, match.line - 16), match.line - 1).join('\n');
+                const isHardcodedOrConfigUrl = /(?:const|let|var)?\s*\burl\s*=\s*(?:[`"'](?:https?:\/\/|\/)|[a-zA-Z0-9_.]*(?:BASE|API|HOST|ENDPOINT|ORIGIN|URL|url|uri|config|env)[a-zA-Z0-9_.]*\s*(?:\+|`|\|\|))/i.test(preceding);
+                const hasRequestInputInScope = /(?:req\.|request\.|@Query|@Body|@Param|params\b|query\b|user_input|r\.URL|flask\.request)/i.test(
+                  lines.slice(Math.max(0, match.line - 20), Math.min(lines.length, match.line + 2)).join('\n')
+                );
+                if (isHardcodedOrConfigUrl || !hasRequestInputInScope) {
+                  continue;
+                }
+              }
+            }
+
+            // Skip missing rate limit warning if rate limiting middleware is already configured in the file
+            if (rule.id === 'security/missing-rate-limit' || rule.id === 'SEC-RAT-001') {
+              if (/\b(?:rateLimit|RateLimiter|limiter|authLimiter|loginLimiter|apiLimiter)\b/i.test(context.content)) {
                 continue;
               }
             }

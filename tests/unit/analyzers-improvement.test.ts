@@ -6,7 +6,11 @@ import { analyzeXSS } from '../../src/scanners/security/analyzers/xss.js';
 import { analyzeInjection } from '../../src/scanners/security/analyzers/injection.js';
 import { analyzeCrypto } from '../../src/scanners/security/analyzers/crypto.js';
 import { analyzeFileOps } from '../../src/scanners/security/analyzers/file-ops.js';
+import { analyzeAuth } from '../../src/scanners/security/analyzers/auth.js';
+import { analyzeAPISec } from '../../src/scanners/security/analyzers/api-sec.js';
 import { analyzeMetrics } from '../../src/scanners/quality/analyzers/metrics.js';
+import { analyzeTaintFlow } from '../../src/core/taint-tracker.js';
+import { parseDependencies } from '../../src/scanners/cve/parsers/package-parser.js';
 
 describe('Improved Analyzers Verification Round 2', () => {
   describe('XSS Sanitizer Awareness', () => {
@@ -210,6 +214,109 @@ class SyncController {
         f => f.message.includes("Function 'if'") || f.message.includes("Function 'foreach'")
       );
       expect(bogusFuncFindings.length).toBe(0);
+    });
+  });
+
+  describe('Round 3 Real-World Corpus Improvements', () => {
+    it('should detect hardcoded fallback secrets in process.env expressions and Google GOCSPX secrets', () => {
+      const code = `
+const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || 'bungbung_master_secret_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'veil_jwt_secret_token_key_safe_2026';
+const GOOGLE_SECRET = process.env.GOOGLE_CLIENT_SECRET || 'GOCSPX-1234567890abcdefghijklmnopqr';
+`;
+      const secretFindings = analyzeSecrets({
+        content: code,
+        filePath: 'src/config/security.ts',
+        language: 'typescript',
+        rules: [],
+      });
+      const authFindings = analyzeAuth({
+        content: code,
+        filePath: 'src/config/security.ts',
+        language: 'typescript',
+        rules: [],
+      });
+      expect(secretFindings.some(f => f.ruleId === 'SEC-SEC-001')).toBe(true);
+      expect(secretFindings.some(f => f.ruleId === 'SEC-SEC-014')).toBe(true);
+      expect(authFindings.some(f => f.ruleId === 'SEC-AUTH-004')).toBe(true);
+    });
+
+    it('should not flag character set lookup tables as high-entropy secrets', () => {
+      const code = `
+const chars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+const base62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+`;
+      const findings = analyzeSecrets({
+        content: code,
+        filePath: 'src/utils/id.ts',
+        language: 'typescript',
+        rules: [],
+      });
+      expect(findings.length).toBe(0);
+    });
+
+    it('should not flag app.disable("x-powered-by") in auth analyzer', () => {
+      const code = `
+import express from 'express';
+const app = express();
+app.disable('x-powered-by');
+`;
+      const findings = analyzeAuth({
+        content: code,
+        filePath: 'src/server.ts',
+        language: 'typescript',
+        rules: [],
+      });
+      expect(findings.length).toBe(0);
+    });
+
+    it('should not flag multi-line static or escapeHtml-sanitized innerHTML assignments', () => {
+      const code = `
+function renderEmpty(el, items) {
+  el.innerHTML = \`
+    <div class="empty-state">
+      <p>No items available</p>
+    </div>
+  \`;
+  el.innerHTML = items.map(v => \`
+    <div class="card">
+      <h3>\${escapeHtml(v.title)}</h3>
+      <span>\${Number(v.count)}</span>
+    </div>
+  \`).join('');
+}
+`;
+      const findings = analyzeXSS({
+        content: code,
+        filePath: 'src/ui/render.js',
+        language: 'javascript',
+        rules: [],
+      });
+      expect(findings.length).toBe(0);
+    });
+
+    it('should not flag RegExp.exec() or redisClient.eval() as command/code injection in taint tracker', () => {
+      const code = `
+function handleUpload(req) {
+  const dataUrl = req.body.image;
+  const match = /^data:image\\/png;base64,(.+)$/.exec(dataUrl);
+  const res = redisClient.eval(luaScript, 1, dataUrl);
+  return { match, res };
+}
+`;
+      const taintResults = analyzeTaintFlow(code, 'src/upload.js', 'javascript', null);
+      expect(taintResults.length).toBe(0);
+    });
+
+    it('should clean multi-range Composer/npm version constraints properly', () => {
+      const composerJson = JSON.stringify({
+        require: {
+          'laravel/Sanctum': '10.24|^11.0|^12.0|^13.0',
+        },
+      });
+      const deps = parseDependencies(composerJson, 'composer.json');
+      expect(deps.length).toBe(1);
+      expect(deps[0].version).toBe('13.0');
     });
   });
 });

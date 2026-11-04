@@ -110,6 +110,12 @@ function analyzeTaintFlowAST(
         // Is this function a known sink?
         const matchedSink = sinks.find(s => {
           const sName = s.pattern.replace(/\$TAINTED|\(|\)/g, '').replace(/[^a-zA-Z0-9_.]/g, '');
+          if (sName === 'exec') {
+            return funcName === 'exec' || /(?:child_process|cp|shell|proc)\s*\.\s*exec$/i.test(funcName);
+          }
+          if (sName === 'eval') {
+            return funcName === 'eval' || /^(?:window|globalThis|global)\s*\.\s*eval$/.test(funcName);
+          }
           return funcName === sName || funcName.endsWith(`.${sName}`);
         });
 
@@ -306,6 +312,12 @@ function findTaintSinksRegex(lines: string[], tainted: TaintedValue, sinks: Tain
       for (const sink of sinks) {
         if (tainted.sanitized.has(sink.type)) continue;
         const sinkPattern = sink.pattern.replace('$TAINTED', '');
+        if (sinkPattern.startsWith('exec(') && /\.\s*exec\s*\(/.test(line) && !/(?:child_process|cp|shell|proc)\s*\.\s*exec\s*\(/i.test(line)) {
+          continue;
+        }
+        if (sinkPattern.startsWith('eval(') && /\.\s*eval\s*\(/.test(line) && !/(?:window|globalThis|global)\s*\.\s*eval\s*\(/i.test(line)) {
+          continue;
+        }
         if (line.includes(sinkPattern)) {
           results.push({
             hasTaintedSink: true,

@@ -236,7 +236,7 @@ export function analyzeAPISec(context: ScanFileContext): Finding[] {
         }
       }
 
-      // Skip SSRF if URL validation patterns are present in the file
+      // Skip SSRF if URL validation patterns are present in the file or if it is not a server-side user-controlled URL
       if (pattern.subcategory === 'ssrf' && (pattern.ruleId === 'SEC-SRF-001' || pattern.ruleId === 'SEC-SRF-002')) {
         if (
           content.includes('startsWith') ||
@@ -244,6 +244,33 @@ export function analyzeAPISec(context: ScanFileContext): Finding[] {
           content.includes('whitelist') ||
           content.includes('trusted')
         ) {
+          continue;
+        }
+        // Skip function declarations like `function fetch(url)` or `def fetch(url)`
+        if (/(?:function\s+\w*|def\s+\w*|async\s+function\s+\w*)\s*\(\s*url\b/i.test(trimmed)) {
+          continue;
+        }
+        // Skip client-side frontend/browser files where fetch(url) is normal client HTTP activity, not SSRF
+        if (/(?:^|[\\/])(?:public|frontend|client|admin_views|extension|src[\\/](?:components|pages|views|hooks|store|assets))[\\/]/i.test(filePath)) {
+          continue;
+        }
+        // If matched on generic `url` identifier (not req./request./params./query./body./user_input), verify it comes from request input
+        if (/\(\s*url\b/i.test(match.match)) {
+          const lines = content.split('\n');
+          const preceding = lines.slice(Math.max(0, match.line - 16), match.line - 1).join('\n');
+          const isHardcodedOrConfigUrl = /(?:const|let|var)?\s*\burl\s*=\s*(?:[`"'](?:https?:\/\/|\/)|[a-zA-Z0-9_.]*(?:BASE|API|HOST|ENDPOINT|ORIGIN|URL|url|uri|config|env)[a-zA-Z0-9_.]*\s*(?:\+|`|\|\|))/i.test(preceding);
+          const hasRequestInputInScope = /(?:req\.|request\.|@Query|@Body|@Param|params\b|query\b|user_input|r\.URL|flask\.request)/i.test(
+            lines.slice(Math.max(0, match.line - 20), Math.min(lines.length, match.line + 2)).join('\n')
+          );
+          if (isHardcodedOrConfigUrl || !hasRequestInputInScope) {
+            continue;
+          }
+        }
+      }
+
+      // Skip missing rate limit warning if rate limiting middleware is already used in the file
+      if (pattern.ruleId === 'SEC-RAT-001') {
+        if (/\b(?:rateLimit|RateLimiter|limiter|authLimiter|loginLimiter|apiLimiter)\b/i.test(content)) {
           continue;
         }
       }

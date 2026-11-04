@@ -30,7 +30,7 @@ export class ScanCache {
       ? resolve(customLocation)
       : resolve(targetDir, '.deepscan', 'cache.json');
     this.data = {
-      version: '1.1.0',
+      version: '1.2.0',
       rulesHash: this.rulesHash,
       entries: {},
     };
@@ -58,7 +58,7 @@ export class ScanCache {
         if (this.rulesHash && parsed.rulesHash !== this.rulesHash) {
           consola.debug('Rules changed - invalidating scan cache');
           this.data = {
-            version: '1.1.0',
+            version: '1.2.0',
             rulesHash: this.rulesHash,
             entries: {},
           };
@@ -72,7 +72,7 @@ export class ScanCache {
     } catch (error) {
       consola.debug('Failed to load scan cache, initializing empty cache:', error);
       this.data = {
-        version: '1.1.0',
+        version: '1.2.0',
         rulesHash: this.rulesHash,
         entries: {},
       };

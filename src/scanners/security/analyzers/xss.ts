@@ -3,7 +3,7 @@
 
 import type { Finding, Severity, Confidence } from '../../../types/finding.js';
 import type { ScanFileContext } from '../../../types/scanner.js';
-import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext, isInSafeASTContext } from '../../base-scanner.js';
+import { createFinding, extractSnippet, matchPattern, isPatternDefinitionContext, isInSafeASTContext, isSafeInnerHtmlAssignment } from '../../base-scanner.js';
 
 // ─── Pattern Definitions ───────────────────────────────────────────────────
 
@@ -311,6 +311,9 @@ export function analyzeXSS(context: ScanFileContext): Finding[] {
 
       // Skip static assignments or sanitized variables to innerHTML / outerHTML
       if (pattern.subcategory === 'dom-xss' && (pattern.regex.source.includes('innerHTML') || pattern.regex.source.includes('outerHTML'))) {
+        if (isSafeInnerHtmlAssignment(content, match.line)) {
+          continue;
+        }
         const innerHtmlMatch = match.lineContent.match(/\.(?:inner|outer)HTML\s*\+?=\s*(.*)/i);
         if (innerHtmlMatch) {
           let rhs = innerHtmlMatch[1].trim();

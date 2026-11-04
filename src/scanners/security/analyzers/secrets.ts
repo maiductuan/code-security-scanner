@@ -51,6 +51,14 @@ const PASSWORD_PATTERNS: SecretPattern[] = [
     confidence: 'high',
     subcategory: 'hardcoded-password',
   },
+  {
+    id: 'SEC-SEC-001',
+    regex: /(?:process\.env\.[A-Z0-9_]*(?:PASSWORD|PASSWD|PWD|SECRET|TOKEN|PRIVATE_KEY)[A-Z0-9_]*)\s*(?:\|\||\?\?)\s*["'][^"']{4,}["']/i,
+    message: 'Hardcoded fallback secret or password in environment variable expression',
+    severity: 'critical',
+    confidence: 'high',
+    subcategory: 'hardcoded-password',
+  },
 ];
 
 // ── API key and token patterns for 20+ services ──
@@ -137,6 +145,15 @@ const API_KEY_PATTERNS: SecretPattern[] = [
     regex: /AIza[0-9A-Za-z\-_]{35}/,
     message: 'Google API key detected',
     severity: 'high',
+    confidence: 'high',
+    subcategory: 'api-key',
+    service: 'Google',
+  },
+  {
+    id: 'SEC-SEC-014',
+    regex: /GOCSPX-[0-9A-Za-z\-_]{28}/,
+    message: 'Google OAuth client secret detected',
+    severity: 'critical',
     confidence: 'high',
     subcategory: 'api-key',
     service: 'Google',
@@ -393,8 +410,8 @@ const ENTROPY_FALSE_POSITIVES = new Set([
 ]);
 
 // ── Test file/directory detection ──
-const TEST_PATH_PATTERN = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration|cypress|playwright)[\\/]/i;
-const TEST_FILE_PATTERN = /\.(?:test|spec|mock|fixture|e2e|cy)\./i;
+const TEST_PATH_PATTERN = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration|cypress|playwright|scratch|benchmarks?|seeds?|seeders?)[\\/]/i;
+const TEST_FILE_PATTERN = /(?:\.(?:test|spec|mock|fixture|e2e|cy)\.|(?:^|[\\/])(?:test[_-][\w.-]+|[\w.-]+[_-](?:test|spec)|generate[_-][\w.-]*users[\w.-]*|[\w.-]*seed[\w.-]*)\.(?:[cm]?[jt]sx?|py|go|rb|php|java)$)/i;
 const TEST_FILE_NAMES = /(?:^|[\\/])(?:conftest\.py|test_helper\.rb|setup_test\.go|jest\.setup\.|vitest\.setup\.)$/i;
 
 function isTestFile(filePath: string): boolean {
@@ -461,14 +478,18 @@ function detectSecretPattern(source: string, filePath: string, pattern: SecretPa
     if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('#') || trimmed.startsWith('/*')) {
       continue;
     }
-    // Skip lines that reference environment variables (good practice)
+    // Skip lines that reference environment variables unless they contain a hardcoded secret fallback or token prefix
     if (/process\.env\b|os\.environ|System\.getenv|ENV\[/i.test(match.lineContent)) {
-      continue;
+      const hasSecretEnvFallback = /(?:process\.env\.[A-Z0-9_]*(?:PASSWORD|PASSWD|PWD|SECRET|TOKEN|PRIVATE_KEY)[A-Z0-9_]*)\s*(?:\|\||\?\?)\s*["'][^"']{4,}["']/i.test(match.lineContent);
+      const isHardcodedTokenPrefix = /^(?:AKIA|ABIA|ACCA|ASIA|ghp_|gho_|ghu_|ghs_|ghr_|xox[bpors]-|sk_live_|rk_live_|AIza|GOCSPX-|SG\.|sq0atp-|npm_|dapi|dop_v1_|shpat_)/.test(match.match);
+      if (!hasSecretEnvFallback && !isHardcodedTokenPrefix) {
+        continue;
+      }
     }
     // Skip example/placeholder values (excluding high-fidelity test keys like AWS keys containing EXAMPLE)
     if (
       !/^(?:AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}$/i.test(match.match) &&
-      /(?:example|placeholder|your[_-]|changeme|xxxx|TODO|FIXME)/i.test(match.match)
+      /(?:example|placeholder|your[_-]|changeme|change[_-]me|xxxx|TODO|FIXME|replace[_-]me|dummy)/i.test(match.match)
     ) {
       continue;
     }
@@ -482,12 +503,16 @@ function detectSecretPattern(source: string, filePath: string, pattern: SecretPa
       continue;
     }
 
-    // For password patterns, skip trivially low-entropy values ('test', 'admin', 'password')
+    // For password patterns, skip trivially low-entropy values ('test', 'admin', 'password') or UI/validation messages
     if (pattern.subcategory === 'hardcoded-password') {
-      const secretValueMatch = match.match.match(/[=:]\s*['"]([^'"]+)['"]/);
+      const secretValueMatch = match.match.match(/(?:\|\||\?\?|[=:])\s*['"]([^'"]+)['"]/);
       if (secretValueMatch) {
         const secretValue = secretValueMatch[1];
         if (shannonEntropy(secretValue) < 2.0) {
+          continue;
+        }
+        // Skip natural language validation/UI messages containing spaces
+        if (/\s/.test(secretValue) && secretValue.split(/\s+/).length >= 3) {
           continue;
         }
       }
@@ -534,12 +559,14 @@ function detectHighEntropyStrings(source: string, filePath: string): Finding[] {
   // Regex to match string assignments that might contain secrets
   const stringAssignmentRegex = /(?:([A-Za-z0-9_$-]+)\s*[:=]\s*)?["']([A-Za-z0-9+/=_\-]{20,})["']/g;
 
-  // Attributes / variable names that are known public HTML metadata, not secrets
+  // Attributes / variable names that are known public HTML metadata or character sets, not secrets
   const PUBLIC_IDENTIFIERS = new Set([
     'google-site-verification', 'facebook-domain-verification', 'yandex-verification',
     'msvalidate', 'csrf-token', 'csrf_token', 'charset', 'viewport', 'content', 'name',
     'classname', 'class', 'style', 'id', 'src', 'href', 'rel', 'type', 'd', 'alt', 'title',
     'font', 'format', 'xmlns', 'color', 'background', 'theme-color', 'generator',
+    'chars', 'alphabet', 'digits', 'alphanumeric', 'base62', 'base58', 'base36', 'base32',
+    'hex', 'symbols', 'pool', 'characters',
   ]);
 
   for (let i = 0; i < lines.length; i++) {
@@ -570,7 +597,17 @@ function detectHighEntropyStrings(source: string, filePath: string): Finding[] {
       // Skip short strings or very long strings (likely not secrets)
       if (value.length < 20 || value.length > 256) continue;
       // Skip if it looks like a URL path, CSS class, or file path
-      if (/^[a-z][a-z0-9-]*(?:\/[a-z][a-z0-9-]*)*$/i.test(value)) continue;
+      if (/^\/?[a-z0-9_-]+(?:\/[a-z0-9_.-]+)+$/i.test(value) || value.startsWith('/')) continue;
+      // Skip alphabet/character-set lookup tables (e.g., 0123456789ABCDEF..., ABCDEFGHJKLMNPQRSTUVWXYZ...)
+      if (
+        value.includes('0123456789') ||
+        value.includes('123456789') ||
+        value.toLowerCase().includes('abcdefgh') ||
+        value.toLowerCase().includes('abcdefghjklmnpqrstuvwxyz') ||
+        /^[0-9A-Z]+$/.test(value) && /^0123456789/.test(value)
+      ) continue;
+      // Skip KEY=VALUE template lines inside strings
+      if (/^[A-Z0-9_]+=[A-Za-z0-9_.-]+$/.test(value)) continue;
       // Skip base64-encoded images or data URIs
       if (/^data:/.test(value)) continue;
 

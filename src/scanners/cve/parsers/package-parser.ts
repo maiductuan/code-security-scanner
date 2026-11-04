@@ -460,5 +460,7 @@ function parsePyprojectToml(content: string): DependencyInfo[] {
  * Clean version string by removing prefixes like ^, ~, >=, v, etc.
  */
 function cleanVersion(version: string): string {
-  return version.replace(/^[~^>=<!\s]+/, '').replace(/^[vV](?=\d)/, '').trim();
+  const parts = version.split(/\s*(?:\|\||\|)\s*/).filter(Boolean);
+  const target = parts.length > 0 ? parts[parts.length - 1] : version;
+  return target.replace(/^[~^>=<!\s]+/, '').replace(/^[vV](?=\d)/, '').trim();
 }

@@ -31,7 +31,7 @@ const SQL_CONCAT_PATTERNS: Array<{ regex: RegExp; message: string }> = [
   },
   {
     // f"SELECT * FROM users WHERE name = '{name}'"  (Python f-string)
-    regex: /f["'](?:SELECT|INSERT|UPDATE|DELETE|DROP)\s+[^"']*\{[^}]+\}[^"']*["']/i,
+    regex: /f["']\s*(?:SELECT\b[\s\S]*?\bFROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|DROP\s+(?:TABLE|DATABASE)|CREATE\s+(?:TABLE|DATABASE)|ALTER\s+TABLE)\b[^"']*\{[^}]+\}[^"']*["']/i,
     message: 'Python f-string used in SQL query – vulnerable to SQL injection',
   },
   {
@@ -321,6 +321,26 @@ function detectPatterns(
       // Skip matches inside comments or pattern/rule definition contexts
       if (isInCommentOrString(match.lineContent, match.column)) continue;
       if (isPatternDefinitionContext(match.lineContent, match.column)) continue;
+
+      // For SQL injection template literals, skip if all ${...} interpolations are safe clause/index variables with parameterized bindings
+      if (meta.ruleId === 'SEC-INJ-001' || meta.ruleId === 'SEC-INJ-002') {
+        const lines = content.split('\n');
+        const queryWindow = lines.slice(match.line - 1, Math.min(lines.length, match.line + 6)).join('\n');
+        if (queryWindow.includes('${')) {
+          const interpMatches = [...queryWindow.matchAll(/\$\{([^}]+)\}/g)].map(m => m[1].trim());
+          const allSafeSqlInterp = interpMatches.length > 0 && interpMatches.every(expr =>
+            /^(?:whereSql|whereClause|where|orderSql|orderBy|limitSql|joinSql|groupSql|havingSql|limIdx|offIdx|pIdx|paramIdx|idx|placeholder\w*|table|tableName|columns|fields|selectFields)$/i.test(expr)
+          );
+          if (allSafeSqlInterp) continue;
+        }
+      }
+
+      // For Command Injection, skip local CLI/build/dev utility scripts that do not handle external HTTP/WS input
+      if (meta.ruleId === 'SEC-INJ-003') {
+        const isLocalScript = /(?:^|[\\/])(?:scripts?|tools?|bin|dev)[\\/]/i.test(filePath);
+        const hasNetworkInput = /\b(?:req\b|request\b|app\.(?:get|post|put|delete|use)|router\.|http\.createServer|WebSocket|socket\.on|@Controller|@Get|@Post|flask|fastapi)\b/i.test(content);
+        if (isLocalScript && !hasNetworkInput) continue;
+      }
 
       const snippet = extractSnippet(content, match.line);
       findings.push(

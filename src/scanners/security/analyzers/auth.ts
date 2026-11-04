@@ -39,7 +39,7 @@ const AUTH_PATTERNS: AuthPattern[] = [
     cwe: ['CWE-916'],
   },
   {
-    regex: /(?:password|passwd|pwd)\s*==\s*(?!null|undefined|"")\w+/i,
+    regex: /(?:password|passwd|pwd)\s*(?<!=)==(?!=)\s*(?!null|undefined|"")\w+/i,
     message: 'Loose equality (==) used for password comparison – use constant-time comparison',
     severity: 'high',
     confidence: 'medium',
@@ -171,6 +171,15 @@ const AUTH_PATTERNS: AuthPattern[] = [
     cwe: ['CWE-798'],
   },
   {
+    regex: /process\.env\.[A-Z0-9_]*JWT[A-Z0-9_]*\s*(?:\|\||\?\?)\s*["'][^"']{4,}["']/i,
+    message: 'JWT secret has a hardcoded fallback value – if the environment variable is unset in production, tokens can be forged',
+    severity: 'critical',
+    confidence: 'high',
+    subcategory: 'jwt',
+    ruleId: 'SEC-AUTH-004',
+    cwe: ['CWE-798'],
+  },
+  {
     regex: /algorithm\s*[:=]\s*["']none["']/i,
     message: 'JWT algorithm set to "none" – tokens are unsigned and easily forged',
     severity: 'critical',
@@ -198,15 +207,6 @@ const AUTH_PATTERNS: AuthPattern[] = [
     subcategory: 'middleware',
     ruleId: 'SEC-AUTH-005',
     cwe: ['CWE-942'],
-  },
-  {
-    regex: /\.disable\s*\(\s*["'](?:x-powered-by|etag)["']\s*\)/i,
-    message: 'Security header disabled – verify this is intentional',
-    severity: 'low',
-    confidence: 'low',
-    subcategory: 'middleware',
-    ruleId: 'SEC-AUTH-005',
-    cwe: ['CWE-693'],
   },
   {
     regex: /ALLOWED_HOSTS\s*=\s*\[\s*["']\*["']\s*\]/i,

@@ -82,12 +82,12 @@ const VENDOR_DIR_PATTERN = /(?:^|[\\/])(?:vendor|third[_-]?party|bower_component
 /** Known vendor/bundled files by filename */
 const KNOWN_VENDOR_FILES_PATTERN = /(?:jquery|lodash|underscore|backbone|angular|react\.production|vue\.global|bootstrap|popper|moment(?:\.min)?|d3|select2|sweetalert|highlight|firebug)(?:[\.-][\w.]+)?\.js$/i;
 
-/** Minified file patterns */
-const MINIFIED_PATTERN = /\.min\.(?:js|css)$/i;
+/** Minified or bundled file patterns */
+const MINIFIED_PATTERN = /\.(?:min|bundle|chunk)\.(?:js|css)$/i;
 
 /** Test file/directory patterns */
-const TEST_PATH_PATTERN = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration|cypress|playwright)[\\/]/i;
-const TEST_FILE_PATTERN = /\.(?:test|spec|mock|fixture|e2e|cy)\./i;
+const TEST_PATH_PATTERN = /(?:^|[\\/])(?:tests?|__tests__|spec|__spec__|fixtures?|mocks?|__mocks__|e2e|integration|cypress|playwright|scratch|benchmarks?)[\\/]/i;
+const TEST_FILE_PATTERN = /(?:\.(?:test|spec|mock|fixture|e2e|cy)\.|^(?:test[_-][\w.-]+|[\w.-]+[_-](?:test|spec))\.(?:[cm]?[jt]sx?|py|go|rb|php|java)$)/i;
 
 function classifyFile(relPath: string, name: string): {
   isLockFile: boolean;
